@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block title %}QR Attendance Session{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="row">
+
+        <!-- QR Card -->
+
+        <div class="col-lg-6">
+
+            <div class="card shadow">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h3>QR Attendance</h3>
+
+                </div>
+
+                <div class="card-body text-center">
+
+                    <h4>
+
+                        {{ session.course.code }}
+
+                    </h4>
+
+                    <h5>
+
+                        {{ session.course.name }}
+
+                    </h5>
+
+                    <hr>
+
+                    <div id="qr-box">
+
+                        <img
+
+                        id="qrImage"
+
+                        src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ request.scheme }}://{{ request.get_host }}{% url 'scan_qr' session.token %}"
+
+                        class="img-fluid">
+
+                    </div>
+
+                    <br>
+
+                    <h3>
+
+                        Token
+
+                    </h3>
+
+                    <p id="token">
+
+                        {{ session.token }}
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Session Info -->
+
+        <div class="col-lg-6">
+
+            <div class="card shadow">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h3>Session Information</h3>
+
+                </div>
+
+                <div class="card-body">
+
+                    <table class="table table-bordered">
+
+                        <tr>
+
+                            <th>Teacher</th>
+
+                            <td>
+
+                                {{ session.teacher.user.get_full_name }}
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <th>Status</th>
+
+                            <td>
+
+                                {{ session.status }}
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <th>Expires In</th>
+
+                            <td>
+
+                                <span id="countdown">
+
+                                    10
+
+                                </span>
+
+                                sec
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <th>Attendance</th>
+
+                            <td>
+
+                                <span id="attendanceCount">
+
+                                    {{ session.attendance_records.count }}
+
+                                </span>
+
+                                Student(s)
+
+                            </td>
+
+                        </tr>
+
+                    </table>
+
+                    <a href="{% url 'close_session' session.id %}"
+
+                       class="btn btn-outline-primary">
+
+                        Close Session
+
+                    </a>
+
+                    <a href="{% url 'delete_session' session.id %}"
+
+                       class="btn btn-danger">
+
+                        Delete
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+let seconds = 10;
+
+function timer(){
+
+    document.getElementById("countdown").innerHTML = seconds;
+
+    seconds--;
+
+    if(seconds < 0){
+
+        seconds = 10;
+
+    }
+
+}
+
+setInterval(timer,1000);
+
+
+// Refresh QR every 10 seconds
+
+setInterval(function(){
+
+fetch("{% url 'refresh_qr' session.id %}")
+
+.then(response=>response.json())
+
+.then(data=>{
+
+document.getElementById("token").innerHTML=data.token;
+
+document.getElementById("qrImage").src=
+
+"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ request.scheme }}://{{ request.get_host }}/qr/scan/"+data.token+"/";
+
+});
+
+},10000);
+
+
+// Live Attendance Count
+
+setInterval(function(){
+
+fetch("{% url 'attendance_count' session.id %}")
+
+.then(response=>response.json())
+
+.then(data=>{
+
+document.getElementById("attendanceCount").innerHTML=data.count;
+
+});
+
+},3000);
+
+</script>
+
+{% endblock %}

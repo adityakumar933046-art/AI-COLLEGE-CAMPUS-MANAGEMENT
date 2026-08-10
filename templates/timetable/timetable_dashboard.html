@@ -1,0 +1,450 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Timetable Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- Page Header -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold">
+
+                <i class="fas fa-calendar-alt text-primary"></i>
+
+                Timetable Dashboard
+
+            </h2>
+
+            <p class="text-muted mb-0">
+
+                Overview of timetable statistics and recent schedules.
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <a href="{% url 'timetable_create' %}"
+               class="btn btn-primary">
+
+                <i class="fas fa-plus"></i>
+
+                Create Timetable
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- Statistics -->
+
+    <div class="row mb-4">
+
+        <div class="col-md-3 mb-3">
+
+            <div class="card border-primary shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="fas fa-calendar-check fa-2x text-primary mb-2"></i>
+
+                    <h6>Total Timetables</h6>
+
+                    <h2 class="fw-bold">
+
+                        {{ total_timetables }}
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3 mb-3">
+
+            <div class="card border-success shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+
+                    <h6>Active</h6>
+
+                    <h2 class="fw-bold">
+
+                        {{ active_timetables }}
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3 mb-3">
+
+            <div class="card border-info shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="fas fa-building fa-2x text-info mb-2"></i>
+
+                    <h6>Departments</h6>
+
+                    <h2 class="fw-bold">
+
+                        {{ departments }}
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3 mb-3">
+
+            <div class="card border-warning shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="fas fa-chalkboard-teacher fa-2x text-warning mb-2"></i>
+
+                    <h6>Teachers</h6>
+
+                    <h2 class="fw-bold">
+
+                        {{ teachers }}
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Recent Timetables -->
+
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-dark text-white">
+
+            <h5 class="mb-0">
+
+                <i class="fas fa-clock"></i>
+
+                Recent Timetables
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover table-bordered">
+
+                    <thead class="table-primary">
+
+                        <tr>
+
+                            <th>Course</th>
+
+                            <th>Teacher</th>
+
+                            <th>Department</th>
+
+                            <th>Day</th>
+
+                            <th>Time</th>
+
+                            <th>Status</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                                                {% for timetable in recent_timetables %}
+
+                        <tr>
+
+                            <td>
+
+                                <strong>
+
+                                    {{ timetable.course.name }}
+
+                                </strong>
+
+                                <br>
+
+                                <small class="text-muted">
+
+                                    {{ timetable.course.code }}
+
+                                </small>
+
+                            </td>
+
+                            <td>
+
+                                {{ timetable.teacher.user.get_full_name }}
+
+                            </td>
+
+                            <td>
+
+                                {{ timetable.department.name }}
+
+                            </td>
+
+                            <td>
+
+                                <span class="badge bg-primary">
+
+                                    {{ timetable.get_day_display }}
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                {{ timetable.start_time|time:"h:i A" }}
+
+                                -
+
+                                {{ timetable.end_time|time:"h:i A" }}
+
+                            </td>
+
+                            <td>
+
+                                {% if timetable.is_active %}
+
+                                    <span class="badge bg-primary">
+
+                                        Active
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-secondary">
+
+                                        Inactive
+
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+
+                            <td colspan="6" class="text-center py-5">
+
+                                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+
+                                <h5 class="text-muted">
+
+                                    No Timetables Found
+
+                                </h5>
+
+                                <p class="text-muted mb-0">
+
+                                    Create your first timetable to get started.
+
+                                </p>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+                        <hr>
+
+            <!-- Dashboard Summary -->
+
+            <div class="row mt-4">
+
+                <div class="col-md-4 mb-3">
+
+                    <div class="card border-primary shadow-sm">
+
+                        <div class="card-body text-center">
+
+                            <i class="fas fa-calendar-check fa-2x text-primary mb-2"></i>
+
+                            <h5>Total Timetables</h5>
+
+                            <h2 class="fw-bold text-primary">
+
+                                {{ total_timetables }}
+
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <div class="card border-success shadow-sm">
+
+                        <div class="card-body text-center">
+
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+
+                            <h5>Active Timetables</h5>
+
+                            <h2 class="fw-bold text-primary">
+
+                                {{ active_timetables }}
+
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <div class="card border-info shadow-sm">
+
+                        <div class="card-body text-center">
+
+                            <i class="fas fa-building fa-2x text-info mb-2"></i>
+
+                            <h5>Departments</h5>
+
+                            <h2 class="fw-bold text-info">
+
+                                {{ departments }}
+
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Quick Actions -->
+
+            <div class="card mt-4 border-0 shadow-sm">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h5 class="mb-0">
+
+                        <i class="fas fa-bolt"></i>
+
+                        Quick Actions
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="d-flex flex-wrap gap-2">
+
+                        <a href="{% url 'timetable_create' %}"
+                           class="btn btn-primary">
+
+                            <i class="fas fa-plus"></i>
+
+                            Create Timetable
+
+                        </a>
+
+                        <a href="{% url 'timetable_list' %}"
+                           class="btn btn-secondary">
+
+                            <i class="fas fa-list"></i>
+
+                            View All
+
+                        </a>
+
+                        <a href="{% url 'export_timetable_excel' %}"
+                           class="btn btn-primary">
+
+                            <i class="fas fa-file-excel"></i>
+
+                            Export Excel
+
+                        </a>
+
+                        <a href="{% url 'export_timetable_csv' %}"
+                           class="btn btn-outline-primary">
+
+                            <i class="fas fa-file-csv"></i>
+
+                            Export CSV
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+                    </div>
+
+    </div>
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Auto refresh every 5 minutes
+    setTimeout(function () {
+
+        location.reload();
+
+    }, 300000);
+
+});
+
+</script>
+
+{% endblock %}

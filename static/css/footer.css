@@ -1,0 +1,84 @@
+/*==================================================
+ SMART CAMPUS FOOTER
+==================================================*/
+
+footer{
+
+    background:#0f172a;
+
+    color:#fff;
+
+    margin-top:80px;
+
+    padding:60px 0 25px;
+
+}
+
+footer h4,
+footer h5{
+
+    color:white;
+
+    margin-bottom:20px;
+
+}
+
+footer p{
+
+    color:#cbd5e1;
+
+}
+
+footer ul{
+
+    list-style:none;
+
+    padding:0;
+
+}
+
+footer li{
+
+    margin-bottom:12px;
+
+}
+
+footer a{
+
+    color:#cbd5e1;
+
+    text-decoration:none;
+
+    transition:.3s;
+
+}
+
+footer a:hover{
+
+    color:#38bdf8;
+
+    padding-left:6px;
+
+}
+
+footer hr{
+
+    border-color:rgba(255,255,255,.15);
+
+}
+
+footer i{
+
+    transition:.3s;
+
+    cursor:pointer;
+
+}
+
+footer i:hover{
+
+    color:#38bdf8;
+
+    transform:translateY(-4px);
+
+}

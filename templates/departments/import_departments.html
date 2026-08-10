@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Import Departments
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+
+    <!-- ============================= -->
+    <!-- PAGE HEADER -->
+    <!-- ============================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+
+        <div>
+
+            <h2 class="fw-bold">
+
+                <i class="fas fa-file-import text-success me-2"></i>
+
+                Import Departments
+
+            </h2>
+
+
+            <p class="text-muted mb-0">
+
+                Upload Excel file to create departments in bulk.
+
+            </p>
+
+
+        </div>
+
+
+
+        <a href="{% url 'department_list' %}"
+           class="btn btn-secondary">
+
+
+            <i class="fas fa-arrow-left me-1"></i>
+
+            Back
+
+
+        </a>
+
+
+    </div>
+
+
+
+
+
+    <!-- ============================= -->
+    <!-- IMPORT CARD -->
+    <!-- ============================= -->
+
+
+    <div class="row justify-content-center">
+
+
+        <div class="col-lg-7">
+
+
+            <div class="card shadow-sm border-0">
+
+
+                <div class="card-header bg-primary text-white">
+
+
+                    <h5 class="mb-0">
+
+                        <i class="fas fa-upload me-2"></i>
+
+                        Upload Excel File
+
+                    </h5>
+
+
+                </div>
+
+
+
+                <div class="card-body">
+
+
+
+                    <div class="alert alert-info">
+
+
+                        <h6 class="fw-bold">
+
+                            Excel Format
+
+                        </h6>
+
+
+                        <p class="mb-2">
+
+                            Your Excel file should contain these columns:
+
+                        </p>
+
+
+                        <ul class="mb-0">
+
+                            <li>Department Code</li>
+
+                            <li>Department Name</li>
+
+                            <li>Short Name</li>
+
+                            <li>Description</li>
+
+                            <li>Established Year</li>
+
+                            <li>Office Phone</li>
+
+                            <li>Office Email</li>
+
+                            <li>Building</li>
+
+                            <li>Total Faculty</li>
+
+                            <li>Total Students</li>
+
+                            <li>Status</li>
+
+
+                        </ul>
+
+
+                    </div>
+
+
+
+
+
+                    <form method="POST"
+                          enctype="multipart/form-data">
+
+
+                        {% csrf_token %}
+
+
+
+                        <div class="mb-4">
+
+
+                            <label class="form-label fw-semibold">
+
+                                Select Excel File
+
+                            </label>
+
+
+                            {{ form.excel_file }}
+
+
+
+                            {% if form.excel_file.errors %}
+
+                                <div class="text-danger mt-2">
+
+                                    {{ form.excel_file.errors }}
+
+                                </div>
+
+                            {% endif %}
+
+
+
+                        </div>
+
+
+
+
+
+                        <div class="d-flex justify-content-between">
+
+
+
+                            <a href="{% url 'download_department_sample' %}"
+                               class="btn btn-outline-primary">
+
+
+                                <i class="fas fa-download me-1"></i>
+
+                                Download Sample
+
+
+                            </a>
+
+
+
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+
+
+                                <i class="fas fa-upload me-1"></i>
+
+                                Import Departments
+
+
+                            </button>
+
+
+                        </div>
+
+
+
+                    </form>
+
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+    <!-- ============================= -->
+    <!-- NOTE -->
+    <!-- ============================= -->
+
+
+    <div class="row justify-content-center mt-4">
+
+
+        <div class="col-lg-7">
+
+
+            <div class="alert alert-warning">
+
+
+                <i class="fas fa-info-circle me-2"></i>
+
+
+                Duplicate department code or name will be skipped
+                and added to the error report.
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+</div>
+
+
+{% endblock %}

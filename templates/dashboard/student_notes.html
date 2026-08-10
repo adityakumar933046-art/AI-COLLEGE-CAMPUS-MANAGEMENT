@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Notes{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold">
+
+                Study Notes
+
+            </h2>
+
+            <p class="text-muted">
+
+                Download notes uploaded by teachers.
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <span class="badge bg-primary fs-6">
+
+                {{ total_notes }} Notes
+
+            </span>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+
+                Notes List
+
+            </h5>
+
+        </div>
+
+        <div class="card-body table-responsive">
+
+            <table class="table table-striped table-hover">
+
+                <thead class="table-primary">
+
+                    <tr>
+
+                        <th>Title</th>
+
+                        <th>Course</th>
+
+                        <th>Teacher</th>
+
+                        <th>Date</th>
+
+                        <th>Download</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for note in notes %}
+
+                    <tr>
+
+                        <td>{{ note.title }}</td>
+
+                        <td>{{ note.course.name }}</td>
+
+                        <td>{{ note.teacher.user.get_full_name }}</td>
+
+                        <td>{{ note.uploaded_at|date:"d M Y" }}</td>
+
+                        <td>
+
+                            {% if note.file %}
+                            <a href="{{ note.file.url }}"
+                               class="btn btn-primary btn-sm">
+
+                                Download
+
+                            </a>
+                            {% else %}
+                            -
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="5"
+                            class="text-center">
+
+                            No Notes Available
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

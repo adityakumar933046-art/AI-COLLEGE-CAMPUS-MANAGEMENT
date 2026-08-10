@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title|default:"Official Marksheet" }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3 d-print-none">
+        <a href="{% url 'my_results' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Results
+        </a>
+        <button onclick="window.print()" class="btn btn-primary">
+            <i class="bi bi-printer me-1"></i> Print / Download PDF
+        </button>
+    </div>
+
+    <div class="card shadow-lg border-2 p-4 bg-white" id="printable-marksheet">
+        <!-- Marksheet Header -->
+        <div class="text-center border-bottom pb-3 mb-4">
+            <h2 class="fw-bold text-uppercase mb-1" style="letter-spacing: 1px;">Smart Campus University ERP</h2>
+            <h5 class="text-muted mb-1">OFFICIAL ACADEMIC GRADE STATEMENT / MARKSHEET</h5>
+            <span class="badge bg-primary px-3 py-2">Semester {{ semester }} Examination Record</span>
+        </div>
+
+        <!-- Student Details Grid -->
+        <div class="row g-3 mb-4 bg-light p-3 rounded border">
+            <div class="col-md-6">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr><th width="140" class="text-muted">Student Name:</th><td><strong class="text-dark">{{ student.full_name }}</strong></td></tr>
+                    <tr><th class="text-muted">Roll Number:</th><td><strong class="text-dark">{{ student.roll_no }}</strong></td></tr>
+                    <tr><th class="text-muted">Admission No:</th><td>{{ student.admission_no }}</td></tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr><th width="140" class="text-muted">Department:</th><td>{{ student.department.name }}</td></tr>
+                    <tr><th class="text-muted">Semester / Section:</th><td>Semester {{ semester }} (Sec {{ student.section|default:"A" }})</td></tr>
+                    <tr><th class="text-muted">Academic Batch:</th><td>{{ student.batch|default:"2026" }}</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Subject Wise Performance Table -->
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered align-middle text-center mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Course Code</th>
+                        <th class="text-start">Course Title</th>
+                        <th>Credits</th>
+                        <th>Marks Obtained</th>
+                        <th>Max Marks</th>
+                        <th>Grade</th>
+                        <th>Grade Point</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in results %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><strong>{{ r.course.code }}</strong></td>
+                            <td class="text-start">{{ r.course.name }}</td>
+                            <td>{{ r.course.credits }}</td>
+                            <td><strong>{{ r.marks_obtained }}</strong></td>
+                            <td>{{ r.total_marks }}</td>
+                            <td><strong>{{ r.grade }}</strong></td>
+                            <td>{{ r.grade_point }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="8" class="text-center py-4">No course results published for this semester.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Evaluation Summary Footer -->
+        <div class="row g-3 align-items-center bg-light p-3 rounded border mb-4">
+            <div class="col-md-3 text-center border-end">
+                <small class="text-muted d-block">Semester SGPA</small>
+                <h3 class="fw-bold text-primary mb-0">{{ sgpa }}</h3>
+            </div>
+            <div class="col-md-3 text-center border-end">
+                <small class="text-muted d-block">Cumulative CGPA</small>
+                <h3 class="fw-bold text-success mb-0">{{ cgpa }}</h3>
+            </div>
+            <div class="col-md-3 text-center border-end">
+                <small class="text-muted d-block">Total Score</small>
+                <h4 class="fw-bold text-dark mb-0">{{ total_marks }} / {{ total_max }} ({{ percentage }}%)</h4>
+            </div>
+            <div class="col-md-3 text-center">
+                <small class="text-muted d-block">Result Status</small>
+                {% if status_pass %}
+                    <span class="badge bg-success px-4 py-2 fs-6">PASS</span>
+                {% else %}
+                    <span class="badge bg-danger px-4 py-2 fs-6">FAIL</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Signatures Footer -->
+        <div class="row mt-5 pt-4 text-center">
+            <div class="col-4 border-top pt-2">
+                <small class="text-muted d-block">Controller of Examinations</small>
+            </div>
+            <div class="col-4 border-top pt-2">
+                <small class="text-muted d-block">Dean Academic Affairs</small>
+            </div>
+            <div class="col-4 border-top pt-2">
+                <small class="text-muted d-block">Registrar / Seal</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

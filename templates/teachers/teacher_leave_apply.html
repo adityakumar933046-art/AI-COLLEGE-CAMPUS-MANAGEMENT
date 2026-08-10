@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Apply Leave
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h3 class="fw-bold">
+
+                <i class="fas fa-calendar-plus text-primary"></i>
+
+                Apply Leave
+
+            </h3>
+
+            <p class="text-muted">
+
+                Submit a new leave request.
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <a href="{% url 'teacher_leave_requests' %}"
+               class="btn btn-secondary">
+
+                <i class="fas fa-arrow-left"></i>
+
+                Back
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+
+                Leave Application Form
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST"
+                  enctype="multipart/form-data">
+
+                {% csrf_token %}
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+
+                            Leave Type
+
+                        </label>
+
+                        {{ form.leave_type }}
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+
+                            From Date
+
+                        </label>
+
+                        {{ form.start_date }}
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+
+                            To Date
+
+                        </label>
+
+                        {{ form.end_date }}
+
+                    </div>
+                                        <div class="col-md-12 mb-3">
+
+                        <label class="form-label">
+
+                            Reason
+
+                        </label>
+
+                        {{ form.reason }}
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+
+                            Supporting Document (Optional)
+
+                        </label>
+
+                        {{ form.attachment }}
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+
+                            Emergency Contact
+
+                        </label>
+
+                        {{ form.emergency_contact }}
+
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+
+                        <label class="form-label">
+
+                            Address During Leave
+
+                        </label>
+
+                        {{ form.address_during_leave }}
+
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+
+                        <label class="form-label">
+
+                            Additional Remarks (Optional)
+
+                        </label>
+
+                        {{ form.remarks }}
+
+                    </div>
+
+                </div>
+                                    <div class="col-12">
+
+                        <div class="d-flex justify-content-end gap-2 mt-3">
+
+                            <a href="{% url 'teacher_leave_requests' %}"
+                               class="btn btn-secondary">
+
+                                <i class="fas fa-arrow-left"></i>
+
+                                Back
+
+                            </a>
+
+                            <button type="reset"
+                                    class="btn btn-outline-primary">
+
+                                <i class="fas fa-undo"></i>
+
+                                Reset
+
+                            </button>
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+
+                                <i class="fas fa-paper-plane"></i>
+
+                                Submit Leave
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

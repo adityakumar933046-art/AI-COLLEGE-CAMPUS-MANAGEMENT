@@ -1,0 +1,553 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Attendance Analytics
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- Page Header -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header bg-primary text-white">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h3 class="mb-1">
+
+                        <i class="fas fa-chart-line"></i>
+
+                        Attendance Analytics
+
+                    </h3>
+
+                    <small>
+
+                        Monitor attendance performance with visual analytics
+
+                    </small>
+
+                </div>
+
+                <div>
+
+                    <a href="{% url 'attendance_dashboard' %}"
+                       class="btn btn-light">
+
+                        <i class="fas fa-arrow-left"></i>
+
+                        Dashboard
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Summary Cards -->
+
+    <div class="row mb-4">
+
+        <div class="col-lg-3 col-md-6 mb-3">
+
+            <div class="card border-primary shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="fas fa-users fa-2x text-primary mb-3"></i>
+
+                    <h2>{{ total_students }}</h2>
+
+                    <p class="mb-0">
+
+                        Total Students
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+
+            <div class="card border-success shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="fas fa-user-check fa-2x text-success mb-3"></i>
+
+                    <h2>{{ overall_attendance }}%</h2>
+
+                    <p class="mb-0">
+
+                        Overall Attendance
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+
+            <div class="card border-warning shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="fas fa-user-clock fa-2x text-warning mb-3"></i>
+
+                    <h2>{{ today_present }}</h2>
+
+                    <p class="mb-0">
+
+                        Present Today
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+
+            <div class="card border-danger shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="fas fa-user-times fa-2x text-danger mb-3"></i>
+
+                    <h2>{{ defaulters }}</h2>
+
+                    <p class="mb-0">
+
+                        Defaulters
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Charts Row -->
+
+    <div class="row">
+
+        <!-- Monthly Trend -->
+
+        <div class="col-lg-8 mb-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h5 class="mb-0">
+
+                        Monthly Attendance Trend
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <canvas id="monthlyChart"
+                            height="120">
+
+                    </canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Pie Chart -->
+
+        <div class="col-lg-4 mb-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h5 class="mb-0">
+
+                        Attendance Distribution
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <canvas id="statusChart">
+
+                    </canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Department Chart -->
+
+    <div class="row">
+
+        <div class="col-lg-6 mb-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-dark text-white">
+
+                    <h5 class="mb-0">
+
+                        Department Wise Attendance
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <canvas id="departmentChart"
+                            height="140">
+
+                    </canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-6 mb-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-secondary text-white">
+
+                    <h5 class="mb-0">
+
+                        Course Wise Attendance
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <canvas id="courseChart"
+                            height="140">
+
+                    </canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+        <!-- Top & Low Attendance Students -->
+
+    <div class="row">
+
+        <!-- Top Students -->
+
+        <div class="col-lg-6 mb-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h5 class="mb-0">
+
+                        Top Performing Students
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover table-bordered mb-0">
+
+                            <thead class="table-light">
+
+                                <tr>
+
+                                    <th>Rank</th>
+
+                                    <th>Student</th>
+
+                                    <th>Roll No</th>
+
+                                    <th>Attendance</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                {% for student in top_students %}
+
+                                <tr>
+
+                                    <td>{{ forloop.counter }}</td>
+
+                                    <td>{{ student.user.get_full_name }}</td>
+
+                                    <td>{{ student.roll_no }}</td>
+
+                                    <td>
+
+                                        <span class="badge bg-primary">
+
+                                            {{ student.attendance_percentage }}%
+
+                                        </span>
+
+                                    </td>
+
+                                </tr>
+
+                                {% empty %}
+
+                                <tr>
+
+                                    <td colspan="4" class="text-center">
+
+                                        No Data Available
+
+                                    </td>
+
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Low Attendance -->
+
+        <div class="col-lg-6 mb-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-secondary text-white">
+
+                    <h5 class="mb-0">
+
+                        Low Attendance Students
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover table-bordered mb-0">
+
+                            <thead class="table-light">
+
+                                <tr>
+
+                                    <th>Student</th>
+
+                                    <th>Roll No</th>
+
+                                    <th>Attendance</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                {% for student in low_students %}
+
+                                <tr>
+
+                                    <td>{{ student.user.get_full_name }}</td>
+
+                                    <td>{{ student.roll_no }}</td>
+
+                                    <td>
+
+                                        <span class="badge bg-secondary">
+
+                                            {{ student.attendance_percentage }}%
+
+                                        </span>
+
+                                    </td>
+
+                                </tr>
+
+                                {% empty %}
+
+                                <tr>
+
+                                    <td colspan="3" class="text-center">
+
+                                        No Defaulters
+
+                                    </td>
+
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Export -->
+
+    <div class="card shadow-sm">
+
+        <div class="card-body text-end">
+
+            <a href="{% url 'export_attendance_excel' %}"
+               class="btn btn-primary">
+
+                <i class="fas fa-file-excel"></i>
+
+                Export Excel
+
+            </a>
+
+            <a href="{% url 'export_attendance_csv' %}"
+               class="btn btn-primary">
+
+                <i class="fas fa-file-csv"></i>
+
+                Export CSV
+
+            </a>
+
+            <button onclick="window.print()"
+                    class="btn btn-secondary">
+
+                <i class="fas fa-print"></i>
+
+                Print
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Chart.js -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+new Chart(document.getElementById("monthlyChart"), {
+
+    type: "line",
+
+    data: monthlyChartData,
+
+    options: {
+
+        responsive: true,
+
+        maintainAspectRatio: false
+
+    }
+
+});
+
+new Chart(document.getElementById("statusChart"), {
+
+    type: "pie",
+
+    data: statusChartData
+
+});
+
+new Chart(document.getElementById("departmentChart"), {
+
+    type: "bar",
+
+    data: departmentChartData,
+
+    options: {
+
+        responsive: true
+
+    }
+
+});
+
+new Chart(document.getElementById("courseChart"), {
+
+    type: "bar",
+
+    data: courseChartData,
+
+    options: {
+
+        responsive: true,
+
+        indexAxis: "y"
+
+    }
+
+});
+
+</script>
+
+{% endblock %}

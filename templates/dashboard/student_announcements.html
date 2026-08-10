@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Announcements{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold">Announcements</h2>
+            <p class="text-muted">
+                Latest announcements from the college.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        {% for announcement in announcements %}
+
+        <div class="col-lg-6 mb-4">
+
+            <div class="card shadow border-0 h-100">
+
+                <div class="card-body">
+
+                    <h4 class="card-title">
+                        {{ announcement.title }}
+                    </h4>
+
+                    <p class="text-muted mb-2">
+                        {{ announcement.created_at|date:"d M Y" }}
+                    </p>
+
+                    <hr>
+
+                    <p class="card-text">
+                        {{ announcement.message }}
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+        <div class="col-12">
+
+            <div class="alert alert-info text-center">
+
+                No announcements available.
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

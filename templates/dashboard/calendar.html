@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Integrated Academic Calendar{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-calendar3 text-primary me-2"></i>
+                Academic Calendar Management
+            </h3>
+            <p class="text-muted mb-0">Manage campus academic events, exam schedules, deadlines, and class routines.</p>
+        </div>
+        <div>
+            {% if request.user.role == "ADMIN" or request.user.role == "TEACHER" %}
+                <a href="{% url 'calendar_event_create' %}" class="btn btn-primary me-2">
+                    <i class="bi bi-plus-circle me-1"></i> Add Academic Event
+                </a>
+            {% endif %}
+            <button onclick="window.print()" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-printer me-1"></i> Print
+            </button>
+            <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill">
+                Today: {{ today|date:"d M Y (l)" }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Filter Card -->
+    <div class="card shadow border-0 mb-4">
+        <div class="card-body p-3">
+            <form method="GET" class="row g-2 align-items-center">
+                <div class="col-md-9">
+                    <select name="category" class="form-select">
+                        <option value="">-- All Academic Event Categories --</option>
+                        <option value="EXAM" {% if category_filter == "EXAM" %}selected{% endif %}>Examinations</option>
+                        <option value="ASSIGNMENT" {% if category_filter == "ASSIGNMENT" %}selected{% endif %}>Assignment Deadlines</option>
+                        <option value="HOLIDAY" {% if category_filter == "HOLIDAY" %}selected{% endif %}>Academic Holidays</option>
+                        <option value="SEMINAR" {% if category_filter == "SEMINAR" %}selected{% endif %}>Seminars & Workshops</option>
+                        <option value="LECTURE" {% if category_filter == "LECTURE" %}selected{% endif %}>Lectures & Class Routines</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel me-1"></i> Filter Events</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Calendar Events Table Card -->
+        <div class="col-lg-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-calendar-event me-2"></i>Scheduled Events & Routines</h5>
+                    <span class="badge bg-light text-primary rounded-pill">{{ calendar_events|length }} Events</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Title & Details</th>
+                                    <th>Date</th>
+                                    <th>Timing</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for evt in calendar_events %}
+                                    <tr>
+                                        <td><span class="badge {{ evt.badge_class }}">{{ evt.code }}</span></td>
+                                        <td>
+                                            <strong class="d-block text-dark">{{ evt.title }}</strong>
+                                            <small class="text-muted d-block">{{ evt.detail }}</small>
+                                            <small class="text-secondary"><i class="bi bi-person me-1"></i> {{ evt.instructor }}</small>
+                                        </td>
+                                        <td><span class="fw-bold text-primary">{{ evt.day_or_date }}</span></td>
+                                        <td><span class="badge bg-outline-dark border text-dark">{{ evt.time_slot }}</span></td>
+                                        <td>
+                                            {% if evt.is_custom and evt.id %}
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{% url 'calendar_event_update' evt.id %}" class="btn btn-outline-primary" title="Edit Event"><i class="bi bi-pencil"></i></a>
+                                                    <a href="{% url 'calendar_event_delete' evt.id %}" class="btn btn-outline-danger" title="Delete Event"><i class="bi bi-trash"></i></a>
+                                                </div>
+                                            {% else %}
+                                                <span class="badge bg-light text-muted border">System Stream</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5 text-muted">
+                                            <i class="bi bi-calendar-x display-1 text-muted d-block mb-3"></i>
+                                            <h5>No Academic Events Found</h5>
+                                            <p class="small mb-0">No events or routine slots match your search filter.</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar Summary Cards -->
+        <div class="col-lg-4">
+            <div class="card shadow border-0 mb-4">
+                <div class="card-header bg-warning text-dark py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-clock-history me-2"></i>Upcoming Deadlines</h5>
+                </div>
+                <div class="card-body p-3">
+                    {% for assign in assignment_events %}
+                        <div class="border-bottom pb-2 mb-2">
+                            <strong class="d-block text-dark">{{ assign.title }}</strong>
+                            <div class="d-flex justify-content-between small text-muted mt-1">
+                                <span><i class="bi bi-book me-1"></i> {{ assign.course.code }}</span>
+                                <span class="text-danger fw-bold"><i class="bi bi-calendar-event me-1"></i> Due {{ assign.due_date|date:"d M" }}</span>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted small mb-0">No pending assignment deadlines.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-megaphone me-2"></i>Official Notices</h5>
+                </div>
+                <div class="card-body p-3">
+                    {% for ann in announcement_events %}
+                        <div class="border-bottom pb-2 mb-2">
+                            <strong class="d-block text-dark">{{ ann.title }}</strong>
+                            <small class="text-muted d-block">{{ ann.message|truncatewords:15 }}</small>
+                            <small class="text-primary mt-1 d-block"><i class="bi bi-clock me-1"></i> {{ ann.created_at|date:"d M Y" }}</small>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted small mb-0">No recent notices published.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

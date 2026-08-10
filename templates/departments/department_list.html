@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Department Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-building text-primary me-2"></i>
+                Academic Department Management
+            </h3>
+            <p class="text-muted mb-0">Manage academic faculties, HOD assignments, and department statistics.</p>
+        </div>
+        <div>
+            {% if request.user.role == "ADMIN" %}
+                <a href="{% url 'department_create' %}" class="btn btn-primary me-2">
+                    <i class="bi bi-plus-circle me-1"></i> Add Department
+                </a>
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-upload me-1"></i> Import
+                    </button>
+                    <ul class="dropdown-menu shadow">
+                        <li><a class="dropdown-item" href="{% url 'import_departments' %}"><i class="bi bi-file-earmark-excel me-2"></i> Import Excel / CSV</a></li>
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card shadow border-0 mb-4">
+        <div class="card-body p-3">
+            <form method="GET" class="row g-2 align-items-center">
+                <div class="col-md-7">
+                    <input type="text" name="search" class="form-control" placeholder="Search department name or code..." value="{{ search }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-select">
+                        <option value="">-- All Status --</option>
+                        <option value="ACTIVE" {% if status == "ACTIVE" %}selected{% endif %}>Active</option>
+                        <option value="INACTIVE" {% if status == "INACTIVE" %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel me-1"></i> Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Departments List Table Card -->
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-diagram-3 me-2"></i>Academic Departments List</h5>
+            <span class="badge bg-light text-primary rounded-pill">{{ departments.count }} Departments</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Code</th>
+                            <th>Department Name</th>
+                            <th>Head of Dept (HOD)</th>
+                            <th>Office Building</th>
+                            <th>Faculty</th>
+                            <th>Students</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dept in departments %}
+                            <tr>
+                                <td><span class="badge bg-secondary">{{ dept.code }}</span></td>
+                                <td><strong class="text-dark">{{ dept.name }}</strong></td>
+                                <td>
+                                    {% if dept.hod %}
+                                        {{ dept.hod.full_name }}
+                                    {% else %}
+                                        <span class="text-muted">Unassigned</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge bg-light text-dark border">{{ dept.building|default:"Academic Block" }}</span></td>
+                                <td><span class="badge bg-outline-primary border text-primary">{{ dept.total_faculty }}</span></td>
+                                <td><span class="badge bg-outline-dark border text-dark">{{ dept.total_students }}</span></td>
+                                <td>
+                                    {% if dept.status == "ACTIVE" %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ dept.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'department_detail' dept.id %}" class="btn btn-outline-primary" title="View Details"><i class="bi bi-eye"></i></a>
+                                        {% if request.user.role == "ADMIN" %}
+                                            <a href="{% url 'department_update' dept.id %}" class="btn btn-outline-secondary" title="Edit Department"><i class="bi bi-pencil"></i></a>
+                                            <a href="{% url 'department_delete' dept.id %}" class="btn btn-outline-danger" title="Delete Department"><i class="bi bi-trash"></i></a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <i class="bi bi-building-x display-1 text-muted d-block mb-3"></i>
+                                    <h5>No Departments Found</h5>
+                                    <p class="small mb-0">No department records match your current query filters.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

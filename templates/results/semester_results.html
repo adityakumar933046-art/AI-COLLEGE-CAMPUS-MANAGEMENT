@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Semester Results{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>
+
+        Semester {{ semester }} Results
+
+    </h2>
+
+    <div class="card shadow">
+
+        <div class="card-body">
+
+            <h5>
+
+                Student :
+
+                {{ student.user.get_full_name }}
+
+            </h5>
+
+            <hr>
+
+            <table class="table table-striped">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>Course</th>
+
+                        <th>Marks</th>
+
+                        <th>Percentage</th>
+
+                        <th>Grade</th>
+
+                        <th>Teacher</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for result in results %}
+
+                    <tr>
+
+                        <td>
+
+                            {{ result.course.code }}
+
+                        </td>
+
+                        <td>
+
+                            {{ result.marks_obtained }}/{{ result.total_marks }}
+
+                        </td>
+
+                        <td>
+
+                            {{ result.percentage }}%
+
+                        </td>
+
+                        <td>
+
+                            {{ result.grade }}
+
+                        </td>
+
+                        <td>
+
+                            {{ result.teacher.user.get_full_name }}
+
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="5" class="text-center">
+
+                            No Results Found
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+            <a href="{% url 'my_results' %}"
+
+               class="btn btn-secondary">
+
+                Back
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

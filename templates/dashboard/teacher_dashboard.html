@@ -1,0 +1,647 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Teacher Dashboard
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <!-- Header -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                Welcome, {{ teacher.user.get_full_name }}
+            </h2>
+
+            <p class="text-muted mb-0">
+                {{ today }}
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Statistics -->
+
+    <div class="row g-4">
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body">
+
+                    <h6>Total Courses</h6>
+
+                    <h2>{{ total_courses }}</h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body">
+
+                    <h6>Total Students</h6>
+
+                    <h2>{{ total_students }}</h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body">
+
+                    <h6>Total Assignments</h6>
+
+                    <h2>{{ total_assignments }}</h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body">
+
+                    <h6>Total Notes</h6>
+
+                    <h2>{{ total_notes }}</h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Attendance -->
+
+    <div class="row mt-4">
+
+        <div class="col-lg-3">
+
+            <div class="card border-success">
+
+                <div class="card-body">
+
+                    <h6>Attendance Taken</h6>
+
+                    <h3>{{ attendance_taken }}</h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3">
+
+            <div class="card border-primary">
+
+                <div class="card-body">
+
+                    <h6>Present</h6>
+
+                    <h3>{{ present_count }}</h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3">
+
+            <div class="card border-danger">
+
+                <div class="card-body">
+
+                    <h6>Absent</h6>
+
+                    <h3>{{ absent_count }}</h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3">
+
+            <div class="card border-warning">
+
+                <div class="card-body">
+
+                    <h6>Late / Leave</h6>
+
+                    <h3>{{ late_count }} / {{ leave_count }}</h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Today's Classes -->
+
+    <div class="card shadow-sm mt-4">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+                Today's Classes ({{ today_classes }})
+            </h5>
+
+        </div>
+
+        <div class="card-body table-responsive">
+
+            <table class="table table-hover">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Course</th>
+                        <th>Department</th>
+                        <th>Semester</th>
+                        <th>Time</th>
+                        <th>Room</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for item in today_timetable %}
+
+                    <tr>
+
+                        <td>{{ item.course.code }}</td>
+
+                        <td>{{ item.department.name }}</td>
+
+                        <td>{{ item.semester }}</td>
+
+                        <td>
+
+                            {{ item.start_time }}
+                            -
+                            {{ item.end_time }}
+
+                        </td>
+
+                        <td>{{ item.classroom }}</td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="5" class="text-center">
+
+                            No Classes Today
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+        <!-- Recent Assignments -->
+
+    <div class="card shadow-sm mt-4">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <h5 class="mb-0">Recent Assignments</h5>
+
+            <span class="badge bg-primary">
+                {{ total_assignments }}
+            </span>
+
+        </div>
+
+        <div class="card-body table-responsive">
+
+            <table class="table table-striped table-hover">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Title</th>
+                        <th>Course</th>
+                        <th>Due Date</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for assignment in recent_assignments %}
+
+                    <tr>
+
+                        <td>{{ assignment.title }}</td>
+
+                        <td>{{ assignment.course.code }}</td>
+
+                        <td>{{ assignment.due_date }}</td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="3" class="text-center">
+
+                            No Assignments Available
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- Recent Notes -->
+
+    <div class="card shadow-sm mt-4">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <h5 class="mb-0">Recent Notes</h5>
+
+            <span class="badge bg-primary">
+                {{ total_notes }}
+            </span>
+
+        </div>
+
+        <div class="card-body table-responsive">
+
+            <table class="table table-hover">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Title</th>
+                        <th>Course</th>
+                        <th>Uploaded</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for note in recent_notes %}
+
+                    <tr>
+
+                        <td>{{ note.title }}</td>
+
+                        <td>{{ note.course.code }}</td>
+
+                        <td>{{ note.uploaded_at }}</td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="3" class="text-center">
+
+                            No Notes Uploaded
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- Recent Results -->
+
+    <div class="card shadow-sm mt-4">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <h5 class="mb-0">Recent Results</h5>
+
+            <span class="badge bg-secondary">
+                {{ total_results }}
+            </span>
+
+        </div>
+
+        <div class="card-body table-responsive">
+
+            <table class="table table-bordered">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th>Marks</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for result in recent_results %}
+
+                    <tr>
+
+                        <td>
+
+                            {{ result.student.user.get_full_name }}
+
+                        </td>
+
+                        <td>{{ result.course.code }}</td>
+
+                        <td>{{ result.marks }}</td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="3" class="text-center">
+
+                            No Results Published
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- Pending Leave Requests -->
+
+    <div class="card shadow-sm mt-4">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+
+                Pending Leave Requests
+
+            </h5>
+
+        </div>
+
+        <div class="card-body table-responsive">
+
+            <table class="table table-hover">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Student</th>
+                        <th>Reason</th>
+                        <th>Applied On</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for leave in pending_leave_requests %}
+
+                    <tr>
+
+                        <td>
+
+                            {{ leave.student.user.get_full_name }}
+
+                        </td>
+
+                        <td>{{ leave.reason }}</td>
+
+                        <td>{{ leave.applied_at }}</td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="3" class="text-center">
+
+                            No Pending Requests
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+        <!-- Latest Announcements -->
+
+    <div class="card shadow-sm mt-4">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <h5 class="mb-0">Latest Announcements</h5>
+
+        </div>
+
+        <div class="card-body">
+
+            {% for announcement in announcements %}
+
+                <div class="border-bottom pb-3 mb-3">
+
+                    <h6 class="fw-bold">
+
+                        {{ announcement.title }}
+
+                    </h6>
+
+                    <p class="mb-1">
+
+                        {{ announcement.message|truncatewords:30 }}
+
+                    </p>
+
+                    <small class="text-muted">
+
+                        {{ announcement.created_at }}
+
+                    </small>
+
+                </div>
+
+            {% empty %}
+
+                <div class="text-center text-muted py-4">
+
+                    No Announcements Available
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+    <!-- Quick Actions -->
+
+    <div class="card shadow-sm mt-4 mb-4">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+
+                Quick Actions
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-lg-3 col-md-6">
+
+                    <a href="{% url 'teacher_attendance' %}"
+                       class="btn btn-primary w-100 py-3">
+
+                        <i class="bi bi-calendar-check"></i><br>
+
+                        Attendance
+
+                    </a>
+
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+
+                    <a href="{% url 'teacher_assignments' %}"
+                       class="btn btn-primary w-100 py-3">
+
+                        <i class="bi bi-journal-bookmark"></i><br>
+
+                        Assignments
+
+                    </a>
+
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+
+                    <a href="{% url 'teacher_notes' %}"
+                       class="btn btn-warning w-100 py-3">
+
+                        <i class="bi bi-book"></i><br>
+
+                        Notes
+
+                    </a>
+
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+
+                    <a href="{% url 'teacher_results' %}"
+                       class="btn btn-danger w-100 py-3">
+
+                        <i class="bi bi-award"></i><br>
+
+                        Results
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,516 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Teaching Schedule{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- Page Header -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold">
+
+                <i class="fas fa-chalkboard-teacher text-primary"></i>
+
+                My Teaching Schedule
+
+            </h2>
+
+            <p class="text-muted mb-0">
+
+                View all classes assigned to you.
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <button class="btn btn-primary"
+                    onclick="window.print()">
+
+                <i class="fas fa-print"></i>
+
+                Print
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- Teacher Information -->
+
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+
+                <i class="fas fa-user-tie"></i>
+
+                Teacher Information
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-4">
+
+                    <strong>Name</strong>
+
+                    <p>{{ request.user.get_full_name }}</p>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <strong>Department</strong>
+
+                    <p>{{ teacher.department.name }}</p>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <strong>Email</strong>
+
+                    <p>{{ request.user.email }}</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+<div class="card shadow-sm border-0 mb-4">
+
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+            Today's Classes
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        {% if today_classes %}
+
+        <table class="table">
+
+            <thead>
+
+                <tr>
+
+                    <th>Time</th>
+
+                    <th>Course</th>
+
+                    <th>Status</th>
+
+                    <th>Attendance</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for cls in today_classes %}
+
+            <tr>
+
+                <td>
+
+                    {{ cls.start_time|time:"h:i A" }}
+                    -
+                    {{ cls.end_time|time:"h:i A" }}
+
+                </td>
+
+                <td>
+
+                    {{ cls.course.name }}
+
+                </td>
+
+                <td>
+
+                    {% if cls.session_status == "ONGOING" %}
+
+                        <span class="badge bg-success">
+
+                            Ongoing
+
+                        </span>
+
+                    {% elif cls.session_status == "UPCOMING" %}
+
+                        <span class="badge bg-warning">
+
+                            Upcoming
+
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge bg-secondary">
+
+                            Completed
+
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    {% if cls.session_status == "ONGOING" %}
+
+                        <a href="{% url 'take_attendance_from_timetable' cls.id %}"
+   class="btn btn-success">
+
+    Take Attendance
+
+</a>
+                    {% elif cls.session_status == "UPCOMING" %}
+
+                        <button class="btn btn-warning" disabled>
+
+                            Waiting
+
+                        </button>
+
+                    {% else %}
+
+                        <button class="btn btn-secondary" disabled>
+
+                            Closed
+
+                        </button>
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        {% else %}
+
+        <div class="alert alert-info">
+
+            No classes today.
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+    <!-- Teaching Schedule -->
+
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-dark text-white">
+
+            <h5 class="mb-0">
+
+                <i class="fas fa-calendar-week"></i>
+
+                Weekly Teaching Schedule
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover align-middle">
+
+                    <thead class="table-primary">
+
+                        <tr>
+
+                            <th>Day</th>
+
+                            <th>Course</th>
+
+                            <th>Department</th>
+
+                            <th>Semester</th>
+
+                            <th>Section</th>
+
+                            <th>Time</th>
+
+                            <th>Room</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+                                                {% for timetable in timetables %}
+
+                        <tr>
+
+                            <td>
+
+                                <span class="badge bg-primary">
+
+                                    {{ timetable.get_day_display }}
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <strong>
+
+                                    {{ timetable.course.name }}
+
+                                </strong>
+
+                                <br>
+
+                                <small class="text-muted">
+
+                                    {{ timetable.course.code }}
+
+                                </small>
+
+                            </td>
+
+                            <td>
+
+                                {{ timetable.department.name }}
+
+                            </td>
+
+                            <td>
+
+                                Semester {{ timetable.semester }}
+
+                            </td>
+
+                            <td>
+
+                                {{ timetable.section }}
+
+                            </td>
+
+                            <td>
+
+                                {{ timetable.start_time|time:"h:i A" }}
+
+                                -
+
+                                {{ timetable.end_time|time:"h:i A" }}
+
+                            </td>
+
+                            <td>
+
+                                {{ timetable.classroom }}
+
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+
+                            <td colspan="7" class="text-center py-5">
+
+                                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+
+                                <h5 class="text-muted">
+
+                                    No Classes Assigned
+
+                                </h5>
+
+                                <p class="text-muted mb-0">
+
+                                    No timetable has been assigned to you yet.
+
+                                </p>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+                        <hr>
+
+            <!-- Summary Cards -->
+
+            <div class="row mt-4">
+
+                <div class="col-md-3 mb-3">
+
+                    <div class="card border-primary shadow-sm">
+
+                        <div class="card-body text-center">
+
+                            <i class="fas fa-calendar-check fa-2x text-primary mb-2"></i>
+
+                            <h5>Total Classes</h5>
+
+                            <h3 class="fw-bold text-primary">
+
+                                {{ timetables|length }}
+
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <div class="card border-success shadow-sm">
+
+                        <div class="card-body text-center">
+
+                            <i class="fas fa-book fa-2x text-success mb-2"></i>
+
+                            <h5>Courses</h5>
+
+                            <h3 class="fw-bold text-success">
+
+                                {{ timetables|length }}
+
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <div class="card border-info shadow-sm">
+
+                        <div class="card-body text-center">
+
+                            <i class="fas fa-clock fa-2x text-info mb-2"></i>
+
+                            <h5>Teaching Days</h5>
+
+                            <h6 class="text-muted">
+
+                                Monday - Saturday
+
+                            </h6>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <div class="card border-warning shadow-sm">
+
+                        <div class="card-body text-center">
+
+                            <i class="fas fa-user-check fa-2x text-warning mb-2"></i>
+
+                            <h5>Status</h5>
+
+                            <span class="badge bg-primary fs-6">
+
+                                Active
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+                    </div>
+
+    </div>
+
+</div>
+
+<style>
+
+@media print {
+
+    .btn,
+    .navbar,
+    .sidebar,
+    footer {
+
+        display: none !important;
+
+    }
+
+    .container-fluid {
+
+        margin: 0;
+        padding: 0;
+
+    }
+
+    .card {
+
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+
+    }
+
+    .table {
+
+        font-size: 12px;
+
+    }
+
+    .table th,
+    .table td {
+
+        padding: 6px;
+
+    }
+
+}
+
+</style>
+
+{% endblock %}

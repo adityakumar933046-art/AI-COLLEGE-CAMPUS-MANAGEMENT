@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="card shadow p-4">
+
+        <h2>
+            📊 Attendance Report
+        </h2>
+
+        <hr>
+
+        <p>
+            <strong>Student:</strong>
+            {{ student.user.username }}
+        </p>
+
+        <p>
+            <strong>Total Classes:</strong>
+            {{ total_classes }}
+        </p>
+
+        <p>
+            <strong>Present:</strong>
+            {{ present_classes }}
+        </p>
+
+        <p>
+            <strong>Attendance %:</strong>
+            {{ percentage }}%
+        </p>
+
+        {% if low_attendance %}
+
+            <div class="alert alert-danger">
+                ⚠ Attendance below 90%
+            </div>
+
+        {% else %}
+
+            <div class="alert alert-success">
+                ✅ Good Attendance
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

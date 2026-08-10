@@ -1,0 +1,111 @@
+/* ==========================================
+   SMART CAMPUS GLOBAL TOPBAR STYLES
+========================================== */
+
+.topbar {
+    height: 66px;
+    background-color: var(--topbar-bg, #ffffff);
+    color: var(--text-color, #1e293b);
+    padding: 0 1.5rem;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    z-index: 1020;
+}
+
+.topbar .btn-icon {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted, #64748b);
+    background: transparent;
+    transition: all 0.2s ease-in-out;
+}
+
+.topbar .btn-icon:hover {
+    color: var(--bs-primary, #0d6efd);
+    background-color: rgba(13, 110, 253, 0.08);
+}
+
+.topbar-search {
+    width: 320px;
+}
+
+.topbar-search input {
+    height: 38px;
+    font-size: 0.875rem;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.topbar-search input:focus {
+    background-color: #ffffff !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+.topbar-profile {
+    transition: background-color 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.topbar-profile:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode .topbar {
+    background-color: #1e293b;
+    border-color: #334155 !important;
+    color: #f8fafc;
+}
+
+body.dark-mode .topbar .page-title,
+body.dark-mode .topbar-profile .profile-info h6 {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .topbar-search input {
+    background-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+body.dark-mode .topbar-search input::placeholder {
+    color: #94a3b8;
+}
+
+body.dark-mode .topbar .btn-icon {
+    color: #cbd5e1;
+}
+
+body.dark-mode .topbar .btn-icon:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #38bdf8;
+}
+
+body.dark-mode .topbar-profile:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .dropdown-menu {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+body.dark-mode .dropdown-item {
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .dropdown-item:hover {
+    background-color: #334155 !important;
+}
+
+body.dark-mode .dropdown-header {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+}
+
+@media (max-width: 768px) {
+    .topbar {
+        height: 60px;
+        padding: 0 1rem;
+    }
+}

@@ -1,0 +1,399 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Update Attendance
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- Header -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header bg-warning text-dark">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h3 class="mb-1">
+
+                        <i class="fas fa-edit"></i>
+
+                        Update Attendance
+
+                    </h3>
+
+                    <small>
+
+                        Edit attendance record
+
+                    </small>
+
+                </div>
+
+                <div>
+
+                    <a href="{% url 'attendance_history' %}"
+                       class="btn btn-outline-primary">
+
+                        <i class="fas fa-arrow-left"></i>
+
+                        Back
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Form -->
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <div class="card shadow-sm">
+
+            <div class="card-header">
+
+                <h5 class="mb-0">
+
+                    Student Information
+
+                </h5>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="fw-bold">
+
+                            Roll Number
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="{{ attendance.student.roll_no }}"
+                            readonly>
+
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="fw-bold">
+
+                            Student Name
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="{{ attendance.student.user.get_full_name }}"
+                            readonly>
+
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="fw-bold">
+
+                            Course
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="{{ attendance.session.course.name }}"
+                            readonly>
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="fw-bold">
+
+                            Date
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="{{ attendance.session.attendance_date }}"
+                            readonly>
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="fw-bold">
+
+                            Semester
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="{{ attendance.session.semester }}"
+                            readonly>
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="fw-bold">
+
+                            Section
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="{{ attendance.session.section }}"
+                            readonly>
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="fw-bold">
+
+                            Lecture No.
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="{{ attendance.session.lecture_no }}"
+                            readonly>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Update Attendance -->
+
+        <div class="card shadow-sm mt-4">
+
+            <div class="card-header">
+
+                <h5 class="mb-0">
+
+                    Attendance Status
+
+                </h5>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="mb-4">
+
+                    <label class="form-label fw-bold">
+
+                        Attendance Status
+
+                    </label>
+
+                    {{ form.status }}
+
+                    {% if form.status.errors %}
+
+                    <div class="text-danger mt-2">
+
+                        {{ form.status.errors }}
+
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label fw-bold">
+
+                        Remarks
+
+                    </label>
+
+                    {{ form.remarks }}
+
+                    {% if form.remarks.errors %}
+
+                    <div class="text-danger mt-2">
+
+                        {{ form.remarks.errors }}
+
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+                {% if form.non_field_errors %}
+
+                <div class="alert alert-danger">
+
+                    {{ form.non_field_errors }}
+
+                </div>
+
+                {% endif %}
+                                <!-- Last Updated Information -->
+
+                <div class="row mt-4">
+
+                    <div class="col-md-6">
+
+                        <div class="alert alert-info mb-0">
+
+                            <strong>Marked By:</strong><br>
+
+                            {{ attendance.marked_by|default:"N/A" }}
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <div class="alert alert-secondary mb-0">
+
+                            <strong>Last Updated:</strong><br>
+
+                            {{ attendance.updated_at|default:attendance.marked_at }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+
+            <div class="card-footer">
+
+                <div class="d-flex justify-content-between">
+
+                    <a href="{% url 'attendance_history' %}"
+                       class="btn btn-secondary">
+
+                        <i class="fas fa-arrow-left"></i>
+
+                        Back
+
+                    </a>
+
+                    <div>
+
+                        <a href="{% url 'attendance_delete' attendance.id %}"
+                           class="btn btn-danger">
+
+                            <i class="fas fa-trash"></i>
+
+                            Delete
+
+                        </a>
+
+                        <button
+                            type="reset"
+                            class="btn btn-outline-primary">
+
+                            <i class="fas fa-undo"></i>
+
+                            Reset
+
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary">
+
+                            <i class="fas fa-save"></i>
+
+                            Save Changes
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+    // Bootstrap styling
+    document.querySelectorAll("select,input,textarea").forEach(function(el){
+
+        if(el.type !== "hidden"){
+
+            if(el.tagName === "SELECT"){
+
+                el.classList.add("form-select");
+
+            }
+            else if(
+                el.type !== "radio" &&
+                el.type !== "checkbox"
+            ){
+
+                el.classList.add("form-control");
+
+            }
+
+        }
+
+    });
+
+    // Confirmation before update
+
+    document.querySelector("form").addEventListener("submit", function(e){
+
+        if(!confirm("Are you sure you want to update this attendance record?")){
+
+            e.preventDefault();
+
+        }
+
+    });
+
+});
+
+</script>
+
+{% endblock %}

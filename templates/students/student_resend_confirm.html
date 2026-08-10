@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Resend Student Credentials | Smart Campus{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-dark py-3">
+                    <h5 class="card-title mb-0"><i class="bi bi-key me-2"></i>Resend Login Credentials</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-warning border-warning">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <strong>Warning:</strong> A new temporary password will be generated. The student's current password will stop working immediately.
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="mb-1"><strong>Student Name:</strong> {{ user_obj.get_full_name|default:user_obj.username }}</p>
+                        <p class="mb-1"><strong>Roll Number:</strong> {{ student.roll_no }}</p>
+                        <p class="mb-1"><strong>Email Address:</strong> {{ user_obj.email }}</p>
+                        <p class="mb-0"><strong>Username:</strong> <code>{{ user_obj.username }}</code></p>
+                    </div>
+
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'student_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-warning fw-bold">
+                                <i class="bi bi-send me-1"></i>Generate & Resend Credentials
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

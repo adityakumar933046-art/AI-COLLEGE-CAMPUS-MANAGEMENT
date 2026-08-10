@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Teacher Attendance
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h3 class="fw-bold">
+                <i class="fas fa-calendar-check text-success"></i>
+                Mark Attendance
+            </h3>
+
+            <p class="text-muted">
+                Mark and manage student attendance.
+            </p>
+
+        </div>
+
+        <a href="{% url 'teacher_dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i>
+            Dashboard
+        </a>
+
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Filter Card -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form method="GET">
+
+                <div class="row">
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+                            Attendance Date
+                        </label>
+
+                        <input
+                            type="date"
+                            name="date"
+                            class="form-control"
+                            value="{{ attendance_date }}"
+                            required>
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+                            Course
+                        </label>
+
+                        <select
+                            name="course"
+                            class="form-select"
+                            required>
+
+                            <option value="">
+                                Select Course
+                            </option>
+
+                            {% for course in courses %}
+
+                            <option
+                                value="{{ course.id }}"
+                                {% if selected_course == course.id|stringformat:"s" %}
+                                selected
+                                {% endif %}>
+
+                                {{ course.code }} - {{ course.name }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+                            Semester
+                        </label>
+
+                        <select
+                            name="semester"
+                            class="form-select">
+
+                            <option value="">
+                                All Semesters
+                            </option>
+
+                            {% for sem in semesters %}
+
+                            <option
+                                value="{{ sem }}"
+                                {% if selected_semester == sem|stringformat:"s" %}
+                                selected
+                                {% endif %}>
+
+                                Semester {{ sem }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-3 mb-3 d-flex align-items-end">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100">
+
+                            <i class="fas fa-search"></i>
+                            Load Students
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <input type="hidden" name="course" value="{{ request.GET.course }}">
+        <input type="hidden" name="semester" value="{{ request.GET.semester }}">
+        <input type="hidden" name="date" value="{{ request.GET.date }}">
+        <div class="card shadow">
+
+            <div class="card-header bg-primary text-white">
+
+                <h5 class="mb-0">
+                    Student Attendance
+                </h5>
+
+            </div>
+
+            <div class="card-body table-responsive">
+
+                <table class="table table-bordered table-hover align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>Photo</th>
+                            <th>Roll No.</th>
+                            <th>Student Name</th>
+                            <th>Department</th>
+                            <th>Present</th>
+                            <th>Absent</th>
+                            <th>Late</th>
+                            <th>Leave</th>
+                            <th>Remarks</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for student in students %}
+
+<tr>
+
+    <td class="text-center">
+
+        {% if student.photo %}
+
+            <img
+                src="{{ student.photo.url }}"
+                width="50"
+                height="50"
+                class="rounded-circle">
+
+        {% else %}
+
+            <img
+                src="{% static 'images/default-user.png' %}"
+                width="50"
+                height="50"
+                class="rounded-circle">
+
+        {% endif %}
+
+    </td>
+
+    <td>
+
+        {{ student.roll_no }}
+
+    </td>
+
+    <td>
+
+        {{ student.user.get_full_name|default:student.user.username }}
+
+    </td>
+
+    <td>
+
+        {{ student.department.name }}
+
+    </td>
+
+    <td class="text-center">
+
+        <input
+            type="radio"
+            name="attendance_{{ student.id }}"
+            value="PRESENT"
+            checked>
+
+    </td>
+
+    <td class="text-center">
+
+        <input
+            type="radio"
+            name="attendance_{{ student.id }}"
+            value="ABSENT">
+
+    </td>
+
+    <td class="text-center">
+
+        <input
+            type="radio"
+            name="attendance_{{ student.id }}"
+            value="LATE">
+
+    </td>
+
+    <td class="text-center">
+
+        <input
+            type="radio"
+            name="attendance_{{ student.id }}"
+            value="LEAVE">
+
+    </td>
+
+    <td>
+
+        <input
+            type="text"
+            name="remarks_{{ student.id }}"
+            class="form-control"
+            placeholder="Remarks">
+
+    </td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+
+    <td colspan="9" class="text-center text-danger py-4">
+
+        <i class="fas fa-user-times"></i><br>
+
+        No Students Found.
+
+    </td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<div class="card mt-4 shadow">
+
+    <div class="card-body">
+
+        <div class="d-flex justify-content-end">
+
+            <button
+                type="reset"
+                class="btn btn-secondary me-2">
+
+                <i class="fas fa-undo"></i>
+
+                Reset
+
+            </button>
+
+            <button
+                type="submit"
+                class="btn btn-primary">
+
+                <i class="fas fa-save"></i>
+
+                Save Attendance
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+    </form>
+
+</div>
+
+{% endblock %}

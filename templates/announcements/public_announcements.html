@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Announcements{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>Latest Announcements</h2>
+
+    {% for announcement in announcements %}
+
+    <div class="card shadow mb-3">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+
+                {{ announcement.title }}
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <p>
+
+                {{ announcement.message }}
+
+            </p>
+
+            <hr>
+
+            <small class="text-muted">
+
+                <strong>Target:</strong> {{ announcement.target }}
+
+                &nbsp; | &nbsp;
+
+                <strong>Posted By:</strong>
+
+                {{ announcement.created_by.get_full_name }}
+
+                &nbsp; | &nbsp;
+
+                <strong>Date:</strong>
+
+                {{ announcement.created_at }}
+
+            </small>
+
+        </div>
+
+    </div>
+
+    {% empty %}
+
+    <div class="alert alert-info">
+
+        No announcements available.
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

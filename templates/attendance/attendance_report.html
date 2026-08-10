@@ -1,0 +1,683 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Attendance Reports
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- Header -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header bg-primary text-white">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h3 class="mb-1">
+
+                        <i class="fas fa-file-alt"></i>
+
+                        Attendance Reports
+
+                    </h3>
+
+                    <small>
+
+                        Generate attendance reports using different filters.
+
+                    </small>
+
+                </div>
+
+                <div>
+
+                    <a href="{% url 'attendance_dashboard' %}"
+                       class="btn btn-light">
+
+                        <i class="fas fa-arrow-left"></i>
+
+                        Dashboard
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Filters -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+
+                Report Filters
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <form method="GET">
+
+                <div class="row">
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+
+                            Department
+
+                        </label>
+
+                        <select
+                            name="department"
+                            class="form-select">
+
+                            <option value="">
+
+                                All Departments
+
+                            </option>
+
+                            {% for department in departments %}
+
+                            <option value="{{ department.id }}">
+
+                                {{ department.name }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+
+                            Course
+
+                        </label>
+
+                        <select
+                            name="course"
+                            class="form-select">
+
+                            <option value="">
+
+                                All Courses
+
+                            </option>
+
+                            {% for course in courses %}
+
+                            <option value="{{ course.id }}">
+
+                                {{ course.name }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+
+                        <label class="form-label">
+
+                            Semester
+
+                        </label>
+
+                        <select
+                            name="semester"
+                            class="form-select">
+
+                            <option value="">
+
+                                All
+
+                            </option>
+
+                            {% for i in "12345678" %}
+
+                            <option value="{{ forloop.counter }}">
+
+                                Semester {{ forloop.counter }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+
+                        <label class="form-label">
+
+                            From Date
+
+                        </label>
+
+                        <input
+                            type="date"
+                            name="from_date"
+                            class="form-control">
+
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+
+                        <label class="form-label">
+
+                            To Date
+
+                        </label>
+
+                        <input
+                            type="date"
+                            name="to_date"
+                            class="form-control">
+
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+
+                            Teacher
+
+                        </label>
+
+                        <select
+                            name="teacher"
+                            class="form-select">
+
+                            <option value="">
+
+                                All Teachers
+
+                            </option>
+
+                            {% for teacher in teachers %}
+
+                            <option value="{{ teacher.id }}">
+
+                                {{ teacher.user.get_full_name }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-9 d-flex align-items-end">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary me-2">
+
+                            <i class="fas fa-search"></i>
+
+                            Generate Report
+
+                        </button>
+
+                        <a href="{% url 'attendance_history' %}"
+                           class="btn btn-secondary me-2">
+
+                            Reset
+
+                        </a>
+
+                        <a href="{% url 'export_attendance_excel' %}"
+                           class="btn btn-primary me-2">
+
+                            <i class="fas fa-file-excel"></i>
+
+                            Excel
+
+                        </a>
+
+                        <a href="{% url 'export_attendance_csv' %}"
+                           class="btn btn-outline-primary">
+
+                            <i class="fas fa-file-csv"></i>
+
+                            CSV
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- Report Summary -->
+
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+
+            <div class="card border-primary shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <h2>
+
+                        {{ total_records }}
+
+                    </h2>
+
+                    <p class="mb-0">
+
+                        Total Records
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card border-success shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <h2>
+
+                        {{ total_present }}
+
+                    </h2>
+
+                    <p class="mb-0">
+
+                        Present
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card border-danger shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <h2>
+
+                        {{ total_absent }}
+
+                    </h2>
+
+                    <p class="mb-0">
+
+                        Absent
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card border-warning shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <h2>
+
+                        {{ overall_percentage }}%
+
+                    </h2>
+
+                    <p class="mb-0">
+
+                        Attendance %
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Report Table -->
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+
+                Attendance Report
+
+            </h5>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover mb-0">
+
+                    <thead class="table-light">
+
+                    <tr>
+
+                        <th>Date</th>
+
+                        <th>Student</th>
+
+                        <th>Roll No</th>
+
+                        <th>Department</th>
+
+                        <th>Course</th>
+
+                        <th>Teacher</th>
+
+                        <th>Status</th>
+
+                        <th>Remarks</th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    {% for attendance in report_data %}
+
+                                        <tr>
+
+                        <td>
+
+                            {{ attendance.session.attendance_date }}
+
+                        </td>
+
+                        <td>
+
+                            {{ attendance.student.user.get_full_name }}
+
+                        </td>
+
+                        <td>
+
+                            {{ attendance.student.roll_no }}
+
+                        </td>
+
+                        <td>
+
+                            {{ attendance.session.department.name }}
+
+                        </td>
+
+                        <td>
+
+                            {{ attendance.session.course.name }}
+
+                        </td>
+
+                        <td>
+
+                            {{ attendance.session.teacher.user.get_full_name }}
+
+                        </td>
+
+                        <td>
+
+                            {% if attendance.status == "PRESENT" %}
+
+                                <span class="badge bg-primary">
+
+                                    Present
+
+                                </span>
+
+                            {% elif attendance.status == "ABSENT" %}
+
+                                <span class="badge bg-secondary">
+
+                                    Absent
+
+                                </span>
+
+                            {% elif attendance.status == "LATE" %}
+
+                                <span class="badge bg-secondary">
+
+                                    Late
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-primary text-dark">
+
+                                    Medical
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {{ attendance.remarks|default:"-" }}
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="8"
+                            class="text-center text-danger">
+
+                            No Attendance Report Found
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+
+        <div class="card-footer">
+
+            <div class="row">
+
+                <div class="col-md-6">
+
+                    <strong>
+
+                        Total Records :
+                        {{ report_data.paginator.count|default:report_data|length }}
+
+                    </strong>
+
+                </div>
+
+                <div class="col-md-6 text-end">
+
+                    <button
+                        onclick="window.print()"
+                        class="btn btn-secondary">
+
+                        <i class="fas fa-print"></i>
+
+                        Print Report
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Pagination -->
+
+    {% if report_data.has_other_pages %}
+
+    <nav class="mt-4">
+
+        <ul class="pagination justify-content-center">
+
+            {% if report_data.has_previous %}
+
+            <li class="page-item">
+
+                <a class="page-link"
+                   href="?page={{ report_data.previous_page_number }}">
+
+                    Previous
+
+                </a>
+
+            </li>
+
+            {% endif %}
+
+            {% for num in report_data.paginator.page_range %}
+
+                {% if report_data.number == num %}
+
+                    <li class="page-item active">
+
+                        <span class="page-link">
+
+                            {{ num }}
+
+                        </span>
+
+                    </li>
+
+                {% else %}
+
+                    <li class="page-item">
+
+                        <a class="page-link"
+                           href="?page={{ num }}">
+
+                            {{ num }}
+
+                        </a>
+
+                    </li>
+
+                {% endif %}
+
+            {% endfor %}
+
+            {% if report_data.has_next %}
+
+            <li class="page-item">
+
+                <a class="page-link"
+                   href="?page={{ report_data.next_page_number }}">
+
+                    Next
+
+                </a>
+
+            </li>
+
+            {% endif %}
+
+        </ul>
+
+    </nav>
+
+    {% endif %}
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+    // Apply Bootstrap styling
+
+    document.querySelectorAll("select,input").forEach(function(el){
+
+        if(el.tagName === "SELECT"){
+
+            el.classList.add("form-select");
+
+        }else{
+
+            el.classList.add("form-control");
+
+        }
+
+    });
+
+    console.log("Attendance Report Loaded");
+
+});
+
+</script>
+
+{% endblock %}

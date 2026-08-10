@@ -1,0 +1,43 @@
+<h2>My Submissions</h2>
+
+<table border="1">
+
+<tr>
+    <th>Assignment</th>
+    <th>Submitted At</th>
+    <th>File</th>
+</tr>
+
+{% for submission in submissions %}
+
+<tr>
+
+<td>
+{{ submission.assignment.title }}
+</td>
+
+<td>
+{{ submission.submitted_at }}
+</td>
+
+<td>
+
+{% if submission.submission_file %}
+
+<a href="{{ submission.submission_file.url }}">
+    Download
+</a>
+
+{% else %}
+
+No File
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>

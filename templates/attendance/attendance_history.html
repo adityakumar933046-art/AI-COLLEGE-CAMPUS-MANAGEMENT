@@ -1,0 +1,552 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Attendance History
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- Header -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header bg-primary text-white">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h3 class="mb-1">
+
+                        <i class="fas fa-history"></i>
+
+                        Attendance History
+
+                    </h3>
+
+                    <small>
+
+                        View and manage previous attendance records
+
+                    </small>
+
+                </div>
+
+                <div>
+
+                    <a href="{% url 'attendance_session_list' %}"
+                       class="btn btn-light">
+
+                        <i class="fas fa-arrow-left"></i>
+
+                        Back
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Filter -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form method="GET">
+
+                <div class="row">
+
+                    <div class="col-md-3 mb-3">
+
+                        <input
+                            type="text"
+                            name="search"
+                            value="{{ request.GET.search }}"
+                            class="form-control"
+                            placeholder="Search Student / Roll No">
+
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+
+                        <input
+                            type="date"
+                            name="date"
+                            value="{{ request.GET.date }}"
+                            class="form-control">
+
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+
+                        <select
+                            name="status"
+                            class="form-select">
+
+                            <option value="">
+
+                                All Status
+
+                            </option>
+
+                            <option value="PRESENT">
+
+                                Present
+
+                            </option>
+
+                            <option value="ABSENT">
+
+                                Absent
+
+                            </option>
+
+                            <option value="LATE">
+
+                                Late
+
+                            </option>
+
+                            <option value="MEDICAL">
+
+                                Medical
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <select
+                            name="course"
+                            class="form-select">
+
+                            <option value="">
+
+                                All Courses
+
+                            </option>
+
+                            {% for course in courses %}
+
+                            <option value="{{ course.id }}">
+
+                                {{ course.name }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+
+                        <button
+                            class="btn btn-primary w-100">
+
+                            <i class="fas fa-search"></i>
+
+                            Search
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- Attendance Table -->
+
+    <div class="card shadow-sm">
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover mb-0">
+
+                    <thead class="table-light">
+
+                    <tr>
+
+                        <th>#</th>
+
+                        <th>Date</th>
+
+                        <th>Roll No</th>
+
+                        <th>Student</th>
+
+                        <th>Course</th>
+
+                        <th>Status</th>
+
+                        <th>Teacher</th>
+
+                        <th>Remarks</th>
+
+                        <th width="180">
+
+                            Action
+
+                        </th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    {% for attendance in attendances %}
+
+                    <tr>
+
+                        <td>
+
+                            {{ forloop.counter }}
+
+                        </td>
+
+                        <td>
+
+                            {{ attendance.session.attendance_date }}
+
+                        </td>
+
+                        <td>
+
+                            {{ attendance.student.roll_no }}
+
+                        </td>
+
+                        <td>
+
+                            {{ attendance.student.user.get_full_name }}
+
+                        </td>
+
+                        <td>
+
+                            {{ attendance.session.course.name }}
+
+                        </td>
+
+                        <td>
+
+                            {% if attendance.status == "PRESENT" %}
+
+                            <span class="badge bg-primary">
+
+                                Present
+
+                            </span>
+
+                            {% elif attendance.status == "ABSENT" %}
+
+                            <span class="badge bg-secondary">
+
+                                Absent
+
+                            </span>
+
+                            {% elif attendance.status == "LATE" %}
+
+                            <span class="badge bg-warning">
+
+                                Late
+
+                            </span>
+
+                            {% else %}
+
+                            <span class="badge bg-primary">
+
+                                Medical
+
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {{ attendance.session.teacher.user.get_full_name }}
+
+                        </td>
+
+                        <td>
+
+                            {{ attendance.remarks|default:"-" }}
+
+                        </td>
+
+                        <td>
+
+                            <a href="{% url 'attendance_detail' attendance.id %}"
+                               class="btn btn-outline-primary btn-sm">
+
+                                View
+
+                            </a>
+
+                            <a href="{% url 'attendance_update' attendance.id %}"
+                               class="btn btn-primary btn-sm">
+
+                                Edit
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="9"
+                            class="text-center text-danger">
+
+                            No Attendance Records Found
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+                        <!-- Card Footer -->
+
+            <div class="card-footer">
+
+                <div class="row align-items-center">
+
+                    <!-- Statistics -->
+
+                    <div class="col-md-6">
+
+                        <div class="d-flex flex-wrap gap-2">
+
+                            <span class="badge bg-primary p-2">
+
+                                Total Records :
+                                {{ attendances.paginator.count|default:attendances|length }}
+
+                            </span>
+
+                            <span class="badge bg-primary p-2">
+
+                                Present :
+                                {{ present_count|default:"0" }}
+
+                            </span>
+
+                            <span class="badge bg-secondary p-2">
+
+                                Absent :
+                                {{ absent_count|default:"0" }}
+
+                            </span>
+
+                            <span class="badge bg-warning text-dark p-2">
+
+                                Late :
+                                {{ late_count|default:"0" }}
+
+                            </span>
+
+                            <span class="badge bg-primary text-dark p-2">
+
+                                Medical :
+                                {{ medical_count|default:"0" }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Action Buttons -->
+
+                    <div class="col-md-6 text-end">
+
+                        <a href="{% url 'export_attendance_excel' %}"
+                           class="btn btn-primary btn-sm">
+
+                            <i class="fas fa-file-excel"></i>
+                            Export Excel
+
+                        </a>
+
+                        <a href="{% url 'export_attendance_csv' %}"
+                           class="btn btn-primary btn-sm">
+
+                            <i class="fas fa-file-csv"></i>
+                            Export CSV
+
+                        </a>
+
+                        <button
+                            type="button"
+                            onclick="window.print()"
+                            class="btn btn-secondary btn-sm">
+
+                            <i class="fas fa-print"></i>
+                            Print
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Pagination -->
+
+    {% if attendances.has_other_pages %}
+
+    <nav class="mt-4">
+
+        <ul class="pagination justify-content-center">
+
+            {% if attendances.has_previous %}
+
+            <li class="page-item">
+
+                <a class="page-link"
+                   href="?page={{ attendances.previous_page_number }}">
+
+                    Previous
+
+                </a>
+
+            </li>
+
+            {% endif %}
+
+            {% for num in attendances.paginator.page_range %}
+
+                {% if attendances.number == num %}
+
+                    <li class="page-item active">
+
+                        <span class="page-link">
+
+                            {{ num }}
+
+                        </span>
+
+                    </li>
+
+                {% else %}
+
+                    <li class="page-item">
+
+                        <a class="page-link"
+                           href="?page={{ num }}">
+
+                            {{ num }}
+
+                        </a>
+
+                    </li>
+
+                {% endif %}
+
+            {% endfor %}
+
+            {% if attendances.has_next %}
+
+            <li class="page-item">
+
+                <a class="page-link"
+                   href="?page={{ attendances.next_page_number }}">
+
+                    Next
+
+                </a>
+
+            </li>
+
+            {% endif %}
+
+        </ul>
+
+    </nav>
+
+    {% endif %}
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+    const searchBox = document.querySelector('input[name="search"]');
+
+    if(searchBox){
+
+        searchBox.focus();
+
+    }
+
+    // Automatically submit when status changes
+    const status = document.querySelector('select[name="status"]');
+
+    if(status){
+
+        status.addEventListener("change", function(){
+
+            this.form.submit();
+
+        });
+
+    }
+
+    // Automatically submit when course changes
+    const course = document.querySelector('select[name="course"]');
+
+    if(course){
+
+        course.addEventListener("change", function(){
+
+            this.form.submit();
+
+        });
+
+    }
+
+});
+
+</script>
+
+{% endblock %}

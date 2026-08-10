@@ -1,0 +1,475 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Attendance Details
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- Header -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header bg-primary text-white">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h3 class="mb-1">
+
+                        <i class="fas fa-clipboard-check"></i>
+
+                        Attendance Details
+
+                    </h3>
+
+                    <small>
+
+                        Complete attendance information
+
+                    </small>
+
+                </div>
+
+                <div>
+
+                    <a href="{% url 'attendance_history' %}"
+                       class="btn btn-light">
+
+                        <i class="fas fa-arrow-left"></i>
+
+                        Back
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Attendance Information -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+
+                Attendance Record
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-3 mb-3">
+
+                    <label class="fw-bold">
+                        Roll Number
+                    </label>
+
+                    <p>
+
+                        {{ attendance.student.roll_no }}
+
+                    </p>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <label class="fw-bold">
+                        Student Name
+                    </label>
+
+                    <p>
+
+                        {{ attendance.student.user.get_full_name }}
+
+                    </p>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <label class="fw-bold">
+                        Department
+                    </label>
+
+                    <p>
+
+                        {{ attendance.session.department.name }}
+
+                    </p>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <label class="fw-bold">
+                        Course
+                    </label>
+
+                    <p>
+
+                        {{ attendance.session.course.name }}
+
+                    </p>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <label class="fw-bold">
+                        Semester
+                    </label>
+
+                    <p>
+
+                        {{ attendance.session.semester }}
+
+                    </p>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <label class="fw-bold">
+                        Section
+                    </label>
+
+                    <p>
+
+                        {{ attendance.session.section }}
+
+                    </p>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <label class="fw-bold">
+                        Lecture No.
+                    </label>
+
+                    <p>
+
+                        {{ attendance.session.lecture_no }}
+
+                    </p>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <label class="fw-bold">
+                        Attendance Date
+                    </label>
+
+                    <p>
+
+                        {{ attendance.session.attendance_date }}
+
+                    </p>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-bold">
+                        Teacher
+                    </label>
+
+                    <p>
+
+                        {{ attendance.session.teacher.user.get_full_name }}
+
+                    </p>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-bold">
+                        Marked By
+                    </label>
+
+                    <p>
+
+                        {{ attendance.marked_by }}
+
+                    </p>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-bold">
+                        Status
+                    </label>
+
+                    <p>
+
+                        {% if attendance.status == "PRESENT" %}
+
+                        <span class="badge bg-primary">
+
+                            Present
+
+                        </span>
+
+                        {% elif attendance.status == "ABSENT" %}
+
+                        <span class="badge bg-secondary">
+
+                            Absent
+
+                        </span>
+
+                        {% elif attendance.status == "LATE" %}
+
+                        <span class="badge bg-secondary">
+
+                            Late
+
+                        </span>
+
+                        {% else %}
+
+                        <span class="badge bg-primary text-dark">
+
+                            Medical
+
+                        </span>
+
+                        {% endif %}
+
+                    </p>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-bold">
+                        Marked At
+                    </label>
+
+                    <p>
+
+                        {{ attendance.marked_at }}
+
+                    </p>
+
+                </div>
+
+                <div class="col-md-12">
+
+                    <label class="fw-bold">
+                        Remarks
+                    </label>
+
+                    <div class="border rounded p-3 bg-light">
+
+                        {{ attendance.remarks|default:"No Remarks" }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+                <!-- Card Footer -->
+
+        <div class="card-footer">
+
+            <div class="d-flex justify-content-end gap-2">
+
+                <a href="{% url 'attendance_update' attendance.id %}"
+                   class="btn btn-outline-primary">
+
+                    <i class="fas fa-edit"></i>
+
+                    Edit
+
+                </a>
+
+                <a href="{% url 'attendance_delete' attendance.id %}"
+                   class="btn btn-danger">
+
+                    <i class="fas fa-trash"></i>
+
+                    Delete
+
+                </a>
+
+                <button
+                    type="button"
+                    onclick="window.print()"
+                    class="btn btn-secondary">
+
+                    <i class="fas fa-print"></i>
+
+                    Print
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Student Attendance Summary -->
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+
+                Student Attendance Summary
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row text-center">
+
+                <div class="col-md-3 mb-3">
+
+                    <div class="alert alert-primary">
+
+                        <h3>
+
+                            {{ overall_percentage|default:"0" }}%
+
+                        </h3>
+
+                        <small>
+
+                            Overall Attendance
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <div class="alert alert-success">
+
+                        <h3>
+
+                            {{ total_present|default:"0" }}
+
+                        </h3>
+
+                        <small>
+
+                            Present
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <div class="alert alert-danger">
+
+                        <h3>
+
+                            {{ total_absent|default:"0" }}
+
+                        </h3>
+
+                        <small>
+
+                            Absent
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <div class="alert alert-warning">
+
+                        <h3>
+
+                            {{ total_classes|default:"0" }}
+
+                        </h3>
+
+                        <small>
+
+                            Total Classes
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Progress Bar -->
+
+            <div class="mt-4">
+
+                <label class="fw-bold">
+
+                    Attendance Percentage
+
+                </label>
+
+                <div class="progress" style="height:25px;">
+
+                    <div
+                        class="progress-bar bg-primary"
+                        role="progressbar"
+                        style="width: {{ overall_percentage|default:'0' }}%;">
+
+                        {{ overall_percentage|default:"0" }}%
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+    console.log("Attendance Detail Loaded");
+
+});
+
+</script>
+
+{% endblock %}

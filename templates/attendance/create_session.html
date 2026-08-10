@@ -1,0 +1,396 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Create Attendance Session
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- Header -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header bg-primary text-white">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h3 class="mb-1">
+                        <i class="fas fa-calendar-plus"></i>
+                        Create Attendance Session
+                    </h3>
+
+                    <small>
+                        Create a new attendance session for a class.
+                    </small>
+
+                </div>
+
+                <div>
+
+                    <a href="{% url 'attendance_session_list' %}"
+                       class="btn btn-light">
+
+                        <i class="fas fa-arrow-left"></i>
+
+                        Back
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Form -->
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <div class="card shadow-sm">
+
+            <div class="card-header">
+
+                <h5 class="mb-0">
+
+                    Session Information
+
+                </h5>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <!-- Department -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-bold">
+
+                            Department
+
+                        </label>
+
+                        {{ form.department }}
+
+                        {% if form.department.errors %}
+
+                        <div class="text-danger mt-1">
+
+                            {{ form.department.errors }}
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                    <!-- Course -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-bold">
+
+                            Course
+
+                        </label>
+
+                        {{ form.course }}
+
+                        {% if form.course.errors %}
+
+                        <div class="text-danger mt-1">
+
+                            {{ form.course.errors }}
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                    <!-- Teacher -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-bold">
+
+                            Teacher
+
+                        </label>
+
+                        {{ form.teacher }}
+
+                        {% if form.teacher.errors %}
+
+                        <div class="text-danger mt-1">
+
+                            {{ form.teacher.errors }}
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                    <!-- Semester -->
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label fw-bold">
+
+                            Semester
+
+                        </label>
+
+                        {{ form.semester }}
+
+                        {% if form.semester.errors %}
+
+                        <div class="text-danger mt-1">
+
+                            {{ form.semester.errors }}
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                    <!-- Section -->
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label fw-bold">
+
+                            Section
+
+                        </label>
+
+                        {{ form.section }}
+
+                        {% if form.section.errors %}
+
+                        <div class="text-danger mt-1">
+
+                            {{ form.section.errors }}
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                    <!-- Attendance Date -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label fw-bold">
+
+                            Attendance Date
+
+                        </label>
+
+                        {{ form.attendance_date }}
+
+                        {% if form.attendance_date.errors %}
+
+                        <div class="text-danger mt-1">
+
+                            {{ form.attendance_date.errors }}
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                    <!-- Lecture Number -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label fw-bold">
+
+                            Lecture Number
+
+                        </label>
+
+                        {{ form.lecture_no }}
+
+                        {% if form.lecture_no.errors %}
+
+                        <div class="text-danger mt-1">
+
+                            {{ form.lecture_no.errors }}
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                    <!-- Status -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label fw-bold">
+
+                            Status
+
+                        </label>
+
+                        {{ form.status }}
+
+                        {% if form.status.errors %}
+
+                        <div class="text-danger mt-1">
+
+                            {{ form.status.errors }}
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                                        <!-- Remarks -->
+
+                    <div class="col-md-12 mb-3">
+
+                        <label class="form-label fw-bold">
+
+                            Remarks
+
+                        </label>
+
+                        {{ form.remarks }}
+
+                        {% if form.remarks.errors %}
+
+                        <div class="text-danger mt-1">
+
+                            {{ form.remarks.errors }}
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                <!-- Non Field Errors -->
+
+                {% if form.non_field_errors %}
+
+                <div class="alert alert-danger mt-3">
+
+                    {{ form.non_field_errors }}
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+            <!-- Footer -->
+
+            <div class="card-footer">
+
+                <div class="d-flex justify-content-between">
+
+                    <a href="{% url 'attendance_session_list' %}"
+                       class="btn btn-secondary">
+
+                        <i class="fas fa-times"></i>
+
+                        Cancel
+
+                    </a>
+
+                    <div>
+
+                        <button
+                            type="reset"
+                            class="btn btn-outline-primary">
+
+                            <i class="fas fa-undo"></i>
+
+                            Reset
+
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary">
+
+                            <i class="fas fa-save"></i>
+
+                            Create Session
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Apply Bootstrap styling to all form controls
+    document.querySelectorAll("select,input,textarea").forEach(function(element){
+
+        if(
+            !element.classList.contains("form-control") &&
+            !element.classList.contains("form-select")
+        ){
+
+            if(element.tagName === "SELECT"){
+
+                element.classList.add("form-select");
+
+            }else{
+
+                element.classList.add("form-control");
+
+            }
+
+        }
+
+    });
+
+    // Set today's date if empty
+    const dateField = document.querySelector('input[type="date"]');
+
+    if(dateField && !dateField.value){
+
+        const today = new Date().toISOString().split("T")[0];
+
+        dateField.value = today;
+
+    }
+
+});
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance Success{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="card shadow">
+
+        <div class="card-body text-center">
+
+            <h1 class="text-success">
+
+                ✓ Attendance Marked Successfully
+
+            </h1>
+
+            <hr>
+
+            <h4>
+
+                Course
+
+            </h4>
+
+            <p>
+
+                {{ session.course.code }} - {{ session.course.name }}
+
+            </p>
+
+            <h4>
+
+                Teacher
+
+            </h4>
+
+            <p>
+
+                {{ session.teacher.user.get_full_name }}
+
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

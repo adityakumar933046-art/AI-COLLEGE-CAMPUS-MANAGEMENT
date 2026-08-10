@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Leave{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="card shadow">
+
+        <div class="card-body text-center">
+
+            <h3>
+
+                Delete Leave Request?
+
+            </h3>
+
+            <br>
+
+            <p>
+
+                <strong>Applicant:</strong>
+
+                {{ leave.applicant.get_full_name }}
+
+            </p>
+
+            <p>
+
+                <strong>Duration:</strong>
+
+                {{ leave.from_date }} - {{ leave.to_date }}
+
+            </p>
+
+            <p>
+
+                <strong>Status:</strong>
+
+                {{ leave.status }}
+
+            </p>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <button type="submit"
+
+                        class="btn btn-danger">
+
+                    Yes Delete
+
+                </button>
+
+                <a href="{% url 'my_leaves' %}"
+
+                   class="btn btn-secondary">
+
+                    Cancel
+
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

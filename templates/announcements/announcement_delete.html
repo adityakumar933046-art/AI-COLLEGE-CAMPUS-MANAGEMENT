@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Announcement{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="card shadow">
+
+        <div class="card-body text-center">
+
+            <h3>Delete Announcement?</h3>
+
+            <br>
+
+            <h4>
+
+                {{ announcement.title }}
+
+            </h4>
+
+            <p>
+
+                Target : {{ announcement.target }}
+
+            </p>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <button type="submit"
+
+                        class="btn btn-danger">
+
+                    Yes Delete
+
+                </button>
+
+                <a href="{% url 'announcement_detail' announcement.id %}"
+
+                   class="btn btn-secondary">
+
+                    Cancel
+
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

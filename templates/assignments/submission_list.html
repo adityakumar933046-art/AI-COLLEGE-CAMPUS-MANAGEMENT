@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student Submissions{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-card-checklist text-primary me-2"></i>
+                Student Submissions & Evaluation
+            </h3>
+            <p class="text-muted mb-0">Grade submitted student assignment solutions and assign marks & feedback.</p>
+        </div>
+        <div>
+            <a href="{% url 'assignment_list' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Back to Assignments
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-journal-check me-2"></i>Submitted Assignment Solutions</h5>
+            <span class="badge bg-light text-primary rounded-pill">{{ page_obj.paginator.count }} Submissions</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Student</th>
+                            <th>Roll Number</th>
+                            <th>Assignment</th>
+                            <th>Submitted Date</th>
+                            <th>Marks</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in submissions %}
+                            <tr>
+                                <td><strong class="text-dark">{{ sub.student.full_name }}</strong></td>
+                                <td><span class="badge bg-secondary">{{ sub.student.roll_no }}</span></td>
+                                <td>
+                                    <strong class="d-block text-dark">{{ sub.assignment.title }}</strong>
+                                    <small class="text-muted">{{ sub.assignment.course.code }}</small>
+                                </td>
+                                <td>{{ sub.submitted_at|date:"d M Y, h:i A" }}</td>
+                                <td>
+                                    {% if sub.status == "GRADED" %}
+                                        <span class="fw-bold text-success">{{ sub.marks }} / {{ sub.assignment.total_marks }}</span>
+                                    {% else %}
+                                        <span class="text-muted">Not Graded</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if sub.status == "GRADED" %}
+                                        <span class="badge bg-success">Graded</span>
+                                    {% elif sub.status == "LATE" %}
+                                        <span class="badge bg-danger">Late Submission</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Submitted</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'update_marks' sub.id %}" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-pencil-square me-1"></i> Grade Solution
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
+                                    <h5>No Submissions Received</h5>
+                                    <p class="small mb-0">No student assignment solutions have been submitted yet.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

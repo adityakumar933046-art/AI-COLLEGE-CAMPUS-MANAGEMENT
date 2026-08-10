@@ -1,0 +1,21 @@
+# Environment variables
+.env
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database
+*.sqlite3
+
+# Media uploads
+media/
+
+# Virtual Environment
+venv/
+env/
+
+# OS generated files
+desktop.ini
+.DS_Store

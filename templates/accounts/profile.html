@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title|default:"My Profile" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-person-badge text-primary me-2"></i>
+                My Profile & Account Details
+            </h3>
+            <p class="text-muted mb-0">Manage your authenticated profile credentials, personal details, and academic records.</p>
+        </div>
+        <div>
+            <a href="{% url 'edit_profile' %}" class="btn btn-primary me-2">
+                <i class="bi bi-pencil-square me-1"></i> Edit Profile
+            </a>
+            <a href="{% url 'change_password' %}" class="btn btn-outline-primary">
+                <i class="bi bi-key me-1"></i> Change Password
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Left Column: Avatar & Role Summary -->
+        <div class="col-lg-4">
+            <div class="card shadow border-0 text-center h-100">
+                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
+                    <div class="position-relative mb-3">
+                        {% if user_obj.profile_picture %}
+                            <img src="{{ user_obj.profile_picture.url }}" class="rounded-circle img-thumbnail shadow-sm" style="width: 160px; height: 160px; object-fit: cover;" alt="Profile Picture">
+                        {% else %}
+                            <img src="{% static 'images/default-user.png' %}" class="rounded-circle img-thumbnail shadow-sm" style="width: 160px; height: 160px; object-fit: cover;" alt="Profile Picture">
+                        {% endif %}
+                    </div>
+
+                    <h4 class="fw-bold text-dark mb-1">{{ user_obj.get_full_name|default:user_obj.username }}</h4>
+                    <p class="text-muted mb-2">@{{ user_obj.username }}</p>
+
+                    {% if role == "ADMIN" %}
+                        <span class="badge bg-danger fs-6 px-3 py-2 rounded-pill"><i class="bi bi-shield-lock me-1"></i> System Administrator</span>
+                    {% elif role == "TEACHER" %}
+                        <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill"><i class="bi bi-person-workspace me-1"></i> Faculty Member</span>
+                    {% else %}
+                        <span class="badge bg-success fs-6 px-3 py-2 rounded-pill"><i class="bi bi-mortarboard me-1"></i> Student</span>
+                    {% endif %}
+
+                    <hr class="w-100 my-4">
+
+                    <div class="w-100 text-start">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Account Status:</span>
+                            {% if user_obj.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Member Since:</span>
+                            <span class="fw-bold text-dark">{{ user_obj.date_joined|date:"d M Y" }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Last Login:</span>
+                            <span class="fw-bold text-dark">{{ user_obj.last_login|date:"d M Y, h:i A"|default:"Recently" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        # Right Column: Contact Details & Role Specific Specs
+        <div class="col-lg-8">
+            <!-- Account & Contact Card -->
+            <div class="card shadow border-0 mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-person-lines-fill me-2"></i>Personal & Contact Credentials</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">First Name</small>
+                            <span class="fw-bold text-dark fs-6">{{ user_obj.first_name|default:"Not specified" }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Last Name</small>
+                            <span class="fw-bold text-dark fs-6">{{ user_obj.last_name|default:"Not specified" }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Email Address</small>
+                            <span class="fw-bold text-dark fs-6">{{ user_obj.email|default:"N/A" }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Phone Number</small>
+                            <span class="fw-bold text-dark fs-6">{{ user_obj.phone|default:"N/A" }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Gender</small>
+                            <span class="fw-bold text-dark fs-6">{{ user_obj.get_gender_display|default:"Not specified" }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Date of Birth</small>
+                            <span class="fw-bold text-dark fs-6">{{ user_obj.date_of_birth|date:"d M Y"|default:"Not specified" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role-Specific Details Card -->
+            {% if role == "STUDENT" and student %}
+                <div class="card shadow border-0">
+                    <div class="card-header bg-success text-white py-3">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-mortarboard me-2"></i>Academic Profile Specification</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Roll Number</small>
+                                <span class="fw-bold text-dark fs-6">{{ student.roll_no }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Department</small>
+                                <span class="fw-bold text-dark fs-6">{{ student.department.name|default:"General" }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Semester</small>
+                                <span class="fw-bold text-dark fs-6">Semester {{ student.semester }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Section</small>
+                                <span class="fw-bold text-dark fs-6">Section {{ student.section|default:"A" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% elif role == "TEACHER" and teacher %}
+                <div class="card shadow border-0">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-person-workspace me-2"></i>Faculty Profile Specification</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Employee ID</small>
+                                <span class="fw-bold text-dark fs-6">{{ teacher.employee_id|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Department</small>
+                                <span class="fw-bold text-dark fs-6">{{ teacher.department.name|default:"General" }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Designation</small>
+                                <span class="fw-bold text-dark fs-6">{{ teacher.designation|default:"Faculty" }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Qualification</small>
+                                <span class="fw-bold text-dark fs-6">{{ teacher.qualification|default:"Higher Degree" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

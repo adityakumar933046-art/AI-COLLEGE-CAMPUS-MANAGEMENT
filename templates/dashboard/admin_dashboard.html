@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Admin Academic Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-speedometer2 text-primary me-2"></i>
+                Campus Academic Overview
+            </h3>
+            <p class="text-muted mb-0">Real-time statistics, attendance analytics, and academic evaluation insights.</p>
+        </div>
+        <div>
+            <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill">
+                Academic Year 2026–27
+            </span>
+        </div>
+    </div>
+
+    <!-- KPI Cards Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-primary text-white p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50 mb-1">Total Students</h6>
+                        <h3 class="fw-bold mb-0">{{ total_students }}</h3>
+                        <small class="text-white-50">{{ active_students }} Active</small>
+                    </div>
+                    <i class="bi bi-people fs-1 text-white-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-success text-white p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50 mb-1">Total Teachers</h6>
+                        <h3 class="fw-bold mb-0">{{ total_teachers }}</h3>
+                        <small class="text-white-50">{{ active_teachers }} Active</small>
+                    </div>
+                    <i class="bi bi-person-workspace fs-1 text-white-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-dark text-white p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50 mb-1">Active Courses</h6>
+                        <h3 class="fw-bold mb-0">{{ active_courses }}</h3>
+                        <small class="text-white-50">Out of {{ total_courses }} Courses</small>
+                    </div>
+                    <i class="bi bi-book fs-1 text-white-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-warning text-dark p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-dark-50 mb-1">Departments</h6>
+                        <h3 class="fw-bold mb-0">{{ total_departments }}</h3>
+                        <small class="text-dark-50">Academic Faculties</small>
+                    </div>
+                    <i class="bi bi-building fs-1 text-dark-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real Analytics Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- 1. Attendance Trend Chart -->
+        <div class="col-lg-8">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-graph-up text-primary me-2"></i>Real-Time Attendance Trend</h5>
+                    <span class="badge bg-light text-primary border">Past 7 Days</span>
+                </div>
+                <div class="card-body p-4" style="min-height: 320px;">
+                    <canvas id="attendanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Department Student Distribution -->
+        <div class="col-lg-4">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-pie-chart text-success me-2"></i>Students by Department</h5>
+                </div>
+                <div class="card-body p-4 d-flex align-items-center justify-content-center" style="min-height: 320px;">
+                    <canvas id="studentChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- 3. Grade Distribution Chart -->
+        <div class="col-lg-6">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-bar-chart-line text-warning me-2"></i>Examination Grade Distribution</h5>
+                </div>
+                <div class="card-body p-4" style="min-height: 280px;">
+                    <canvas id="gradeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Attendance Defaulters List (< 75%) -->
+        <div class="col-lg-6">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-danger text-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Attendance Defaulters (&lt; 75%)</h5>
+                    <span class="badge bg-light text-danger">Action Needed</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Roll Number</th>
+                                    <th>Department</th>
+                                    <th>Attendance %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="defaultersTableBody">
+                                <tr><td colspan="4" class="text-center py-4 text-muted">Loading attendance defaulters...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Leave Details{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+
+            <h3>Leave Details</h3>
+
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered">
+
+                <tr>
+
+                    <th width="220">Applicant</th>
+
+                    <td>{{ leave.applicant.get_full_name }}</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>From Date</th>
+
+                    <td>{{ leave.from_date }}</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>To Date</th>
+
+                    <td>{{ leave.to_date }}</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Status</th>
+
+                    <td>{{ leave.status }}</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Reason</th>
+
+                    <td>{{ leave.reason }}</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Remarks</th>
+
+                    <td>{{ leave.remarks }}</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Applied At</th>
+
+                    <td>{{ leave.applied_at }}</td>
+
+                </tr>
+
+            </table>
+
+            <a href="{% url 'my_leaves' %}" class="btn btn-secondary">
+
+                Back
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}My Leave Requests{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="row mb-4">
+
+        <div class="col-md-8">
+
+            <h2 class="fw-bold">My Leave Requests</h2>
+
+            <p class="text-muted">
+                View all your leave applications
+            </p>
+
+        </div>
+
+        <div class="col-md-4 text-end">
+
+            <a href="#" class="btn btn-primary">
+                + Apply Leave
+            </a>
+
+        </div>
+
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+                Leave History
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>#</th>
+                            <th>Leave Type</th>
+                            <th>From Date</th>
+                            <th>To Date</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Applied On</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for leave in leaves %}
+
+                        <tr>
+
+                            <td>{{ forloop.counter }}</td>
+
+                            <td>{{ leave.leave_type }}</td>
+
+                            <td>{{ leave.from_date }}</td>
+
+                            <td>{{ leave.to_date }}</td>
+
+                            <td>{{ leave.reason|truncatechars:40 }}</td>
+
+                            <td>
+
+                                {% if leave.status == "Approved" %}
+
+                                    <span class="badge bg-primary">
+
+                                        Approved
+
+                                    </span>
+
+                                {% elif leave.status == "Rejected" %}
+
+                                    <span class="badge bg-secondary">
+
+                                        Rejected
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-secondary">
+
+                                        Pending
+
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {{ leave.applied_at|date:"d M Y" }}
+
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+
+                            <td colspan="7"
+                                class="text-center text-muted">
+
+                                No Leave Requests Found
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

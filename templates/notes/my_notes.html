@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}My Notes{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>Study Notes</h2>
+
+    <form method="GET" class="row mb-3">
+
+        <div class="col-md-6">
+
+            <input type="text"
+
+                   name="search"
+
+                   class="form-control"
+
+                   placeholder="Search Notes..."
+
+                   value="{{ search }}">
+
+        </div>
+
+        <div class="col-md-2">
+
+            <button class="btn btn-primary w-100">
+
+                Search
+
+            </button>
+
+        </div>
+
+    </form>
+
+    <div class="card shadow">
+
+        <div class="table-responsive">
+
+            <table class="table table-striped">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>Title</th>
+
+                        <th>Course</th>
+
+                        <th>Teacher</th>
+
+                        <th>Uploaded</th>
+
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for note in notes %}
+
+                    <tr>
+
+                        <td>{{ note.title }}</td>
+
+                        <td>{{ note.course.code }}</td>
+
+                        <td>{{ note.teacher.user.get_full_name }}</td>
+
+                        <td>{{ note.uploaded_at }}</td>
+
+                        <td>
+
+                            <a href="{% url 'note_detail' note.id %}"
+
+                               class="btn btn-outline-primary btn-sm">
+
+                                View
+
+                            </a>
+
+                            <a href="{% url 'download_note' note.id %}"
+
+                               class="btn btn-primary btn-sm">
+
+                                Download
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="5" class="text-center">
+
+                            No Notes Found
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

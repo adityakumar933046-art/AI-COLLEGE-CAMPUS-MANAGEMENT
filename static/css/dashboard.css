@@ -1,0 +1,847 @@
+/*=====================================================
+                DASHBOARD.CSS
+                  PART 1A
+======================================================*/
+
+
+/*=========================
+        MAIN CONTENT
+==========================*/
+
+.main-content{
+
+    margin-left:280px;
+    margin-top:75px;
+
+    min-height:100vh;
+
+    background:#f8fafc;
+
+    padding:25px;
+
+    transition:.35s ease;
+
+}
+
+.main-content.expand{
+
+    margin-left:85px;
+
+}
+
+
+/*=========================
+      PAGE CONTAINER
+==========================*/
+
+.container-fluid{
+
+    width:100%;
+
+}
+
+
+/*=========================
+      WELCOME CARD
+==========================*/
+
+.welcome-card{
+
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #3b82f6
+    );
+
+    color:#fff;
+
+    overflow:hidden;
+
+    position:relative;
+
+}
+
+.welcome-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    right:-60px;
+    top:-60px;
+
+    width:180px;
+    height:180px;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.08);
+
+}
+
+.welcome-card h2,
+.welcome-card p{
+
+    color:#fff;
+
+}
+
+
+/*=========================
+      STATISTICS CARDS
+==========================*/
+
+.stat-card{
+
+    position:relative;
+
+    overflow:hidden;
+
+    border-radius:16px;
+
+    transition:.3s ease;
+
+}
+
+.stat-card:hover{
+
+    transform:translateY(-8px);
+
+    box-shadow:0 18px 35px rgba(0,0,0,.12);
+
+}
+
+.stat-card .card-body{
+
+    padding:24px;
+
+}
+
+.stat-card h6{
+
+    color:#64748b;
+
+    font-size:.9rem;
+
+    margin-bottom:8px;
+
+}
+
+.stat-card h2{
+
+    font-size:2rem;
+
+    font-weight:700;
+
+    color:#0f172a;
+
+}
+
+
+/*=========================
+        STAT ICON
+==========================*/
+
+.stat-icon{
+
+    width:62px;
+    height:62px;
+
+    border-radius:16px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    color:#fff;
+
+    font-size:1.6rem;
+
+    flex-shrink:0;
+
+}
+
+.bg-primary.stat-icon{
+
+    background:#2563eb!important;
+
+}
+
+.bg-primary.stat-icon{
+
+    background:#16a34a!important;
+
+}
+
+.bg-warning.stat-icon{
+
+    background:#f59e0b!important;
+
+}
+
+.bg-secondary.stat-icon{
+
+    background:#dc2626!important;
+
+}
+
+
+/*=========================
+      SMALL STATS
+==========================*/
+
+.stat-small{
+
+    border-radius:16px;
+
+    transition:.3s ease;
+
+}
+
+.stat-small:hover{
+
+    transform:translateY(-5px);
+
+}
+
+.stat-small h2{
+
+    font-size:2rem;
+
+    font-weight:700;
+
+}
+
+
+/*=========================
+      CARD HEADERS
+==========================*/
+
+.card-header{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    background:#fff;
+
+    border-bottom:1px solid #e2e8f0;
+
+    padding:16px 20px;
+
+}
+
+.card-header h5{
+
+    margin:0;
+
+    font-weight:600;
+
+}
+
+
+/*=========================
+        CHART CARD
+==========================*/
+
+canvas{
+
+    width:100%!important;
+
+    max-width:100%;
+
+}
+
+/*=====================================================
+                DASHBOARD.CSS
+                  PART 1B
+======================================================*/
+
+
+/*=========================
+      TABLE CARDS
+==========================*/
+
+.table-responsive{
+
+    overflow-x:auto;
+
+    border-radius:0 0 16px 16px;
+
+}
+
+.table{
+
+    margin-bottom:0;
+
+    vertical-align:middle;
+
+}
+
+.table thead{
+
+    background:#f8fafc;
+
+}
+
+.table thead th{
+
+    padding:16px;
+
+    font-size:.9rem;
+
+    font-weight:600;
+
+    color:#475569;
+
+    border-bottom:2px solid #e2e8f0;
+
+}
+
+.table tbody td{
+
+    padding:16px;
+
+    color:#334155;
+
+    border-color:#edf2f7;
+
+}
+
+.table-hover tbody tr{
+
+    transition:.25s ease;
+
+}
+
+.table-hover tbody tr:hover{
+
+    background:#f8fbff;
+
+    transform:scale(1.01);
+
+}
+
+
+/*=========================
+      LIST GROUP
+==========================*/
+
+.list-group-item{
+
+    padding:18px 20px;
+
+    border-color:#eef2f7;
+
+    transition:.3s ease;
+
+}
+
+.list-group-item:hover{
+
+    background:#f8fafc;
+
+}
+
+.list-group-item h6{
+
+    font-weight:600;
+
+    margin-bottom:6px;
+
+}
+
+.list-group-item small{
+
+    color:#64748b;
+
+}
+
+
+/*=========================
+      ANNOUNCEMENTS
+==========================*/
+
+.border-bottom{
+
+    border-color:#e2e8f0!important;
+
+}
+
+.border-bottom:last-child{
+
+    border-bottom:none!important;
+
+}
+
+
+/*=========================
+      QUICK ACTIONS
+==========================*/
+
+.btn.w-100{
+
+    border-radius:14px;
+
+    font-weight:600;
+
+    transition:.3s ease;
+
+}
+
+.btn.w-100 i{
+
+    font-size:1.4rem;
+
+    margin-bottom:8px;
+
+    display:block;
+
+}
+
+.btn.w-100:hover{
+
+    transform:translateY(-4px);
+
+    box-shadow:0 12px 24px rgba(37,99,235,.18);
+
+}
+
+
+/*=========================
+        BADGES
+==========================*/
+
+.badge{
+
+    font-weight:600;
+
+    letter-spacing:.3px;
+
+}
+
+
+/*=========================
+      EMPTY STATE
+==========================*/
+
+.text-center.text-muted{
+
+    padding:24px;
+
+    font-style:italic;
+
+}
+
+
+/*=========================
+      CARD ANIMATION
+==========================*/
+
+.card{
+
+    transition:.3s ease;
+
+}
+
+.card:hover{
+
+    box-shadow:0 15px 35px rgba(15,23,42,.10);
+
+}
+
+
+/*=========================
+      ICON COLORS
+==========================*/
+
+.bi{
+
+    vertical-align:middle;
+
+}
+
+.display-5{
+
+    opacity:.95;
+
+}
+
+/*=====================================================
+                DASHBOARD.CSS
+                  PART 1C
+======================================================*/
+
+
+/*=========================
+        PROGRESS CARDS
+==========================*/
+
+.progress{
+
+    height:10px;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    background:#e2e8f0;
+
+}
+
+.progress-bar{
+
+    border-radius:20px;
+
+}
+
+
+/*=========================
+      TIMETABLE CARD
+==========================*/
+
+.timetable-card .table td,
+.timetable-card .table th{
+
+    text-align:center;
+
+    vertical-align:middle;
+
+}
+
+.timetable-card .table tbody tr:hover{
+
+    background:#f8fafc;
+
+}
+
+
+/*=========================
+      ACTIVITY LIST
+==========================*/
+
+.activity-item{
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:15px;
+
+    padding:16px 0;
+
+    border-bottom:1px solid #edf2f7;
+
+}
+
+.activity-item:last-child{
+
+    border-bottom:none;
+
+}
+
+.activity-icon{
+
+    width:45px;
+
+    height:45px;
+
+    border-radius:50%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:#dbeafe;
+
+    color:var(--primary);
+
+    flex-shrink:0;
+
+}
+
+.activity-content h6{
+
+    margin-bottom:4px;
+
+    font-size:.95rem;
+
+    font-weight:600;
+
+}
+
+.activity-content p{
+
+    margin:0;
+
+    color:#64748b;
+
+    font-size:.88rem;
+
+}
+
+
+/*=========================
+        PROFILE CARD
+==========================*/
+
+.profile-card{
+
+    text-align:center;
+
+}
+
+.profile-card img{
+
+    width:100px;
+
+    height:100px;
+
+    border-radius:50%;
+
+    object-fit:cover;
+
+    border:4px solid #e2e8f0;
+
+    margin-bottom:15px;
+
+}
+
+.profile-card h5{
+
+    margin-bottom:5px;
+
+    font-weight:600;
+
+}
+
+.profile-card p{
+
+    color:#64748b;
+
+    margin-bottom:0;
+
+}
+
+
+/*=========================
+      RESPONSIVE
+==========================*/
+
+@media(max-width:992px){
+
+    .main-content{
+
+        margin-left:0;
+
+        padding:20px;
+
+    }
+
+}
+
+@media(max-width:768px){
+
+    .main-content{
+
+        padding:15px;
+
+    }
+
+    .stat-card .card-body{
+
+        padding:18px;
+
+    }
+
+    .stat-card h2{
+
+        font-size:1.6rem;
+
+    }
+
+    .card-header{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:10px;
+
+    }
+
+}
+
+@media(max-width:576px){
+
+    .main-content{
+
+        padding:12px;
+
+    }
+
+    .table thead{
+
+        display:none;
+
+    }
+
+    .table tbody td{
+
+        display:block;
+
+        width:100%;
+
+        text-align:right;
+
+        padding-left:45%;
+
+        position:relative;
+
+    }
+
+    .table tbody td::before{
+
+        content:attr(data-label);
+
+        position:absolute;
+
+        left:15px;
+
+        font-weight:600;
+
+        color:#475569;
+
+        text-align:left;
+
+    }
+
+    .table tbody tr{
+
+        display:block;
+
+        margin-bottom:15px;
+
+        border:1px solid #e2e8f0;
+
+        border-radius:12px;
+
+        overflow:hidden;
+
+    }
+
+}
+
+
+/*=========================
+        DARK MODE
+==========================*/
+
+body.dark-mode .main-content{
+
+    background:#0f172a;
+
+}
+
+body.dark-mode .card{
+
+    background:#1e293b;
+
+    color:#f8fafc;
+
+}
+
+body.dark-mode .card-header{
+
+    background:#1e293b;
+
+    border-color:#334155;
+
+}
+
+body.dark-mode .table{
+
+    color:#f8fafc;
+
+}
+
+body.dark-mode .table thead{
+
+    background:#273449;
+
+}
+
+body.dark-mode .table thead th{
+
+    color:#e2e8f0;
+
+    border-color:#334155;
+
+}
+
+body.dark-mode .table tbody td{
+
+    border-color:#334155;
+
+}
+
+body.dark-mode .table-hover tbody tr:hover{
+
+    background:#334155;
+
+}
+
+body.dark-mode .list-group-item{
+
+    background:#1e293b;
+
+    border-color:#334155;
+
+    color:#f8fafc;
+
+}
+
+body.dark-mode .list-group-item:hover{
+
+    background:#334155;
+
+}
+
+body.dark-mode .activity-item{
+
+    border-color:#334155;
+
+}
+
+body.dark-mode .activity-content p{
+
+    color:#cbd5e1;
+
+}
+
+
+/*=========================
+      REDUCED MOTION
+==========================*/
+
+@media(prefers-reduced-motion:reduce){
+
+    .card,
+    .stat-card,
+    .activity-item{
+
+        transition:none !important;
+
+    }
+
+}
+
+
+/*=========================
+            END
+==========================*/

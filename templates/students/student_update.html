@@ -1,0 +1,1222 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}
+Update Student
+{% endblock %}
+
+
+
+{% block content %}
+
+
+<div class="container-fluid py-4">
+
+
+
+    <!-- ============================= -->
+    <!-- PAGE HEADER -->
+    <!-- ============================= -->
+
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+
+        <div>
+
+
+            <h2 class="fw-bold mb-1">
+
+
+                <i class="fas fa-user-edit text-warning me-2"></i>
+
+
+                Update Student
+
+
+            </h2>
+
+
+            <p class="text-muted">
+
+
+                Update student account and profile information.
+
+
+            </p>
+
+
+        </div>
+
+
+
+
+
+        <a href="{% url 'student_detail' student.id %}"
+
+           class="btn btn-outline-primary">
+
+
+            <i class="fas fa-arrow-left me-1"></i>
+
+
+            Back
+
+
+        </a>
+
+
+
+    </div>
+
+
+
+
+
+
+    <!-- ============================= -->
+    <!-- FORM -->
+    <!-- ============================= -->
+
+
+    <div class="card shadow-sm border-0">
+
+
+        <div class="card-body">
+
+
+
+            <form method="POST"
+                  enctype="multipart/form-data">
+
+
+                {% csrf_token %}
+
+
+
+                <div class="row">
+
+
+
+
+
+                    <!-- ============================= -->
+                    <!-- ACCOUNT INFORMATION -->
+                    <!-- ============================= -->
+
+
+                    <div class="col-12 mb-3">
+
+
+                        <h5 class="fw-bold text-primary">
+
+
+                            <i class="fas fa-user me-2"></i>
+
+
+                            Account Information
+
+
+                        </h5>
+
+
+                        <hr>
+
+
+                    </div>
+
+
+
+
+
+
+                    <!-- Username -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+                            Username
+
+                        </label>
+
+
+                        {{ form.username }}
+
+
+                    </div>
+
+
+
+
+
+                    <!-- First Name -->
+
+
+                    <div class="col-md-3 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+                            First Name
+
+                        </label>
+
+
+                        {{ form.first_name }}
+
+
+                    </div>
+
+
+
+
+
+
+                    <!-- Last Name -->
+
+
+                    <div class="col-md-3 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+                            Last Name
+
+                        </label>
+
+
+                        {{ form.last_name }}
+
+
+                    </div>
+
+
+
+
+
+
+                    <!-- Email -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+                            Email
+
+                        </label>
+
+
+                        {{ form.email }}
+
+
+                    </div>
+
+
+
+
+
+
+                    <!-- Password -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+                            Password
+
+                        </label>
+
+
+                        {{ form.password }}
+
+
+                        <small class="text-muted">
+
+                            Leave blank to keep old password.
+
+                        </small>
+
+
+                    </div>
+
+                    
+                    <!-- ============================= -->
+                    <!-- ACADEMIC INFORMATION -->
+                    <!-- ============================= -->
+
+
+                    <div class="col-12 mt-3 mb-3">
+
+
+                        <h5 class="fw-bold text-success">
+
+
+                            <i class="fas fa-graduation-cap me-2"></i>
+
+
+                            Academic Information
+
+
+                        </h5>
+
+
+                        <hr>
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Admission No -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Admission Number
+
+
+                        </label>
+
+
+
+                        {{ form.admission_no }}
+
+
+
+                        <small class="text-danger">
+
+
+                            {{ form.admission_no.errors }}
+
+
+                        </small>
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Roll No -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Roll Number
+
+
+                        </label>
+
+
+
+                        {{ form.roll_no }}
+
+
+
+                        <small class="text-danger">
+
+
+                            {{ form.roll_no.errors }}
+
+
+                        </small>
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Department -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Department
+
+
+                        </label>
+
+
+
+                        {{ form.department }}
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Semester -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Semester
+
+
+                        </label>
+
+
+
+                        {{ form.semester }}
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Section -->
+
+
+                    <div class="col-md-4 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Section
+
+
+                        </label>
+
+
+
+                        {{ form.section }}
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Batch -->
+
+
+                    <div class="col-md-4 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Batch
+
+
+                        </label>
+
+
+
+                        {{ form.batch }}
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Academic Year -->
+
+
+                    <div class="col-md-4 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Academic Year
+
+
+                        </label>
+
+
+
+                        {{ form.academic_year }}
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Admission Date -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Admission Date
+
+
+                        </label>
+
+
+
+                        {{ form.admission_date }}
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- CGPA -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            CGPA
+
+
+                        </label>
+
+
+
+                        {{ form.cgpa }}
+
+
+
+                    </div>
+                    
+                    <!-- ============================= -->
+                    <!-- PERSONAL INFORMATION -->
+                    <!-- ============================= -->
+
+
+                    <div class="col-12 mt-3 mb-3">
+
+
+                        <h5 class="fw-bold text-warning">
+
+
+                            <i class="fas fa-id-card me-2"></i>
+
+
+                            Personal Information
+
+
+                        </h5>
+
+
+                        <hr>
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Photo Upload -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Profile Photo
+
+
+                        </label>
+
+
+
+                        {{ form.photo }}
+
+
+
+                        <small class="text-danger d-block">
+
+
+                            {{ form.photo.errors }}
+
+
+                        </small>
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Current Photo Preview -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Current Photo
+
+
+                        </label>
+
+
+
+                        <div>
+
+
+                            {% if student.photo %}
+
+
+                            <img id="photoPreview"
+
+                                 src="{{ student.photo.url }}"
+
+                                 width="120"
+
+                                 height="120"
+
+                                 class="rounded-circle border"
+
+                                 style="object-fit:cover;">
+
+
+
+                            {% else %}
+
+
+
+                            <img id="photoPreview"
+
+                                 src="{% static 'images/default-user.png' %}"
+
+                                 width="120"
+
+                                 height="120"
+
+                                 class="rounded-circle border"
+
+                                 style="object-fit:cover;">
+
+
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Phone -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Phone Number
+
+
+                        </label>
+
+
+
+                        {{ form.phone }}
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Gender -->
+
+
+                    <div class="col-md-3 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Gender
+
+
+                        </label>
+
+
+
+                        {{ form.gender }}
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- DOB -->
+
+
+                    <div class="col-md-3 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Date of Birth
+
+
+                        </label>
+
+
+
+                        {{ form.date_of_birth }}
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Blood Group -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Blood Group
+
+
+                        </label>
+
+
+
+                        {{ form.blood_group }}
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- ============================= -->
+                    <!-- GUARDIAN INFORMATION -->
+                    <!-- ============================= -->
+
+
+                    <div class="col-12 mt-3 mb-3">
+
+
+                        <h5 class="fw-bold text-info">
+
+
+                            <i class="fas fa-users me-2"></i>
+
+
+                            Guardian Information
+
+
+                        </h5>
+
+
+                        <hr>
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Father Name -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Father Name
+
+
+                        </label>
+
+
+
+                        {{ form.father_name }}
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Mother Name -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Mother Name
+
+
+                        </label>
+
+
+
+                        {{ form.mother_name }}
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Guardian Phone -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+
+                            Guardian Phone
+
+
+                        </label>
+
+
+
+                        {{ form.guardian_phone }}
+
+
+
+                    </div>
+                    
+                    <!-- ============================= -->
+                    <!-- ADDRESS INFORMATION -->
+                    <!-- ============================= -->
+
+
+                    <div class="col-12 mt-3 mb-3">
+
+
+                        <h5 class="fw-bold text-secondary">
+
+
+                            <i class="fas fa-map-marker-alt me-2"></i>
+
+
+                            Address Information
+
+
+                        </h5>
+
+
+                        <hr>
+
+
+                    </div>
+
+
+
+
+
+
+                    <!-- Address -->
+
+
+                    <div class="col-12 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+                            Address
+
+                        </label>
+
+
+                        {{ form.address }}
+
+
+                    </div>
+
+
+
+
+
+
+                    <!-- City -->
+
+
+                    <div class="col-md-4 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+                            City
+
+                        </label>
+
+
+                        {{ form.city }}
+
+
+                    </div>
+
+
+
+
+
+
+                    <!-- State -->
+
+
+                    <div class="col-md-4 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+                            State
+
+                        </label>
+
+
+                        {{ form.state }}
+
+
+                    </div>
+
+
+
+
+
+
+                    <!-- Pincode -->
+
+
+                    <div class="col-md-4 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+                            Pincode
+
+                        </label>
+
+
+                        {{ form.pincode }}
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- Status -->
+
+
+                    <div class="col-md-6 mb-3">
+
+
+                        <label class="form-label fw-semibold">
+
+                            Status
+
+                        </label>
+
+
+                        {{ form.status }}
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- ============================= -->
+                    <!-- BUTTONS -->
+                    <!-- ============================= -->
+
+
+                    <div class="col-12">
+
+
+                        <hr>
+
+
+                        <div class="d-flex justify-content-end gap-2">
+
+
+
+                            <a href="{% url 'student_detail' student.id %}"
+
+                               class="btn btn-secondary">
+
+
+                                <i class="fas fa-times me-1"></i>
+
+
+                                Cancel
+
+
+                            </a>
+
+
+
+
+
+
+                            <button type="reset"
+
+                                    class="btn btn-outline-primary">
+
+
+                                <i class="fas fa-rotate-left me-1"></i>
+
+
+                                Reset
+
+
+                            </button>
+
+
+
+
+
+
+
+                            <button type="submit"
+
+                                    class="btn btn-primary">
+
+
+                                <i class="fas fa-save me-1"></i>
+
+
+                                Update Student
+
+
+                            </button>
+
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+
+
+
+
+<!-- ============================= -->
+<!-- PHOTO PREVIEW SCRIPT -->
+<!-- ============================= -->
+
+
+<script>
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+function(){
+
+
+    const input = document.getElementById(
+        "id_photo"
+    );
+
+
+    const preview = document.getElementById(
+        "photoPreview"
+    );
+
+
+
+    if(input){
+
+
+        input.addEventListener(
+
+            "change",
+
+            function(){
+
+
+                if(this.files && this.files[0]){
+
+
+                    const reader = new FileReader();
+
+
+
+                    reader.onload = function(e){
+
+
+                        preview.src = e.target.result;
+
+
+                    };
+
+
+
+                    reader.readAsDataURL(
+                        this.files[0]
+                    );
+
+
+                }
+
+
+            }
+
+        );
+
+
+    }
+
+
+});
+
+
+</script>
+
+
+
+
+
+{% endblock %}

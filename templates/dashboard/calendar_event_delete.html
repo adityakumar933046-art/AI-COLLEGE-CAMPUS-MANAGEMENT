@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Delete Academic Event{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-danger text-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>Confirm Deletion</h5>
+                </div>
+                <div class="card-body p-4 text-center">
+                    <i class="bi bi-calendar-x display-1 text-danger d-block mb-3"></i>
+                    <h4 class="fw-bold mb-2">Delete Academic Event?</h4>
+                    <p class="text-muted mb-4">Are you sure you want to delete <strong>"{{ event.title }}"</strong>? This action will remove the event from all student and faculty calendars.</p>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{% url 'calendar' %}" class="btn btn-secondary px-4">Cancel</a>
+                            <button type="submit" class="btn btn-danger px-4"><i class="bi bi-trash me-1"></i> Delete Event</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

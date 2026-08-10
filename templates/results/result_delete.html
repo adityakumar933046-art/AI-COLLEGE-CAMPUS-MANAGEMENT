@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Result{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="card shadow">
+
+        <div class="card-body text-center">
+
+            <h3>Delete Result?</h3>
+
+            <br>
+
+            <h4>
+
+                {{ result.student.user.get_full_name }}
+
+            </h4>
+
+            <p>
+
+                {{ result.course.code }} - {{ result.course.name }}
+
+            </p>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <button type="submit" class="btn btn-danger">
+
+                    Yes Delete
+
+                </button>
+
+                <a href="{% url 'result_detail' result.id %}"
+
+                   class="btn btn-secondary">
+
+                    Cancel
+
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

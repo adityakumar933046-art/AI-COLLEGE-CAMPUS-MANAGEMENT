@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Assigned Courses{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-book text-primary me-2"></i>
+                My Assigned Courses
+            </h3>
+            <p class="text-muted mb-0">Courses and subjects assigned to {{ teacher.full_name }}</p>
+        </div>
+        <div>
+            <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill">
+                {{ total_courses }} Courses Assigned
+            </span>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="card shadow border-0 mb-4">
+        <div class="card-body p-3">
+            <form method="GET" class="row g-2 align-items-center">
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" name="search" class="form-control border-start-0" placeholder="Search by course name or code..." value="{{ search }}">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Courses Grid -->
+    <div class="row g-4">
+        {% for item in courses_page %}
+            <div class="col-lg-6">
+                <div class="card shadow border-0 h-100">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                        <div>
+                            <span class="badge bg-primary me-2">{{ item.course.code }}</span>
+                            <strong class="fs-5 text-dark">{{ item.course.name }}</strong>
+                        </div>
+                        <span class="badge bg-outline-dark border text-dark">Semester {{ item.course.semester }}</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="text-muted small d-block">Department</label>
+                                <span class="fw-semibold text-dark">{{ item.course.department.name }}</span>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small d-block">Credits</label>
+                                <span class="fw-semibold text-dark">{{ item.course.credits }} Credits</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-around text-center bg-light p-3 rounded mb-3">
+                            <div>
+                                <span class="fw-bold fs-5 text-primary d-block">{{ item.enrolled_students }}</span>
+                                <small class="text-muted">Students</small>
+                            </div>
+                            <div class="border-start ps-3">
+                                <span class="fw-bold fs-5 text-success d-block">{{ item.att_sessions }}</span>
+                                <small class="text-muted">Sessions</small>
+                            </div>
+                            <div class="border-start ps-3">
+                                <span class="fw-bold fs-5 text-warning d-block">{{ item.assignments_count }}</span>
+                                <small class="text-muted">Assignments</small>
+                            </div>
+                            <div class="border-start ps-3">
+                                <span class="fw-bold fs-5 text-dark d-block">{{ item.notes_count }}</span>
+                                <small class="text-muted">Notes</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light p-3 d-flex justify-content-between align-items-center">
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'create_attendance_session' %}" class="btn btn-outline-primary" title="Mark Attendance">
+                                <i class="bi bi-calendar-check me-1"></i> Attendance
+                            </a>
+                            <a href="{% url 'assignment_create' %}" class="btn btn-outline-success" title="Create Assignment">
+                                <i class="bi bi-plus-circle me-1"></i> Assignment
+                            </a>
+                            <a href="{% url 'note_create' %}" class="btn btn-outline-dark" title="Upload Note">
+                                <i class="bi bi-upload me-1"></i> Note
+                            </a>
+                        </div>
+                        <a href="{% url 'course_detail' item.course.id %}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-eye me-1"></i> View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="card shadow border-0 text-center p-5">
+                    <i class="bi bi-journal-x display-1 text-muted mb-3"></i>
+                    <h4 class="fw-bold text-dark">No Assigned Courses</h4>
+                    <p class="text-muted">You do not have any courses assigned to your account yet.</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,688 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Attendance Dashboard
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- Header -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header bg-primary text-white">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h3 class="mb-1">
+
+                        <i class="fas fa-chart-line"></i>
+
+                        Attendance Dashboard
+
+                    </h3>
+
+                    <small>
+
+                        Attendance Analytics & Reports
+
+                    </small>
+
+                </div>
+
+                <div>
+
+                    <a href="{% url 'attendance_session_list' %}"
+                       class="btn btn-light">
+
+                        <i class="fas fa-list"></i>
+
+                        Attendance Sessions
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- KPI Cards -->
+
+    <div class="row">
+
+        <div class="col-lg-3 col-md-6 mb-4">
+
+            <div class="card border-primary shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="fas fa-users fa-3x text-primary mb-3"></i>
+
+                    <h2>
+
+                        {{ total_students }}
+
+                    </h2>
+
+                    <p class="mb-0">
+
+                        Total Students
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+
+            <div class="card border-success shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="fas fa-user-check fa-3x text-success mb-3"></i>
+
+                    <h2>
+
+                        {{ present_today }}
+
+                    </h2>
+
+                    <p class="mb-0">
+
+                        Present Today
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+
+            <div class="card border-danger shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="fas fa-user-times fa-3x text-danger mb-3"></i>
+
+                    <h2>
+
+                        {{ absent_today }}
+
+                    </h2>
+
+                    <p class="mb-0">
+
+                        Absent Today
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+
+            <div class="card border-warning shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="fas fa-percentage fa-3x text-warning mb-3"></i>
+
+                    <h2>
+
+                        {{ attendance_percentage }}%
+
+                    </h2>
+
+                    <p class="mb-0">
+
+                        Overall Attendance
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Summary -->
+
+    <div class="row">
+
+        <div class="col-lg-8 mb-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h5 class="mb-0">
+
+                        Today's Attendance Summary
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="progress mb-4" style="height:30px;">
+
+                        <div
+                            class="progress-bar bg-primary"
+                            style="width: {{ attendance_percentage }}%;">
+
+                            {{ attendance_percentage }}%
+
+                        </div>
+
+                    </div>
+
+                    <div class="row text-center">
+
+                        <div class="col-md-3">
+
+                            <div class="alert alert-success">
+
+                                <h4>{{ present_today }}</h4>
+
+                                Present
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            <div class="alert alert-danger">
+
+                                <h4>{{ absent_today }}</h4>
+
+                                Absent
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            <div class="alert alert-warning">
+
+                                <h4>{{ late_today }}</h4>
+
+                                Late
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            <div class="alert alert-info">
+
+                                <h4>{{ medical_today }}</h4>
+
+                                Medical
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Quick Actions -->
+
+        <div class="col-lg-4 mb-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-dark text-white">
+
+                    <h5 class="mb-0">
+
+                        Quick Actions
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body d-grid gap-2">
+
+                    <a href="{% url 'create_attendance_session' %}"
+                       class="btn btn-primary">
+
+                        <i class="fas fa-plus-circle"></i>
+
+                        Create Session
+
+                    </a>
+
+                    <a href="{% url 'attendance_history' %}"
+                       class="btn btn-primary">
+
+                        <i class="fas fa-history"></i>
+
+                        Attendance History
+
+                    </a>
+
+                    <a href="{% url 'attendance_defaulters' %}"
+                       class="btn btn-outline-primary">
+
+                        <i class="fas fa-exclamation-triangle"></i>
+
+                        Defaulters
+
+                    </a>
+
+                    <a href="{% url 'attendance_history' %}"
+                       class="btn btn-outline-primary">
+
+                        <i class="fas fa-file-alt"></i>
+
+                        Reports
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+        <!-- Recent Attendance Sessions -->
+
+    <div class="row">
+
+        <div class="col-lg-8 mb-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-secondary text-white">
+
+                    <h5 class="mb-0">
+
+                        Recent Attendance Sessions
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover table-bordered mb-0">
+
+                            <thead class="table-light">
+
+                            <tr>
+
+                                <th>Date</th>
+
+                                <th>Course</th>
+
+                                <th>Teacher</th>
+
+                                <th>Semester</th>
+
+                                <th>Section</th>
+
+                                <th>Status</th>
+
+                            </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                            {% for session in recent_sessions %}
+
+                            <tr>
+
+                                <td>
+
+                                    {{ session.attendance_date }}
+
+                                </td>
+
+                                <td>
+
+                                    {{ session.course.name }}
+
+                                </td>
+
+                                <td>
+
+                                    {{ session.teacher.user.get_full_name }}
+
+                                </td>
+
+                                <td>
+
+                                    {{ session.semester }}
+
+                                </td>
+
+                                <td>
+
+                                    {{ session.section }}
+
+                                </td>
+
+                                <td>
+
+                                    {% if session.status == "OPEN" %}
+
+                                    <span class="badge bg-primary">
+
+                                        OPEN
+
+                                    </span>
+
+                                    {% else %}
+
+                                    <span class="badge bg-secondary">
+
+                                        CLOSED
+
+                                    </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                            {% empty %}
+
+                            <tr>
+
+                                <td colspan="6"
+                                    class="text-center text-danger">
+
+                                    No Attendance Sessions Found
+
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Top Courses -->
+
+        <div class="col-lg-4 mb-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h5 class="mb-0">
+
+                        Top Attendance Courses
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    {% for item in top_courses %}
+
+                    <div class="mb-3">
+
+                        <div class="d-flex justify-content-between">
+
+                            <strong>
+
+                                {{ item.course__name }}
+
+                            </strong>
+
+                            <span>
+
+                                {{ item.percentage }}%
+
+                            </span>
+
+                        </div>
+
+                        <div class="progress">
+
+                            <div
+                                class="progress-bar bg-primary"
+                                style="width:{{ item.percentage }}%;">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    {% empty %}
+
+                    <p class="text-muted text-center">
+
+                        No Data Available
+
+                    </p>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Department Statistics -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+
+                Department Statistics
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover">
+
+                    <thead class="table-light">
+
+                    <tr>
+
+                        <th>Department</th>
+
+                        <th>Total Students</th>
+
+                        <th>Present</th>
+
+                        <th>Absent</th>
+
+                        <th>Attendance %</th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    {% for dept in department_stats %}
+
+                    <tr>
+
+                        <td>
+
+                            {{ dept.department }}
+
+                        </td>
+
+                        <td>
+
+                            {{ dept.total_students }}
+
+                        </td>
+
+                        <td>
+
+                            {{ dept.present }}
+
+                        </td>
+
+                        <td>
+
+                            {{ dept.absent }}
+
+                        </td>
+
+                        <td>
+
+                            <span class="badge bg-primary">
+
+                                {{ dept.percentage }}%
+
+                            </span>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="5"
+                            class="text-center">
+
+                            No Department Statistics
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Recent Activities -->
+
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-dark text-white">
+
+            <h5 class="mb-0">
+
+                Recent Activities
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <ul class="list-group">
+
+                {% for activity in recent_activities %}
+
+                <li class="list-group-item">
+
+                    <strong>
+
+                        {{ activity.user }}
+
+                    </strong>
+
+                    {{ activity.message }}
+
+                    <span class="float-end text-muted">
+
+                        {{ activity.created_at }}
+
+                    </span>
+
+                </li>
+
+                {% empty %}
+
+                <li class="list-group-item text-center">
+
+                    No Recent Activities
+
+                </li>
+
+                {% endfor %}
+
+            </ul>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+    console.log("Attendance Dashboard Loaded");
+
+});
+
+</script>
+
+{% endblock %}

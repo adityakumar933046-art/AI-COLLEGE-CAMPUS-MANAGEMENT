@@ -1,0 +1,711 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Smart Campus Management System
+{% endblock %}
+
+{% block content %}
+
+<!-- ================= HERO SECTION ================= -->
+
+<section class="dashboard-banner mb-5">
+
+    <div class="row align-items-center">
+
+        <div class="col-lg-7">
+
+            <span class="badge bg-warning text-dark px-3 py-2 mb-3">
+                🎓 Welcome to Smart Campus
+            </span>
+
+            <h1 class="fw-bold text-white mb-3">
+                Smart Campus
+                <br>
+                Management System
+            </h1>
+
+            <p class="fs-5 text-white">
+
+                A complete digital platform for Students,
+                Teachers and Administration.
+
+                Manage Attendance, Results,
+                Assignments, Notes, Timetable,
+                Leave Management and much more.
+
+            </p>
+
+            {% if user.is_authenticated %}
+
+                <h4 class="mt-4 text-white">
+
+                    Welcome,
+                    {{ user.username }}
+
+                </h4>
+
+                {% if user.role == "ADMIN" %}
+
+                    <a href="/admin-dashboard/"
+                       class="btn btn-warning btn-lg mt-3">
+
+                        🚀 Admin Dashboard
+
+                    </a>
+
+                {% elif user.role == "TEACHER" %}
+
+                    <a href="/teacher-dashboard/"
+                       class="btn btn-primary btn-lg mt-3">
+
+                        👨‍🏫 Teacher Dashboard
+
+                    </a>
+
+                {% else %}
+
+                    <a href="/student-dashboard/"
+                       class="btn btn-light btn-lg mt-3">
+
+                        👨‍🎓 Student Dashboard
+
+                    </a>
+
+                {% endif %}
+
+            {% else %}
+
+                <a href="/login/"
+                   class="btn btn-light btn-lg me-3 mt-3">
+
+                    Login
+
+                </a>
+
+                <a href="/register/"
+                   class="btn btn-warning btn-lg mt-3">
+
+                    Register
+
+                </a>
+
+            {% endif %}
+
+        </div>
+
+        <div class="col-lg-5 text-center">
+
+            <img src="{% static 'images/campus.png' %}"
+
+                 class="img-fluid"
+
+                 style="max-height:420px;">
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================= CAMPUS STATS ================= -->
+
+<div class="row g-4 mb-5">
+
+    <div class="col-md-3">
+
+        <div class="dashboard-card primary-card">
+
+            <h6>Total Students</h6>
+
+            <h2>{{ students_count }}</h2>
+
+            <i class="bi bi-people-fill"></i>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="dashboard-card success-card">
+
+            <h6>Total Teachers</h6>
+
+            <h2>{{ teachers_count }}</h2>
+
+            <i class="bi bi-person-video3"></i>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="dashboard-card warning-card">
+
+            <h6>Total Courses</h6>
+
+            <h2>{{ courses_count }}</h2>
+
+            <i class="bi bi-book-fill"></i>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="dashboard-card danger-card">
+
+            <h6>Assignments</h6>
+
+            <h2>{{ assignments_count }}</h2>
+
+            <i class="bi bi-journal-text"></i>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ================= FEATURES SECTION ================= -->
+
+<section class="py-5">
+
+    <div class="text-center mb-5">
+
+        <h2 class="fw-bold">
+
+            🚀 Smart Campus Features
+
+        </h2>
+
+        <p class="text-muted">
+
+            Everything you need to manage your campus efficiently.
+
+        </p>
+
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card quick-card h-100">
+
+                <i class="bi bi-calendar-check-fill"></i>
+
+                <h5>Attendance</h5>
+
+                <p>
+
+                    Digital attendance with reports,
+                    QR Attendance and analytics.
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card quick-card h-100">
+
+                <i class="bi bi-journal-text"></i>
+
+                <h5>Assignments</h5>
+
+                <p>
+
+                    Upload, submit and track
+                    assignment progress.
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card quick-card h-100">
+
+                <i class="bi bi-award-fill"></i>
+
+                <h5>Results</h5>
+
+                <p>
+
+                    View grades, marks,
+                    GPA and performance.
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card quick-card h-100">
+
+                <i class="bi bi-book-fill"></i>
+
+                <h5>Study Notes</h5>
+
+                <p>
+
+                    Download PDFs,
+                    notes and study material.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================= USER PORTALS ================= -->
+
+<section class="py-5">
+
+    <div class="text-center mb-5">
+
+        <h2 class="fw-bold">
+
+            👥 User Portals
+
+        </h2>
+
+        <p class="text-muted">
+
+            Separate dashboards for every role.
+
+        </p>
+
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-4">
+
+            <div class="card profile-card h-100">
+
+                <i class="bi bi-mortarboard-fill display-3 text-primary"></i>
+
+                <h3 class="mt-3">
+
+                    Student Portal
+
+                </h3>
+
+                <p>
+
+                    Attendance
+
+                    <br>
+
+                    Results
+
+                    <br>
+
+                    Notes
+
+                    <br>
+
+                    Timetable
+
+                    <br>
+
+                    Leave Application
+
+                    <br>
+
+                    Assignments
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="card profile-card h-100">
+
+                <i class="bi bi-person-workspace display-3 text-success"></i>
+
+                <h3 class="mt-3">
+
+                    Teacher Portal
+
+                </h3>
+
+                <p>
+
+                    Student Management
+
+                    <br>
+
+                    QR Attendance
+
+                    <br>
+
+                    Upload Notes
+
+                    <br>
+
+                    Upload Results
+
+                    <br>
+
+                    Analytics
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="card profile-card h-100">
+
+                <i class="bi bi-speedometer2 display-3 text-danger"></i>
+
+                <h3 class="mt-3">
+
+                    Admin Portal
+
+                </h3>
+
+                <p>
+
+                    Student Management
+
+                    <br>
+
+                    Teacher Management
+
+                    <br>
+
+                    Courses
+
+                    <br>
+
+                    Reports
+
+                    <br>
+
+                    Analytics Dashboard
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================= WHY CHOOSE US ================= -->
+
+<section class="py-5">
+
+    <div class="row align-items-center">
+
+        <div class="col-lg-6">
+
+            <img
+                src="{% static 'images/about-campus.png' %}"
+                class="img-fluid rounded-4 shadow-lg">
+
+        </div>
+
+        <div class="col-lg-6">
+
+            <h2 class="fw-bold mb-4">
+
+                Why Choose Smart Campus?
+
+            </h2>
+
+            <div class="mb-3">
+
+                ✅ Modern Dashboard
+
+            </div>
+
+            <div class="mb-3">
+
+                ✅ QR Attendance System
+
+            </div>
+
+            <div class="mb-3">
+
+                ✅ Secure Login
+
+            </div>
+
+            <div class="mb-3">
+
+                ✅ Student Analytics
+
+            </div>
+
+            <div class="mb-3">
+
+                ✅ Assignment Tracking
+
+            </div>
+
+            <div class="mb-3">
+
+                ✅ Results & Reports
+
+            </div>
+
+            <div class="mb-3">
+
+                ✅ Responsive Design
+
+            </div>
+
+            <div class="mb-3">
+
+                ✅ Future Ready ERP
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<!-- ================= LATEST ANNOUNCEMENTS ================= -->
+
+<section class="py-5">
+
+    <div class="text-center mb-5">
+
+        <h2 class="fw-bold">
+
+            📢 Latest Announcements
+
+        </h2>
+
+        <p class="text-muted">
+
+            Stay updated with the latest campus news.
+
+        </p>
+
+    </div>
+
+    <div class="row">
+
+        {% for announcement in announcements %}
+
+        <div class="col-lg-6 mb-4">
+
+            <div class="card glass-card h-100">
+
+                <div class="card-body">
+
+                    <span class="badge bg-primary mb-3">
+
+                        Announcement
+
+                    </span>
+
+                    <h4>
+
+                        {{ announcement.title }}
+
+                    </h4>
+
+                    <p>
+
+                        {{ announcement.message }}
+
+                    </p>
+
+                    <small class="text-muted">
+
+                        <i class="bi bi-calendar-event"></i>
+
+                        {{ announcement.created_at }}
+
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+        <div class="col-12">
+
+            <div class="alert alert-info">
+
+                No announcements available.
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+<!-- ================= CONTACT SECTION ================= -->
+
+<section class="py-5">
+
+    <div class="dashboard-banner">
+
+        <div class="row align-items-center">
+
+            <div class="col-lg-7">
+
+                <h2 class="text-white">
+
+                    📞 Contact Smart Campus
+
+                </h2>
+
+                <p class="text-white">
+
+                    Need help? Reach out to our support team.
+
+                </p>
+
+                <p class="text-white">
+
+                    📧 support@smartcampus.com
+
+                </p>
+
+                <p class="text-white">
+
+                    ☎ +91 9876543210
+
+                </p>
+
+                <p class="text-white">
+
+                    📍 Smart Campus University,
+                    Lucknow, Uttar Pradesh
+
+                </p>
+
+            </div>
+
+            <div class="col-lg-5 text-center">
+
+                <i class="bi bi-headset text-white"
+                   style="font-size:130px;"></i>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================= FINAL CTA ================= -->
+
+<section class="py-5">
+
+    <div class="card bg-primary-gradient">
+
+        <div class="card-body text-center p-5">
+
+            <h2 class="text-white">
+
+                Ready to Experience Smart Campus?
+
+            </h2>
+
+            <p class="text-white">
+
+                Join thousands of students and teachers
+                using our modern campus management system.
+
+            </p>
+
+            {% if not user.is_authenticated %}
+
+            <a href="/register/"
+
+               class="btn btn-warning btn-lg mt-3 me-2">
+
+                Register Now
+
+            </a>
+
+            <a href="/login/"
+
+               class="btn btn-light btn-lg mt-3">
+
+                Login
+
+            </a>
+
+            {% else %}
+
+            {% if user.role == "ADMIN" %}
+
+            <a href="/admin-dashboard/"
+
+               class="btn btn-light btn-lg mt-3">
+
+                Go To Dashboard
+
+            </a>
+
+            {% elif user.role == "TEACHER" %}
+
+            <a href="/teacher-dashboard/"
+
+               class="btn btn-light btn-lg mt-3">
+
+                Go To Dashboard
+
+            </a>
+
+            {% else %}
+
+            <a href="/student-dashboard/"
+
+               class="btn btn-light btn-lg mt-3">
+
+                Go To Dashboard
+
+            </a>
+
+            {% endif %}
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

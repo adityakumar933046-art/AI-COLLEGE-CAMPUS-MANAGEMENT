@@ -1,0 +1,304 @@
+/*==================================================
+            SMART CAMPUS ERP TOPBAR
+==================================================*/
+
+.topbar{
+
+    position:sticky;
+
+    top:0;
+
+    z-index:1000;
+
+    height:75px;
+
+    background:#ffffff;
+
+    border-bottom:1px solid #e2e8f0;
+
+    padding:0 25px;
+
+    display:flex;
+
+    align-items:center;
+
+}
+
+/*=========================================
+        Sidebar Toggle
+=========================================*/
+
+#sidebarToggle{
+
+    width:48px;
+
+    height:48px;
+
+    border-radius:12px;
+
+    border:none;
+
+    background:#f1f5f9;
+
+    transition:.3s;
+
+}
+
+#sidebarToggle:hover{
+
+    background:#2563eb;
+
+    color:#fff;
+
+}
+
+/*=========================================
+            Page Title
+=========================================*/
+
+.topbar h4{
+
+    font-weight:700;
+
+    color:#1e293b;
+
+    margin:0;
+
+}
+
+/*=========================================
+            Search Box
+=========================================*/
+
+.topbar .input-group{
+
+    width:320px;
+
+}
+
+.topbar .input-group-text{
+
+    border:none;
+
+    background:#f8fafc;
+
+}
+
+.topbar .form-control{
+
+    border:none;
+
+    background:#f8fafc;
+
+    box-shadow:none;
+
+}
+
+.topbar .form-control:focus{
+
+    background:#fff;
+
+    border:1px solid #2563eb;
+
+    box-shadow:0 0 0 3px rgba(37,99,235,.15);
+
+}
+
+/*=========================================
+        Notification Button
+=========================================*/
+
+.topbar .btn-light{
+
+    width:48px;
+
+    height:48px;
+
+    border-radius:12px;
+
+    border:none;
+
+    background:#f8fafc;
+
+    transition:.3s;
+
+}
+
+.topbar .btn-light:hover{
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+.topbar .badge{
+
+    font-size:10px;
+
+}
+
+/*=========================================
+        Profile Button
+=========================================*/
+
+.dropdown button{
+
+    border:none;
+
+    background:#fff;
+
+    border-radius:15px;
+
+    padding:8px 15px;
+
+    transition:.3s;
+
+}
+
+.dropdown button:hover{
+
+    background:#f8fafc;
+
+}
+
+.dropdown img{
+
+    width:42px;
+
+    height:42px;
+
+    object-fit:cover;
+
+    border-radius:50%;
+
+    border:2px solid #2563eb;
+
+}
+
+/*=========================================
+        Dropdown Menu
+=========================================*/
+
+.dropdown-menu{
+
+    border:none;
+
+    border-radius:15px;
+
+    box-shadow:0 10px 35px rgba(0,0,0,.12);
+
+    padding:10px;
+
+}
+
+.dropdown-item{
+
+    padding:10px 15px;
+
+    border-radius:10px;
+
+    transition:.25s;
+
+}
+
+.dropdown-item:hover{
+
+    background:#2563eb;
+
+    color:#fff;
+
+}
+
+.dropdown-divider{
+
+    margin:8px 0;
+
+}
+
+/*=========================================
+        Search Animation
+=========================================*/
+
+.form-control{
+
+    transition:.3s;
+
+}
+
+/*=========================================
+        Sticky Shadow
+=========================================*/
+
+.topbar{
+
+    box-shadow:0 4px 20px rgba(0,0,0,.05);
+
+}
+
+/*=========================================
+        Responsive
+=========================================*/
+
+
+/*=========================================
+        Dark Mode
+=========================================*/
+
+body.dark-mode .topbar{
+
+    background:#0f172a;
+
+    border-color:#334155;
+
+}
+
+body.dark-mode .topbar h4{
+
+    color:#fff;
+
+}
+
+body.dark-mode .dropdown button{
+
+    background:#1e293b;
+
+    color:white;
+
+}
+
+body.dark-mode .dropdown-menu{
+
+    background:#1e293b;
+
+}
+
+body.dark-mode .dropdown-item{
+
+    color:#fff;
+
+}
+
+body.dark-mode .form-control{
+
+    background:#1e293b;
+
+    color:#fff;
+
+}
+
+body.dark-mode .input-group-text{
+
+    background:#1e293b;
+
+    color:white;
+
+}
+
+body.dark-mode .btn-light{
+
+    background:#1e293b;
+
+    color:white;
+
+}

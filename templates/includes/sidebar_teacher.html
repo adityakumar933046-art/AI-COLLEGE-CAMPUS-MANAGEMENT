@@ -1,0 +1,130 @@
+{% load static %}
+<aside id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+        <a href="{% url 'teacher_dashboard' %}" class="logo">
+            <div class="logo-icon"><i class="bi bi-person-workspace"></i></div>
+            <div class="logo-text">
+                <h4>Smart Campus</h4>
+                <small>Faculty Portal</small>
+            </div>
+        </a>
+        <button id="sidebarToggle" class="sidebar-toggle"><i class="bi bi-list"></i></button>
+    </div>
+
+    <div class="admin-profile">
+        <div class="profile-image">
+            {% if request.user.profile_picture %}
+                <img src="{{ request.user.profile_picture.url }}" alt="Profile">
+            {% else %}
+                <img src="{% static 'images/default-user.png' %}" alt="Profile">
+            {% endif %}
+        </div>
+        <div class="profile-info">
+            <h6>{{ request.user.get_full_name|default:request.user.username }}</h6>
+            <span class="badge bg-primary">Faculty Member</span>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <ul>
+            <!-- MAIN -->
+            <li class="menu-heading">MAIN</li>
+            <li>
+                <a href="{% url 'teacher_dashboard' %}" class="{% if request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+
+            <!-- TEACHING & CLASSES -->
+            <li class="menu-heading">TEACHING & CLASSES</li>
+            <li>
+                <a href="{% url 'teacher_courses' %}" class="{% if request.resolver_match.url_name == 'teacher_courses' %}active{% endif %}">
+                    <i class="bi bi-journal-bookmark-fill"></i>
+                    <span>My Courses</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'teacher_timetable' %}" class="{% if request.resolver_match.url_name == 'teacher_timetable' %}active{% endif %}">
+                    <i class="bi bi-calendar3"></i>
+                    <span>My Timetable</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'attendance_session_list' %}" class="{% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-calendar-check-fill"></i>
+                    <span>Attendance Registers</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'qr_session_list' %}" class="{% if 'qr' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-qr-code-scan"></i>
+                    <span>QR Attendance</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'assignment_list' %}" class="{% if 'assignment' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Assignments</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'teacher_notes' %}" class="{% if 'note' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                    <span>Study Materials</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'result_list' %}" class="{% if 'result' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-bar-chart-line-fill"></i>
+                    <span>Exam Results</span>
+                </a>
+            </li>
+
+            <!-- ACADEMIC & NOTICES -->
+            <li class="menu-heading">ACADEMIC & NOTICES</li>
+            <li>
+                <a href="{% url 'announcement_list' %}" class="{% if 'announcement' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-megaphone-fill"></i>
+                    <span>Announcements</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'calendar' %}" class="{% if request.resolver_match.url_name == 'calendar' %}active{% endif %}">
+                    <i class="bi bi-calendar-event-fill"></i>
+                    <span>Academic Calendar</span>
+                </a>
+            </li>
+
+            <!-- ACCOUNT -->
+            <li class="menu-heading">ACCOUNT</li>
+            <li>
+                <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                    <i class="bi bi-person-circle"></i>
+                    <span>My Profile</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'change_password' %}" class="{% if request.resolver_match.url_name == 'change_password' %}active{% endif %}">
+                    <i class="bi bi-key-fill"></i>
+                    <span>Change Password</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'logout' %}" class="text-danger" onclick="return confirm('Are you sure you want to logout?')">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="text-center">
+            <h6 class="mb-1">Smart Campus ERP</h6>
+            <small class="text-muted">Faculty Portal</small>
+            <hr class="my-2">
+            <small class="text-secondary">&copy; 2026 Smart Campus</small>
+        </div>
+    </div>
+</aside>

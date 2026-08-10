@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Academic Attendance Summary | Smart Campus{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-person-check text-primary me-2"></i>
+                My Academic Attendance Summary
+            </h3>
+            <p class="text-muted mb-0">
+                Course-wise breakdown, date-wise lecture history, and 75% threshold compliance tracker.
+            </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'export_attendance_excel' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}" class="btn btn-outline-success">
+                <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
+            </a>
+            <a href="{% url 'export_attendance_csv' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}" class="btn btn-outline-secondary">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
+            </a>
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="bi bi-printer me-1"></i> Print Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Low Attendance Warning Alert -->
+    {% if low_attendance_courses %}
+    <div class="alert alert-warning alert-dismissible fade show border-warning shadow-sm mb-4" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill fs-3 text-warning me-3"></i>
+            <div>
+                <h5 class="alert-heading fw-bold mb-1">Low Attendance Warning!</h5>
+                <p class="mb-0 small text-dark">
+                    You have attendance below the mandatory <strong>75% threshold</strong> in: 
+                    {% for item in low_attendance_courses %}
+                        <span class="badge bg-danger ms-1">{{ item.course.code }} ({{ item.percentage }}%)</span>
+                    {% endfor %}
+                    . Please contact your subject faculty immediately.
+                </p>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- Top KPI Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 {% if overall_percentage >= 75 %}bg-success{% else %}bg-danger{% endif %} text-white">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-white-50 small fw-bold text-uppercase">Overall Attendance</span>
+                    <i class="bi bi-pie-chart fs-4 text-white-50"></i>
+                </div>
+                <h2 class="fw-bold mb-0">{{ overall_percentage }}%</h2>
+                <small class="text-white-50">Min Threshold: 75%</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-white-50 small fw-bold text-uppercase">Total Conducted</span>
+                    <i class="bi bi-journal-check fs-4 text-white-50"></i>
+                </div>
+                <h2 class="fw-bold mb-0">{{ total_classes }}</h2>
+                <small class="text-white-50">Lectures Held</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-success text-white">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-white-50 small fw-bold text-uppercase">Total Attended</span>
+                    <i class="bi bi-check-circle fs-4 text-white-50"></i>
+                </div>
+                <h2 class="fw-bold mb-0">{{ total_present }}</h2>
+                <small class="text-white-50">Present Sessions</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-dark text-white">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-white-50 small fw-bold text-uppercase">Total Absent</span>
+                    <i class="bi bi-x-circle fs-4 text-white-50"></i>
+                </div>
+                <h2 class="fw-bold mb-0">{{ total_absent }}</h2>
+                <small class="text-white-50">Missed Sessions</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Control Card -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body p-3">
+            <form method="GET" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted">Course Filter</label>
+                    <select name="course" class="form-select form-select-sm">
+                        <option value="">-- All Courses --</option>
+                        {% for crs in academic_courses %}
+                            <option value="{{ crs.id }}" {% if selected_course == crs.id|stringformat:"s" %}selected{% endif %}>
+                                {{ crs.code }} - {{ crs.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted">From Date</label>
+                    <input type="date" name="from_date" class="form-control form-control-sm" value="{{ selected_from_date }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted">To Date</label>
+                    <input type="date" name="to_date" class="form-control form-control-sm" value="{{ selected_to_date }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted">Status</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">-- All Statuses --</option>
+                        <option value="PRESENT" {% if selected_status == "PRESENT" %}selected{% endif %}>Present</option>
+                        <option value="ABSENT" {% if selected_status == "ABSENT" %}selected{% endif %}>Absent</option>
+                        <option value="LATE" {% if selected_status == "LATE" %}selected{% endif %}>Late</option>
+                        <option value="MEDICAL" {% if selected_status == "MEDICAL" %}selected{% endif %}>Medical</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-sm btn-primary w-100">
+                        <i class="bi bi-funnel me-1"></i> Apply Filter
+                    </button>
+                    <a href="{% url 'student_attendance' %}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Course-Wise Attendance Table -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-journal-bookmark text-primary me-2"></i>Subject-Wise Attendance Breakdown</h5>
+            <span class="badge bg-primary rounded-pill">75% Mandatory</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Course / Code</th>
+                        <th>Faculty Member</th>
+                        <th class="text-center">Total Classes</th>
+                        <th class="text-center">Attended</th>
+                        <th class="text-center">Absent</th>
+                        <th style="min-width: 200px;">Attendance %</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in course_attendance %}
+                        <tr>
+                            <td>
+                                <strong class="text-dark d-block">{{ item.course.name }}</strong>
+                                <small class="text-muted fw-bold">{{ item.course.code }}</small>
+                            </td>
+                            <td>{{ item.course.teacher.full_name|default:"Faculty Assigned" }}</td>
+                            <td class="text-center fw-bold">{{ item.total }}</td>
+                            <td class="text-center text-success fw-bold">{{ item.present }}</td>
+                            <td class="text-center text-danger fw-bold">{{ item.absent }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height: 8px;">
+                                        <div class="progress-bar {% if item.percentage >= 75 %}bg-success{% else %}bg-danger{% endif %}" role="progressbar" style="width: {{ item.percentage }}%;"></div>
+                                    </div>
+                                    <span class="fw-bold small">{{ item.percentage }}%</span>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                {% if item.total == 0 %}
+                                    <span class="badge bg-secondary">No Classes</span>
+                                {% elif item.percentage >= 75 %}
+                                    <span class="badge bg-success-subtle text-success border border-success">Sufficient</span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger border border-danger">Low (< 75%)</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">No course attendance records available for your profile.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Attendance Visualization Charts -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-7">
+            <div class="card border-0 shadow-sm rounded-3 p-3 h-100">
+                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Attendance Percentage by Subject</h6>
+                <div style="position: relative; height: 260px;">
+                    <canvas id="courseAttendanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="card border-0 shadow-sm rounded-3 p-3 h-100">
+                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-pie-chart-fill text-success me-2"></i>Class Participation Breakdown</h6>
+                <div style="position: relative; height: 260px;">
+                    <canvas id="participationChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date-Wise Class Lecture History -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-calendar-event text-primary me-2"></i>Date-Wise Class Lecture History</h5>
+            <span class="badge bg-secondary rounded-pill">{{ class_history|length }} Sessions Listed</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Course</th>
+                        <th>Lecture / Topic</th>
+                        <th>Faculty</th>
+                        <th class="text-center">Status</th>
+                        <th>Remarks / Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in class_history %}
+                        <tr>
+                            <td class="fw-bold text-dark">
+                                {{ rec.session.attendance_date|date:"d M Y" }}
+                            </td>
+                            <td>
+                                <strong class="text-dark d-block">{{ rec.session.course.code }}</strong>
+                                <small class="text-muted">{{ rec.session.course.name }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark me-1">Lecture {{ rec.session.lecture_no }}</span>
+                                <small class="text-muted">{{ rec.session.remarks|default:"Standard Lecture" }}</small>
+                            </td>
+                            <td>{{ rec.session.teacher.full_name|default:"Faculty" }}</td>
+                            <td class="text-center">
+                                {% if rec.status == "PRESENT" %}
+                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Present</span>
+                                {% elif rec.status == "ABSENT" %}
+                                    <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Absent</span>
+                                {% elif rec.status == "LATE" %}
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>Late</span>
+                                {% else %}
+                                    <span class="badge bg-info text-dark"><i class="bi bi-hospital me-1"></i>Medical</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">{{ rec.remarks|default:"-" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">No detailed class history records match your filters.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Chart.js Integration -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. Course Attendance Bar Chart
+    const courseLabels = {{ chart_labels|safe }};
+    const coursePcts = {{ chart_percentages|safe }};
+
+    if (document.getElementById('courseAttendanceChart') && courseLabels.length > 0) {
+        new Chart(document.getElementById('courseAttendanceChart'), {
+            type: 'bar',
+            data: {
+                labels: courseLabels,
+                datasets: [{
+                    label: 'Attendance %',
+                    data: coursePcts,
+                    backgroundColor: coursePcts.map(pct => pct >= 75 ? 'rgba(34, 197, 94, 0.85)' : 'rgba(239, 68, 68, 0.85)'),
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { callback: value => value + '%' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    // 2. Participation Doughnut Chart
+    if (document.getElementById('participationChart')) {
+        new Chart(document.getElementById('participationChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Present', 'Absent', 'Late', 'Medical'],
+                datasets: [{
+                    data: [{{ total_present }}, {{ total_absent }}, {{ total_late }}, {{ total_medical }}],
+                    backgroundColor: ['#22c55e', '#ef4444', '#f59e0b', '#06b6d4'],
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

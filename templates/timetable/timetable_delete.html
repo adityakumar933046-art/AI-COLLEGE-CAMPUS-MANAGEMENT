@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Delete Timetable{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- Page Header -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold text-danger">
+
+                <i class="fas fa-trash-alt"></i>
+
+                Delete Timetable
+
+            </h2>
+
+            <p class="text-muted mb-0">
+
+                Confirm before permanently deleting this timetable.
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <a href="{% url 'timetable_detail' timetable.pk %}"
+               class="btn btn-secondary">
+
+                <i class="fas fa-arrow-left"></i>
+
+                Back
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- Warning -->
+
+    <div class="alert alert-danger shadow-sm">
+
+        <i class="fas fa-exclamation-triangle"></i>
+
+        <strong>Warning!</strong>
+
+        This action cannot be undone. Once deleted, this timetable record will be permanently removed.
+
+    </div>
+
+    <!-- Card -->
+
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-secondary text-white">
+
+            <h5 class="mb-0">
+
+                <i class="fas fa-calendar-times"></i>
+
+                Timetable Information
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <div class="row">
+                                    <!-- Department -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label fw-bold text-muted">
+
+                        Department
+
+                    </label>
+
+                    <div class="form-control bg-light">
+
+                        {{ timetable.department.name }}
+
+                    </div>
+
+                </div>
+
+                <!-- Semester -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label fw-bold text-muted">
+
+                        Semester
+
+                    </label>
+
+                    <div class="form-control bg-light">
+
+                        Semester {{ timetable.semester }}
+
+                    </div>
+
+                </div>
+
+                <!-- Section -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label fw-bold text-muted">
+
+                        Section
+
+                    </label>
+
+                    <div class="form-control bg-light">
+
+                        {{ timetable.section }}
+
+                    </div>
+
+                </div>
+
+                <!-- Course -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label fw-bold text-muted">
+
+                        Course
+
+                    </label>
+
+                    <div class="form-control bg-light">
+
+                        {{ timetable.course.name }}
+
+                        ({{ timetable.course.code }})
+
+                    </div>
+
+                </div>
+
+                <!-- Teacher -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label fw-bold text-muted">
+
+                        Teacher
+
+                    </label>
+
+                    <div class="form-control bg-light">
+
+                        {{ timetable.teacher.user.get_full_name }}
+
+                    </div>
+
+                </div>
+
+                <!-- Day -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label fw-bold text-muted">
+
+                        Day
+
+                    </label>
+
+                    <div class="form-control bg-light">
+
+                        {{ timetable.get_day_display }}
+
+                    </div>
+
+                </div>
+                                <!-- Start Time -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label fw-bold text-muted">
+
+                        Start Time
+
+                    </label>
+
+                    <div class="form-control bg-light">
+
+                        {{ timetable.start_time|time:"h:i A" }}
+
+                    </div>
+
+                </div>
+
+                <!-- End Time -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label fw-bold text-muted">
+
+                        End Time
+
+                    </label>
+
+                    <div class="form-control bg-light">
+
+                        {{ timetable.end_time|time:"h:i A" }}
+
+                    </div>
+
+                </div>
+
+                <!-- Classroom -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label fw-bold text-muted">
+
+                        Classroom
+
+                    </label>
+
+                    <div class="form-control bg-light">
+
+                        {{ timetable.classroom }}
+
+                    </div>
+
+                </div>
+
+                <!-- Status -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label fw-bold text-muted">
+
+                        Status
+
+                    </label>
+
+                    <div>
+
+                        {% if timetable.is_active %}
+
+                            <span class="badge bg-primary fs-6">
+
+                                Active
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-secondary fs-6">
+
+                                Inactive
+
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                <!-- Created At -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label fw-bold text-muted">
+
+                        Created At
+
+                    </label>
+
+                    <div class="form-control bg-light">
+
+                        {{ timetable.created_at|date:"d M Y, h:i A" }}
+
+                    </div>
+
+                </div>
+
+                <!-- Updated At -->
+
+                <div class="col-md-6 mb-4">
+
+                    <label class="form-label fw-bold text-muted">
+
+                        Last Updated
+
+                    </label>
+
+                    <div class="form-control bg-light">
+
+                        {{ timetable.updated_at|date:"d M Y, h:i A" }}
+
+                    </div>
+
+                </div>
+
+                <div class="col-12">
+
+                    <div class="alert alert-warning">
+
+                        <i class="fas fa-exclamation-circle"></i>
+
+                        <strong>Confirmation Required:</strong>
+
+                        Please make sure you really want to delete this timetable. This action cannot be undone.
+
+                    </div>
+
+                </div>
+                                <hr>
+
+                <!-- Action Buttons -->
+
+                <div class="col-12">
+
+                    <div class="d-flex justify-content-end gap-2">
+
+                        <a href="{% url 'timetable_detail' timetable.pk %}"
+                           class="btn btn-secondary">
+
+                            <i class="fas fa-times"></i>
+
+                            Cancel
+
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-danger">
+
+                            <i class="fas fa-trash-alt"></i>
+
+                            Delete Timetable
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const form = document.querySelector("form");
+
+    form.addEventListener("submit", function (e) {
+
+        if (!confirm("Are you sure you want to permanently delete this timetable?")) {
+
+            e.preventDefault();
+
+            return;
+
+        }
+
+        const btn = form.querySelector("button[type='submit']");
+
+        btn.disabled = true;
+
+        btn.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+
+    });
+
+});
+
+</script>
+
+{% endblock %}

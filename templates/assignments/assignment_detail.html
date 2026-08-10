@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ assignment.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-journal-text text-primary me-2"></i>
+                Assignment Specifications
+            </h3>
+            <p class="text-muted mb-0">Detailed instructions, question attachment, and student submission portal.</p>
+        </div>
+        <div>
+            <a href="{% url 'assignment_list' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Back to Assignments
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-book me-2"></i>{{ assignment.course.code }} - {{ assignment.course.name }}</h5>
+                    <span class="badge bg-light text-primary fs-7">Max Marks: {{ assignment.total_marks }}</span>
+                </div>
+                <div class="card-body p-4">
+                    <h2 class="fw-bold text-dark mb-3">{{ assignment.title }}</h2>
+
+                    <div class="d-flex flex-wrap gap-4 text-muted border-bottom pb-3 mb-4 small">
+                        <div><i class="bi bi-person-circle me-1 text-primary"></i> <strong>Faculty:</strong> {{ assignment.teacher.full_name }}</div>
+                        <div><i class="bi bi-clock me-1 text-primary"></i> <strong>Posted:</strong> {{ assignment.created_at|date:"d M Y" }}</div>
+                        <div><i class="bi bi-calendar-event me-1 text-danger"></i> <strong>Deadline:</strong> <span class="text-danger fw-bold">{{ assignment.due_date|date:"d M Y" }}</span></div>
+                    </div>
+
+                    <h6 class="fw-bold text-dark">Instructions & Problem Description:</h6>
+                    <div class="lh-lg mb-4 text-dark fs-5" style="white-space: pre-wrap;">{{ assignment.description|default:"Please complete the assignment tasks according to course guidelines." }}</div>
+
+                    {% if assignment.file %}
+                        <div class="card bg-light border-0 p-3 mb-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-file-earmark-pdf display-6 text-primary"></i>
+                                    <div>
+                                        <strong class="d-block text-dark">Assignment Problem Attachment</strong>
+                                        <small class="text-muted">Download question document</small>
+                                    </div>
+                                </div>
+                                <a href="{{ assignment.file.url }}" class="btn btn-primary" download>
+                                    <i class="bi bi-download me-1"></i> Download Attachment
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Student Submission Portal Card -->
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-upload me-2"></i>Submission Status</h5>
+                </div>
+                <div class="card-body p-4 text-center">
+                    {% if submission %}
+                        {% if submission.status == "GRADED" %}
+                            <div class="badge bg-success fs-6 p-2 mb-3"><i class="bi bi-check-circle me-1"></i> Graded Result</div>
+                            <h2 class="fw-bold text-success mb-1">{{ submission.marks }} / {{ assignment.total_marks }}</h2>
+                            <p class="text-muted small">Score Awarded</p>
+                            {% if submission.feedback %}
+                                <div class="card bg-light border-0 p-3 text-start mt-3">
+                                    <small class="fw-bold text-dark d-block mb-1">Teacher Feedback:</small>
+                                    <small class="text-muted">{{ submission.feedback }}</small>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="badge bg-primary fs-6 p-2 mb-3"><i class="bi bi-file-earmark-check me-1"></i> Submitted</div>
+                            <p class="text-muted small">Submitted on {{ submission.submitted_at|date:"d M Y, h:i A" }}</p>
+                            <a href="{% url 'submit_assignment' assignment.id %}" class="btn btn-outline-primary w-100 mt-2">
+                                <i class="bi bi-pencil-square me-1"></i> Resubmit Solution
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <div class="badge bg-warning text-dark fs-6 p-2 mb-3"><i class="bi bi-clock me-1"></i> Pending Submission</div>
+                        <p class="text-muted small mb-4">You have not submitted a solution for this assignment yet.</p>
+                        {% if request.user.role == "STUDENT" %}
+                            <a href="{% url 'submit_assignment' assignment.id %}" class="btn btn-success w-100 btn-lg">
+                                <i class="bi bi-upload me-1"></i> Submit Solution
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

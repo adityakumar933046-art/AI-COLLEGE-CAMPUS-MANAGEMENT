@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Academic Assignments{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-journal-text text-primary me-2"></i>
+                Academic Assignments & Tasks
+            </h3>
+            <p class="text-muted mb-0">Course assignments, problem sets, project submissions, and deadline tracking.</p>
+        </div>
+        <div>
+            {% if request.user.role == "ADMIN" or request.user.role == "TEACHER" %}
+                <a href="{% url 'assignment_create' %}" class="btn btn-primary me-2">
+                    <i class="bi bi-plus-circle me-1"></i> Create Assignment
+                </a>
+                <a href="{% url 'submission_list' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-check2-square me-1"></i> Grade Submissions
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Filter Card -->
+    <div class="card shadow border-0 mb-4">
+        <div class="card-body p-3">
+            <form method="GET" class="row g-2 align-items-center">
+                <div class="col-md-6">
+                    <input type="text" name="search" class="form-control" placeholder="Search assignment title, course code or instructor..." value="{{ search|default:'' }}">
+                </div>
+                <div class="col-md-4">
+                    <select name="course" class="form-select">
+                        <option value="">-- Select Course --</option>
+                        {% for c in courses %}
+                            <option value="{{ c.id }}" {% if course_id == c.id|stringformat:"s" %}selected{% endif %}>{{ c.code }} - {{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel me-1"></i> Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Assignments Cards Grid -->
+    <div class="row g-4">
+        {% for assign in assignments %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-primary fs-7">{{ assign.course.code }}</span>
+                                <span class="badge bg-outline-dark border text-dark">Max Marks: {{ assign.total_marks }}</span>
+                            </div>
+
+                            <h5 class="fw-bold text-dark mb-2">
+                                <a href="{% url 'assignment_detail' assign.id %}" class="text-dark text-decoration-none">
+                                    {{ assign.title }}
+                                </a>
+                            </h5>
+
+                            <p class="text-muted small mb-3">{{ assign.description|truncatewords:20|default:"No instructions provided." }}</p>
+                        </div>
+
+                        <div class="pt-3 border-top">
+                            <div class="d-flex justify-content-between align-items-center mb-3 small text-muted">
+                                <span><i class="bi bi-person me-1"></i> {{ assign.teacher.full_name }}</span>
+                                <span class="text-danger fw-bold"><i class="bi bi-calendar-event me-1"></i> Due {{ assign.due_date|date:"d M Y" }}</span>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'assignment_detail' assign.id %}" class="btn btn-primary btn-sm flex-grow-1">
+                                    <i class="bi bi-eye me-1"></i> View Assignment
+                                </a>
+                                {% if request.user.role == "STUDENT" %}
+                                    <a href="{% url 'submit_assignment' assign.id %}" class="btn btn-outline-success btn-sm">
+                                        <i class="bi bi-upload"></i> Submit
+                                    </a>
+                                {% elif request.user.role == "ADMIN" or request.user == assign.teacher.user %}
+                                    <a href="{% url 'assignment_update' assign.id %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil"></i></a>
+                                    <a href="{% url 'assignment_delete' assign.id %}" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5 text-muted">
+                <i class="bi bi-journal-x display-1 text-muted d-block mb-3"></i>
+                <h5>No Academic Assignments Found</h5>
+                <p class="small mb-0">No active tasks or problem sets match your current filter selection.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj.has_other_pages %}
+        <div class="mt-4">
+            <nav>
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo; Previous</a></li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next &raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

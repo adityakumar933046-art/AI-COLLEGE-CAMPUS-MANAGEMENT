@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Leave History</h2>
+
+<table class="table table-bordered">
+
+    <tr>
+        <th>Reason</th>
+        <th>From</th>
+        <th>To</th>
+        <th>Status</th>
+    </tr>
+
+    {% for leave in leaves %}
+
+    <tr>
+        <td>{{ leave.reason }}</td>
+        <td>{{ leave.start_date }}</td>
+        <td>{{ leave.end_date }}</td>
+        <td>{{ leave.status }}</td>
+    </tr>
+
+    {% empty %}
+
+    <tr>
+        <td colspan="4">
+            No Leave Records Found
+        </td>
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+{% endblock %}

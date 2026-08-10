@@ -1,0 +1,793 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Department Details
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+
+    <!-- ============================= -->
+    <!-- PAGE HEADER -->
+    <!-- ============================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+
+                <i class="fas fa-building text-primary me-2"></i>
+
+                Department Details
+
+            </h2>
+
+            <p class="text-muted mb-0">
+
+                View complete department information.
+
+            </p>
+
+        </div>
+
+
+        <div class="d-flex gap-2">
+
+
+            <a href="{% url 'department_update' department.id %}"
+               class="btn btn-outline-primary">
+
+                <i class="fas fa-edit me-1"></i>
+
+                Edit
+
+            </a>
+
+
+            <a href="{% url 'department_list' %}"
+               class="btn btn-secondary">
+
+                <i class="fas fa-arrow-left me-1"></i>
+
+                Back
+
+            </a>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ============================= -->
+    <!-- DEPARTMENT PROFILE CARD -->
+    <!-- ============================= -->
+
+
+    <div class="card shadow-sm border-0 mb-4">
+
+
+        <div class="card-body">
+
+
+            <div class="row align-items-center">
+
+
+                <!-- Logo -->
+
+
+                <div class="col-md-3 text-center">
+
+
+                    {% if department.logo %}
+
+                        <img src="{{ department.logo.url }}"
+                             class="rounded-circle border"
+                             width="150"
+                             height="150"
+                             style="object-fit:cover;">
+
+
+                    {% else %}
+
+
+                        <img src="{% static 'images/department.png' %}"
+                             class="rounded-circle border"
+                             width="150"
+                             height="150"
+                             style="object-fit:cover;">
+
+
+                    {% endif %}
+
+
+                </div>
+
+
+
+                <!-- Basic Information -->
+
+
+                <div class="col-md-9">
+
+
+                    <h3 class="fw-bold">
+
+                        {{ department.name }}
+
+                    </h3>
+
+
+                    <p class="text-muted">
+
+                        {{ department.short_name }}
+
+                    </p>
+
+
+
+                    <div class="row">
+
+
+                        <div class="col-md-6 mb-2">
+
+                            <strong>
+                                Department Code:
+                            </strong>
+
+                            {{ department.code }}
+
+                        </div>
+
+
+
+                        <div class="col-md-6 mb-2">
+
+                            <strong>
+                                Established:
+                            </strong>
+
+                            {{ department.established_year|default:"-" }}
+
+                        </div>
+
+
+
+                        <div class="col-md-6 mb-2">
+
+                            <strong>
+                                Status:
+                            </strong>
+
+
+                            {% if department.status == "ACTIVE" %}
+
+                                <span class="badge bg-primary">
+
+                                    Active
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary">
+
+                                    Inactive
+
+                                </span>
+
+                            {% endif %}
+
+
+                        </div>
+
+
+
+                        <div class="col-md-6 mb-2">
+
+                            <strong>
+                                Building:
+                            </strong>
+
+                            {{ department.building|default:"-" }}
+
+                        </div>
+
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+    
+    <!-- ============================= -->
+    <!-- HOD & CONTACT INFORMATION -->
+    <!-- ============================= -->
+
+
+    <div class="row g-4 mb-4">
+
+
+        <!-- HOD DETAILS -->
+
+
+        <div class="col-lg-6">
+
+
+            <div class="card shadow-sm border-0 h-100">
+
+
+                <div class="card-header bg-primary text-white">
+
+                    <h5 class="mb-0">
+
+                        <i class="fas fa-user-tie me-2"></i>
+
+                        Head of Department
+
+                    </h5>
+
+                </div>
+
+
+                <div class="card-body">
+
+
+                    {% if department.hod %}
+
+
+                    <div class="d-flex align-items-center">
+
+
+                        {% if department.hod.photo %}
+
+                            <img src="{{ department.hod.photo.url }}"
+                                 width="80"
+                                 height="80"
+                                 class="rounded-circle border me-3"
+                                 style="object-fit:cover;">
+
+                        {% else %}
+
+                            <img src="{% static 'images/default-user.png' %}"
+                                 width="80"
+                                 height="80"
+                                 class="rounded-circle border me-3">
+
+                        {% endif %}
+
+
+                        <div>
+
+
+                            <h5 class="mb-1">
+
+                                {{ department.hod.full_name }}
+
+                            </h5>
+
+
+                            <p class="text-muted mb-1">
+
+                                {{ department.hod.designation }}
+
+                            </p>
+
+
+                            <p class="mb-0">
+
+                                <i class="fas fa-phone me-2"></i>
+
+                                {{ department.hod.phone }}
+
+                            </p>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                    {% else %}
+
+
+                    <p class="text-muted mb-0">
+
+                        HOD not assigned.
+
+                    </p>
+
+
+                    {% endif %}
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+
+
+        <!-- CONTACT DETAILS -->
+
+
+        <div class="col-lg-6">
+
+
+            <div class="card shadow-sm border-0 h-100">
+
+
+                <div class="card-header bg-primary text-white">
+
+
+                    <h5 class="mb-0">
+
+                        <i class="fas fa-address-book me-2"></i>
+
+                        Contact Information
+
+                    </h5>
+
+
+                </div>
+
+
+                <div class="card-body">
+
+
+                    <p>
+
+                        <strong>
+
+                            Office Phone:
+
+                        </strong>
+
+                        {{ department.office_phone|default:"-" }}
+
+                    </p>
+
+
+                    <p>
+
+                        <strong>
+
+                            Email:
+
+                        </strong>
+
+                        {{ department.office_email|default:"-" }}
+
+                    </p>
+
+
+                    <p>
+
+                        <strong>
+
+                            Building:
+
+                        </strong>
+
+                        {{ department.building|default:"-" }}
+
+                    </p>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+    <!-- ============================= -->
+    <!-- DESCRIPTION -->
+    <!-- ============================= -->
+
+
+    <div class="card shadow-sm border-0 mb-4">
+
+
+        <div class="card-header bg-primary text-white">
+
+
+            <h5 class="mb-0">
+
+                <i class="fas fa-align-left me-2"></i>
+
+                Description
+
+            </h5>
+
+
+        </div>
+
+
+        <div class="card-body">
+
+
+            {% if department.description %}
+
+                {{ department.description }}
+
+
+            {% else %}
+
+                <span class="text-muted">
+
+                    No description available.
+
+                </span>
+
+
+            {% endif %}
+
+
+        </div>
+
+
+    </div>
+    
+    <!-- ============================= -->
+    <!-- STATISTICS -->
+    <!-- ============================= -->
+
+
+    <div class="row g-4 mb-4">
+
+
+        <div class="col-md-4">
+
+
+            <div class="card shadow-sm border-0 text-center">
+
+
+                <div class="card-body">
+
+
+                    <i class="fas fa-chalkboard-teacher fa-2x text-primary mb-2"></i>
+
+
+                    <h6 class="text-muted">
+
+                        Total Faculty
+
+                    </h6>
+
+
+                    <h2 class="fw-bold">
+
+                        {{ department.total_faculty }}
+
+                    </h2>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+
+
+        <div class="col-md-4">
+
+
+            <div class="card shadow-sm border-0 text-center">
+
+
+                <div class="card-body">
+
+
+                    <i class="fas fa-user-graduate fa-2x text-success mb-2"></i>
+
+
+                    <h6 class="text-muted">
+
+                        Total Students
+
+                    </h6>
+
+
+                    <h2 class="fw-bold">
+
+                        {{ department.total_students }}
+
+                    </h2>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+
+
+        <div class="col-md-4">
+
+
+            <div class="card shadow-sm border-0 text-center">
+
+
+                <div class="card-body">
+
+
+                    <i class="fas fa-calendar-check fa-2x text-warning mb-2"></i>
+
+
+                    <h6 class="text-muted">
+
+                        Created Date
+
+                    </h6>
+
+
+                    <h6 class="fw-bold">
+
+                        {{ department.created_at|date:"d M Y" }}
+
+                    </h6>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+    <!-- ============================= -->
+    <!-- SYSTEM INFORMATION -->
+    <!-- ============================= -->
+
+
+    <div class="card shadow-sm border-0 mb-4">
+
+
+        <div class="card-header bg-dark text-white">
+
+
+            <h5 class="mb-0">
+
+                <i class="fas fa-info-circle me-2"></i>
+
+                System Information
+
+            </h5>
+
+
+        </div>
+
+
+        <div class="card-body">
+
+
+            <div class="row">
+
+
+                <div class="col-md-6 mb-2">
+
+
+                    <strong>
+                        Created By:
+                    </strong>
+
+
+                    {% if department.created_by %}
+
+                        {{ department.created_by.get_full_name|default:department.created_by.username }}
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+
+                </div>
+
+
+
+
+                <div class="col-md-6 mb-2">
+
+
+                    <strong>
+                        Updated By:
+                    </strong>
+
+
+                    {% if department.updated_by %}
+
+                        {{ department.updated_by.get_full_name|default:department.updated_by.username }}
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+
+                </div>
+
+
+
+
+                <div class="col-md-6 mb-2">
+
+
+                    <strong>
+                        Last Updated:
+                    </strong>
+
+
+                    {{ department.updated_at|date:"d M Y H:i" }}
+
+
+                </div>
+
+
+
+
+                <div class="col-md-6 mb-2">
+
+
+                    <strong>
+                        Import Status:
+                    </strong>
+
+
+                    {% if department.is_imported %}
+
+                        <span class="badge bg-primary">
+
+                            Imported
+
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge bg-secondary">
+
+                            Manual Entry
+
+                        </span>
+
+                    {% endif %}
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+    <!-- ============================= -->
+    <!-- ACTION BUTTONS -->
+    <!-- ============================= -->
+
+
+    <div class="card shadow-sm border-0">
+
+
+        <div class="card-body">
+
+
+            <div class="d-flex justify-content-end gap-2">
+
+
+                {% if department.status == "ACTIVE" %}
+
+
+                <a href="{% url 'deactivate_department' department.id %}"
+                   class="btn btn-outline-primary">
+
+
+                    <i class="fas fa-ban me-1"></i>
+
+                    Deactivate
+
+
+                </a>
+
+
+                {% else %}
+
+
+                <a href="{% url 'activate_department' department.id %}"
+                   class="btn btn-primary">
+
+
+                    <i class="fas fa-check me-1"></i>
+
+                    Activate
+
+
+                </a>
+
+
+                {% endif %}
+
+
+
+
+
+                <a href="{% url 'department_delete' department.id %}"
+                   class="btn btn-danger">
+
+
+                    <i class="fas fa-trash me-1"></i>
+
+                    Delete
+
+
+                </a>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+</div>
+
+
+{% endblock %}

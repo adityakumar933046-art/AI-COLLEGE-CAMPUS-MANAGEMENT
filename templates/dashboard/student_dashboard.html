@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+
+{% block title %}
+Student Dashboard
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- ================= Statistics ================= -->
+
+    <div class="row g-4">
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card shadow border-0">
+
+                <div class="card-body">
+
+                    <h6>Attendance</h6>
+
+                    <h2>{{ attendance_percentage }}%</h2>
+
+                    <i class="bi bi-calendar-check-fill fs-1 text-success"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card shadow border-0">
+
+                <div class="card-body">
+
+                    <h6>Assignments</h6>
+
+                    <h2>{{ assignments|length }}</h2>
+
+                    <i class="bi bi-journal-bookmark-fill fs-1 text-primary"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card shadow border-0">
+
+                <div class="card-body">
+
+                    <h6>Results</h6>
+
+                    <h2>{{ results|length }}</h2>
+
+                    <i class="bi bi-award-fill fs-1 text-warning"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card shadow border-0">
+
+                <div class="card-body">
+
+                    <h6>Notes</h6>
+
+                    <h2>{{ notes|length }}</h2>
+
+                    <i class="bi bi-book-fill fs-1 text-danger"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ================= Today's Timetable ================= -->
+
+    <div class="card shadow mt-4">
+
+        <div class="card-header">
+
+            <h5>Today's Timetable</h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-hover">
+
+                <thead>
+
+                <tr>
+
+                    <th>Day</th>
+                    <th>Course</th>
+                    <th>Teacher</th>
+                    <th>Time</th>
+                    <th>Room</th>
+
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for item in timetable %}
+
+                <tr>
+
+                    <td>{{ item.day }}</td>
+
+                    <td>{{ item.course.code }}</td>
+
+                    <td>{{ item.teacher.user.get_full_name }}</td>
+
+                    <td>{{ item.start_time }} - {{ item.end_time }}</td>
+
+                    <td>{{ item.classroom }}</td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="5" class="text-center">
+
+                        No Classes Available
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!-- ================= Assignments ================= -->
+
+    <div class="card shadow mt-4">
+
+        <div class="card-header">
+
+            <h5>Latest Assignments</h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-striped">
+
+                <thead>
+
+                <tr>
+
+                    <th>Title</th>
+                    <th>Course</th>
+                    <th>Due Date</th>
+
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for assignment in assignments %}
+
+                <tr>
+
+                    <td>{{ assignment.title }}</td>
+
+                    <td>{{ assignment.course }}</td>
+
+                    <td>{{ assignment.due_date }}</td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="3">
+
+                        No Assignments
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!-- ================= Results ================= -->
+
+    <div class="card shadow mt-4">
+
+        <div class="card-header">
+
+            <h5>Latest Results</h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-striped">
+
+                <thead>
+
+                <tr>
+
+                    <th>Course</th>
+                    <th>Marks</th>
+                    <th>Grade</th>
+
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for result in results %}
+
+                <tr>
+
+                    <td>{{ result.course }}</td>
+
+                    <td>{{ result.marks }}</td>
+
+                    <td>{{ result.grade }}</td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="3">
+
+                        No Results Published
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!-- ================= Notes ================= -->
+
+    <div class="card shadow mt-4">
+
+        <div class="card-header">
+
+            <h5>Latest Notes</h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <ul class="list-group">
+
+                {% for note in notes %}
+
+                <li class="list-group-item d-flex justify-content-between">
+
+                    <span>
+
+                        {{ note.title }}
+
+                    </span>
+
+                    <a href="{{ note.file.url }}"
+
+                       class="btn btn-sm btn-primary">
+
+                        Download
+
+                    </a>
+
+                </li>
+
+                {% empty %}
+
+                <li class="list-group-item">
+
+                    No Notes Available
+
+                </li>
+
+                {% endfor %}
+
+            </ul>
+
+        </div>
+
+    </div>
+
+    <!-- ================= Announcements ================= -->
+
+    <div class="card shadow mt-4">
+
+        <div class="card-header">
+
+            <h5>Latest Announcements</h5>
+
+        </div>
+
+        <div class="card-body">
+
+            {% for announcement in announcements %}
+
+            <div class="border-bottom mb-3 pb-2">
+
+                <h6>{{ announcement.title }}</h6>
+
+                <p>{{ announcement.message|truncatewords:20 }}</p>
+
+                <small class="text-muted">
+
+                    {{ announcement.created_at }}
+
+                </small>
+
+            </div>
+
+            {% empty %}
+
+            <p>No Announcements Available</p>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

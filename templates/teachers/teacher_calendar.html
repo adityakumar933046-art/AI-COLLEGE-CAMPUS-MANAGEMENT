@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Teacher Calendar
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h3 class="fw-bold">
+
+                <i class="fas fa-calendar-alt text-primary"></i>
+
+                Teacher Calendar
+
+            </h3>
+
+            <p class="text-muted">
+
+                View your classes, exams, holidays and important events.
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <a href="{% url 'teacher_dashboard' %}"
+               class="btn btn-secondary">
+
+                <i class="fas fa-arrow-left"></i>
+
+                Dashboard
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- Calendar Filter -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form method="GET">
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+
+                        <select
+                            name="month"
+                            class="form-select">
+
+                            <option value="">Select Month</option>
+
+                            {% for month in months %}
+
+                            <option
+                                value="{{ month.number }}"
+                                {% if request.GET.month == month.number|stringformat:"s" %}
+                                selected
+                                {% endif %}>
+
+                                {{ month.name }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                        <select
+                            name="year"
+                            class="form-select">
+
+                            {% for year in years %}
+
+                            <option
+                                value="{{ year }}"
+                                {% if request.GET.year == year|stringformat:"s" %}
+                                selected
+                                {% endif %}>
+
+                                {{ year }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-4 mb-3 d-grid">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary">
+
+                            <i class="fas fa-search"></i>
+
+                            View Calendar
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+        <!-- Calendar -->
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+
+                {{ current_month }} {{ current_year }}
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered text-center align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>Sunday</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for week in calendar %}
+
+                        <tr>
+
+                            {% for day in week %}
+
+                            <td style="height:140px; width:14%; vertical-align:top;">
+
+                                {% if day.date %}
+
+                                <div class="fw-bold mb-2">
+
+                                    {{ day.date }}
+
+                                </div>
+
+                                {% for class in day.classes %}
+
+                                <span class="badge bg-primary d-block mb-1">
+
+                                    {{ class.subject }}
+
+                                </span>
+
+                                {% endfor %}
+
+                                {% for exam in day.exams %}
+
+                                <span class="badge bg-secondary d-block mb-1">
+
+                                    {{ exam.name }}
+
+                                </span>
+
+                                {% endfor %}
+
+                                {% for holiday in day.holidays %}
+
+                                <span class="badge bg-primary d-block mb-1">
+
+                                    {{ holiday.title }}
+
+                                </span>
+
+                                {% endfor %}
+
+                                {% for event in day.events %}
+
+                                <span class="badge bg-warning text-dark d-block mb-1">
+
+                                    {{ event.title }}
+
+                                </span>
+
+                                {% endfor %}
+
+                                {% endif %}
+
+                            </td>
+
+                            {% endfor %}
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+        <!-- Calendar Legend -->
+
+    <div class="card mt-4 shadow">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+
+                Calendar Legend
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <span class="badge bg-primary me-2">
+
+                Classes
+
+            </span>
+
+            <span class="badge bg-secondary me-2">
+
+                Exams
+
+            </span>
+
+            <span class="badge bg-primary me-2">
+
+                Holidays
+
+            </span>
+
+            <span class="badge bg-warning text-dark me-2">
+
+                Events
+
+            </span>
+
+        </div>
+
+    </div>
+
+    <!-- Calendar Navigation -->
+
+    <div class="d-flex justify-content-between mt-4">
+
+        <a href="?month={{ previous_month }}&year={{ previous_year }}"
+           class="btn btn-outline-primary">
+
+            <i class="fas fa-angle-left"></i>
+
+            Previous Month
+
+        </a>
+
+        <a href="?month={{ next_month }}&year={{ next_year }}"
+           class="btn btn-outline-primary">
+
+            Next Month
+
+            <i class="fas fa-angle-right"></i>
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Courses{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-journal-bookmark-fill text-primary me-2"></i>
+                My Enrolled Courses
+            </h3>
+            <p class="text-muted mb-0">Academic curriculum enrolled for {{ student.department.name }} • Semester {{ student.semester }}</p>
+        </div>
+        <div>
+            <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill">
+                Semester {{ student.semester }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Overview Card -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 bg-primary text-white p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50 mb-1">Total Enrolled Courses</h6>
+                        <h3 class="fw-bold mb-0">{{ enriched_courses|length }}</h3>
+                    </div>
+                    <i class="bi bi-book fs-1 text-white-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 bg-success text-white p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50 mb-1">Academic Department</h6>
+                        <h4 class="fw-bold mb-0">{{ student.department.short_name|default:student.department.name }}</h4>
+                    </div>
+                    <i class="bi bi-building fs-1 text-white-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 bg-dark text-white p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50 mb-1">Academic Section / Batch</h6>
+                        <h4 class="fw-bold mb-0">Section {{ student.section|default:"A" }} ({{ student.batch|default:"2026" }})</h4>
+                    </div>
+                    <i class="bi bi-people fs-1 text-white-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enrolled Courses Grid -->
+    <div class="row g-4">
+        {% for item in enriched_courses %}
+            <div class="col-lg-6">
+                <div class="card shadow border-0 h-100">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                        <div>
+                            <span class="badge bg-primary me-2">{{ item.course.code }}</span>
+                            <strong class="fs-5 text-dark">{{ item.course.name }}</strong>
+                        </div>
+                        <span class="badge bg-outline-dark border text-dark">{{ item.course.credits }} Credits</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="text-muted small d-block">Assigned Faculty</label>
+                                <span class="fw-semibold text-dark">
+                                    {% if item.course.teacher %}
+                                        {{ item.course.teacher.user.get_full_name }}
+                                    {% else %}
+                                        <span class="text-muted">Unassigned</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small d-block">Subject Attendance</label>
+                                <div class="d-flex align-items-center">
+                                    <span class="fw-bold me-2 text-primary">{{ item.attendance_pct }}%</span>
+                                    <div class="progress flex-grow-1" style="height: 6px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ item.attendance_pct }}%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3 text-muted small border-top pt-3">
+                            <div><i class="bi bi-journal-text me-1 text-primary"></i> <strong>{{ item.assignments_count }}</strong> Assignments</div>
+                            <div><i class="bi bi-file-earmark-text me-1 text-success"></i> <strong>{{ item.notes_count }}</strong> Notes</div>
+                            <div><i class="bi bi-calendar-check me-1 text-dark"></i> <strong>{{ item.total_att }}</strong> Sessions</div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light p-3 d-flex justify-content-between align-items-center">
+                        <a href="{% url 'course_materials' item.course.id %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-folder me-1"></i> Materials
+                        </a>
+                        <a href="{% url 'course_detail' item.course.id %}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-eye me-1"></i> View Course Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="card shadow border-0 text-center p-5">
+                    <i class="bi bi-journal-x display-1 text-muted mb-3"></i>
+                    <h4 class="fw-bold text-dark">No Courses Found</h4>
+                    <p class="text-muted">No courses are currently assigned to your department and semester.</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

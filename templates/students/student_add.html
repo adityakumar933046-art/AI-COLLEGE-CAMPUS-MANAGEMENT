@@ -1,0 +1,490 @@
+{% extends "base.html" %}
+
+{% block title %}
+Add Student
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold">
+
+                Add New Student
+
+            </h2>
+
+            <p class="text-muted">
+
+                Fill in the details to register a new student.
+
+            </p>
+
+        </div>
+
+        <a href="{% url 'student_list' %}"
+           class="btn btn-secondary">
+
+            Back to List
+
+        </a>
+
+    </div>
+
+    <form method="POST"
+          enctype="multipart/form-data">
+
+        {% csrf_token %}
+
+        <div class="card shadow border-0 mb-4">
+
+            <div class="card-header bg-primary text-white">
+
+                <h5 class="mb-0">
+
+                    Academic Information
+
+                </h5>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+
+                            Admission Number
+
+                        </label>
+
+                        {{ form.admission_no }}
+
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+
+                            Roll Number
+
+                        </label>
+
+                        {{ form.roll_no }}
+
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+
+                            Department
+
+                        </label>
+
+                        {{ form.department }}
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+
+                            Semester
+
+                        </label>
+
+                        {{ form.semester }}
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+
+                            Section
+
+                        </label>
+
+                        {{ form.section }}
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+
+                            Batch
+
+                        </label>
+
+                        {{ form.batch }}
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+
+                            Academic Year
+
+                        </label>
+
+                        {{ form.academic_year }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+                <!-- Personal Information -->
+
+        <div class="card shadow border-0 mb-4">
+
+            <div class="card-header bg-primary text-white">
+
+                <h5 class="mb-0">
+
+                    Personal Information
+
+                </h5>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+
+                            First Name
+
+                        </label>
+
+                        <input type="text"
+                               name="first_name"
+                               class="form-control"
+                               required>
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+
+                            Last Name
+
+                        </label>
+
+                        <input type="text"
+                               name="last_name"
+                               class="form-control">
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+
+                            Email
+
+                        </label>
+
+                        <input type="email"
+                               name="email"
+                               class="form-control">
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+
+                            Phone Number
+
+                        </label>
+
+                        {{ form.phone }}
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+
+                            Alternate Phone
+
+                        </label>
+
+                        {{ form.alternate_phone }}
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+
+                            Gender
+
+                        </label>
+
+                        {{ form.gender }}
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+
+                            Date of Birth
+
+                        </label>
+
+                        {{ form.date_of_birth }}
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+
+                            Blood Group
+
+                        </label>
+
+                        {{ form.blood_group }}
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+
+                            Profile Photo
+
+                        </label>
+
+                        {{ form.photo }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+                <!-- Guardian & Address Information -->
+
+        <div class="card shadow border-0 mb-4">
+
+            <div class="card-header bg-primary text-white">
+
+                <h5 class="mb-0">
+
+                    Guardian & Address Information
+
+                </h5>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+
+                            Father's Name
+
+                        </label>
+
+                        {{ form.father_name }}
+
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+
+                            Mother's Name
+
+                        </label>
+
+                        {{ form.mother_name }}
+
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+
+                            Guardian Phone
+
+                        </label>
+
+                        {{ form.guardian_phone }}
+
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+
+                        <label class="form-label">
+
+                            Address
+
+                        </label>
+
+                        {{ form.address }}
+
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+
+                            City
+
+                        </label>
+
+                        {{ form.city }}
+
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+
+                            State
+
+                        </label>
+
+                        {{ form.state }}
+
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+
+                            Pincode
+
+                        </label>
+
+                        {{ form.pincode }}
+
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+
+                            CGPA
+
+                        </label>
+
+                        {{ form.cgpa }}
+
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+
+                            Status
+
+                        </label>
+
+                        {{ form.status }}
+
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+
+                            Admission Date
+
+                        </label>
+
+                        {{ form.admission_date }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+                <!-- Form Errors -->
+
+        {% if form.errors %}
+
+            <div class="alert alert-danger">
+
+                <h6>Please correct the following errors:</h6>
+
+                {{ form.errors }}
+
+            </div>
+
+        {% endif %}
+
+        <!-- Action Buttons -->
+
+        <div class="card shadow border-0">
+
+            <div class="card-body text-end">
+
+                <a href="{% url 'student_list' %}"
+                   class="btn btn-secondary">
+
+                    <i class="fas fa-arrow-left"></i>
+
+                    Back
+
+                </a>
+
+                <button
+                    type="reset"
+                    class="btn btn-outline-primary">
+
+                    <i class="fas fa-undo"></i>
+
+                    Reset
+
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary">
+
+                    <i class="fas fa-save"></i>
+
+                    Save Student
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

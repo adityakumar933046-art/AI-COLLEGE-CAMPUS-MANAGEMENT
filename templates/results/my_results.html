@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title|default:"My Academic Results" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-bar-chart-line-fill text-primary me-2"></i>
+                My Academic Performance
+            </h3>
+            <p class="text-muted mb-0">Examination results, semester SGPA, and cumulative CGPA score.</p>
+        </div>
+        <div>
+            <span class="badge bg-primary fs-5 px-4 py-2 rounded-pill shadow-sm">
+                Cumulative CGPA: {{ cgpa }} / 10.0
+            </span>
+        </div>
+    </div>
+
+    <!-- Quick Overview Stats -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-primary text-white p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50 mb-1">Overall CGPA</h6>
+                        <h2 class="fw-bold mb-0">{{ cgpa }}</h2>
+                    </div>
+                    <i class="bi bi-award fs-1 text-white-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-success text-white p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50 mb-1">Overall Score %</h6>
+                        <h2 class="fw-bold mb-0">{{ overall_pct }}%</h2>
+                    </div>
+                    <i class="bi bi-graph-up-arrow fs-1 text-white-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-dark text-white p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50 mb-1">Evaluated Courses</h6>
+                        <h2 class="fw-bold mb-0">{{ total_courses }}</h2>
+                    </div>
+                    <i class="bi bi-journal-check fs-1 text-white-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-info text-white p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50 mb-1">Department</h6>
+                        <h4 class="fw-bold mb-0">{{ student.department.short_name|default:student.department.name }}</h4>
+                    </div>
+                    <i class="bi bi-building fs-1 text-white-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Semester Summaries -->
+    {% for sem in semester_summaries %}
+        <div class="card shadow border-0 mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                <div>
+                    <h5 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-journal-bookmark text-primary me-2"></i>
+                        Semester {{ sem.semester }} Results
+                    </h5>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-primary fs-6 px-3 py-2">SGPA: {{ sem.sgpa }}</span>
+                    <span class="badge bg-outline-dark border text-dark fs-6 px-3 py-2">Score: {{ sem.percentage }}%</span>
+                    <a href="{% url 'marksheet' sem.semester %}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-printer me-1"></i> Official Marksheet
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Subject Code</th>
+                                <th>Subject Name</th>
+                                <th>Exam Type</th>
+                                <th>Credits</th>
+                                <th>Marks Obtained</th>
+                                <th>Grade</th>
+                                <th>Grade Point</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for res in sem.results %}
+                                <tr>
+                                    <td><span class="badge bg-secondary">{{ res.course.code }}</span></td>
+                                    <td><strong>{{ res.course.name }}</strong></td>
+                                    <td><span class="badge bg-outline-secondary border text-dark">{{ res.exam_type }}</span></td>
+                                    <td>{{ res.course.credits }}</td>
+                                    <td><strong class="text-dark">{{ res.marks_obtained }}</strong> / {{ res.total_marks }}</td>
+                                    <td>
+                                        {% if res.grade == "A+" or res.grade == "A" %}
+                                            <span class="badge bg-success px-3 py-1">{{ res.grade }}</span>
+                                        {% elif res.grade == "B+" or res.grade == "B" %}
+                                            <span class="badge bg-primary px-3 py-1">{{ res.grade }}</span>
+                                        {% elif res.grade == "C" or res.grade == "D" %}
+                                            <span class="badge bg-warning text-dark px-3 py-1">{{ res.grade }}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger px-3 py-1">{{ res.grade }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><strong class="text-primary">{{ res.grade_point }}</strong></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="card shadow border-0 text-center p-5">
+            <i class="bi bi-file-earmark-x display-1 text-muted mb-3"></i>
+            <h4 class="fw-bold text-dark">No Published Results Found</h4>
+            <p class="text-muted">Your examination marks will appear here once published by the academic administration.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

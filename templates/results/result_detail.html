@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Result Details{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<div class="card shadow">
+
+<div class="card-header bg-primary text-white">
+
+<h3>Result Details</h3>
+
+</div>
+
+<div class="card-body">
+
+<table class="table table-bordered">
+
+<tr>
+
+<th>Student</th>
+
+<td>{{ result.student.user.get_full_name }}</td>
+
+</tr>
+
+<tr>
+
+<th>Course</th>
+
+<td>{{ result.course.name }}</td>
+
+</tr>
+
+<tr>
+
+<th>Semester</th>
+
+<td>{{ result.semester }}</td>
+
+</tr>
+
+<tr>
+
+<th>Marks</th>
+
+<td>{{ result.marks_obtained }}/{{ result.total_marks }}</td>
+
+</tr>
+
+<tr>
+
+<th>Percentage</th>
+
+<td>{{ result.percentage }}%</td>
+
+</tr>
+
+<tr>
+
+<th>Grade</th>
+
+<td>{{ result.grade }}</td>
+
+</tr>
+
+<tr>
+
+<th>Teacher</th>
+
+<td>{{ result.teacher.user.get_full_name }}</td>
+
+</tr>
+
+<tr>
+
+<th>Remarks</th>
+
+<td>{{ result.remarks }}</td>
+
+</tr>
+
+</table>
+
+<a href="{% url 'result_update' result.id %}" class="btn btn-outline-primary">
+
+Edit
+
+</a>
+
+<a href="{% url 'result_delete' result.id %}" class="btn btn-danger">
+
+Delete
+
+</a>
+
+<a href="{% url 'result_list' %}" class="btn btn-secondary">
+
+Back
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

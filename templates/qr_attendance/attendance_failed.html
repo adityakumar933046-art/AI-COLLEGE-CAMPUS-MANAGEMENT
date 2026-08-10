@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance Failed{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="card shadow">
+
+        <div class="card-body text-center">
+
+            <h1 class="text-danger">
+
+                Attendance Failed
+
+            </h1>
+
+            <hr>
+
+            <h4>
+
+                {{ message }}
+
+            </h4>
+
+            <br>
+
+            <a href="/"
+
+               class="btn btn-primary">
+
+                Go Home
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

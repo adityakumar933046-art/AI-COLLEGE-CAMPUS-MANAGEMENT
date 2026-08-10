@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Timetable{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-calendar3 text-primary me-2"></i>
+                My Weekly Timetable
+            </h3>
+            <p class="text-muted mb-0">Lecture routine enrolled for {{ student.department.name }} • Semester {{ student.semester }}</p>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="bi bi-printer me-1"></i> Print Schedule
+            </button>
+        </div>
+    </div>
+
+    <!-- Student Quick Info -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-primary text-white p-3">
+                <h6 class="text-white-50 mb-1">Student Roll No</h6>
+                <h4 class="fw-bold mb-0">{{ student.roll_no }}</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-success text-white p-3">
+                <h6 class="text-white-50 mb-1">Academic Department</h6>
+                <h4 class="fw-bold mb-0">{{ student.department.short_name|default:student.department.name }}</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-dark text-white p-3">
+                <h6 class="text-white-50 mb-1">Semester & Section</h6>
+                <h4 class="fw-bold mb-0">Sem {{ student.semester }} (Sec {{ student.section|default:"A" }})</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-info text-white p-3">
+                <h6 class="text-white-50 mb-1">Weekly Classes</h6>
+                <h4 class="fw-bold mb-0">{{ total_classes }} Scheduled</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timetable Routine Table Card -->
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-table me-2"></i>Weekly Class Routine</h5>
+            <span class="badge bg-light text-primary rounded-pill">{{ timetables.count }} Lectures</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Day</th>
+                            <th>Time Slot</th>
+                            <th>Course Code & Title</th>
+                            <th>Faculty Member</th>
+                            <th>Classroom</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for slot in timetables %}
+                            <tr>
+                                <td><span class="fw-bold text-primary">{{ slot.day }}</span></td>
+                                <td><span class="badge bg-outline-dark border text-dark">{{ slot.start_time|time:"h:i A" }} - {{ slot.end_time|time:"h:i A" }}</span></td>
+                                <td>
+                                    <strong class="d-block text-dark">{{ slot.course.name }}</strong>
+                                    <small class="badge bg-secondary">{{ slot.course.code }}</small>
+                                </td>
+                                <td>
+                                    {% if slot.teacher %}
+                                        {{ slot.teacher.full_name }}
+                                    {% else %}
+                                        <span class="text-muted">Unassigned</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge bg-light text-dark border">{{ slot.classroom }}</span></td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-calendar-x display-1 text-muted d-block mb-3"></i>
+                                    <h5>No Classes Scheduled</h5>
+                                    <p class="small mb-0">Your class routine has not been published yet.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

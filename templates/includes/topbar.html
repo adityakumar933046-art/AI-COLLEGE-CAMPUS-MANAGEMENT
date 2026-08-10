@@ -1,0 +1,155 @@
+{% load static %}
+
+<nav class="topbar sticky-top shadow-sm border-bottom">
+
+    <!-- Left Section: Hamburger & Page Title -->
+    <div class="topbar-left d-flex align-items-center gap-3">
+        <button class="btn btn-icon menu-toggle border-0" id="sidebarToggle" aria-label="Toggle Navigation Sidebar" title="Toggle Sidebar">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+
+        <h4 class="page-title mb-0 fw-bold fs-5 text-dark">
+            {% block page_title %}
+                {{ title|default:"Smart Campus" }}
+            {% endblock %}
+        </h4>
+    </div>
+
+    <!-- Center Section: Global Search Bar -->
+    <div class="topbar-search position-relative d-none d-md-flex align-items-center">
+        <i class="bi bi-search search-icon position-absolute ms-3 text-muted"></i>
+        <input
+            type="text"
+            id="globalSearchInput"
+            class="form-control form-control-sm ps-5 pe-3 rounded-pill bg-light border-0"
+            placeholder="Search courses, notes, announcements..."
+            autocomplete="off"
+            aria-label="Search Smart Campus">
+        <div id="globalSearchResults" class="search-dropdown-results shadow-lg rounded-3 bg-white position-absolute start-0 w-100 mt-2 p-2" style="display: none; top: 100%; z-index: 1060;"></div>
+    </div>
+
+    <!-- Right Section: Theme Toggle, Notifications & User Profile -->
+    <div class="topbar-right d-flex align-items-center gap-2 gap-md-3">
+
+        <!-- Theme Toggle Button -->
+        <button
+            class="btn btn-icon topbar-icon rounded-circle p-2 border-0"
+            id="themeToggle"
+            aria-label="Toggle Dark Mode"
+            title="Toggle Dark Mode">
+            <i class="bi bi-moon-stars fs-5" id="themeIcon"></i>
+        </button>
+
+        <!-- Notifications Dropdown -->
+        <div class="dropdown">
+            <button
+                class="btn btn-icon topbar-icon rounded-circle p-2 border-0 position-relative"
+                id="notificationDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                aria-label="Notifications"
+                title="Notifications">
+                <i class="bi bi-bell fs-5"></i>
+                {% if notification_count %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.65rem;">
+                        {{ notification_count }}
+                    </span>
+                {% endif %}
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2 py-0" style="width: 320px; max-height: 400px; overflow-y: auto; z-index: 1055;">
+                <li class="dropdown-header bg-light py-2 px-3 fw-bold text-dark d-flex justify-content-between align-items-center border-bottom">
+                    <span><i class="bi bi-bell me-2 text-primary"></i>Notifications</span>
+                    <span class="badge bg-primary rounded-pill">{{ notification_count|default:"0" }} New</span>
+                </li>
+
+                {% for notification in notifications %}
+                    <li>
+                        <a href="{% url 'announcement_list' %}" class="dropdown-item py-2 px-3 border-bottom text-wrap">
+                            <strong class="d-block text-dark small mb-1">{{ notification.title }}</strong>
+                            <span class="text-muted small d-block">{{ notification.message|truncatechars:60 }}</span>
+                        </a>
+                    </li>
+                {% empty %}
+                    <li class="py-4 text-center text-muted">
+                        <i class="bi bi-bell-slash fs-3 d-block mb-1 text-muted"></i>
+                        <small>No new notifications</small>
+                    </li>
+                {% endfor %}
+
+                <li class="bg-light text-center py-2 border-top">
+                    <a href="{% url 'announcement_list' %}" class="text-primary small fw-bold text-decoration-none">
+                        View All Announcements <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- User Profile Dropdown -->
+        <div class="dropdown">
+            <a href="#"
+               class="topbar-profile d-flex align-items-center gap-2 text-decoration-none p-1 rounded-pill hover-bg"
+               data-bs-toggle="dropdown"
+               aria-expanded="false">
+
+                {% if request.user.student_profile and request.user.student_profile.photo %}
+                    <img src="{{ request.user.student_profile.photo.url }}" alt="Profile Photo" class="rounded-circle object-fit-cover" width="36" height="36">
+                {% elif request.user.teacher_profile and request.user.teacher_profile.photo %}
+                    <img src="{{ request.user.teacher_profile.photo.url }}" alt="Profile Photo" class="rounded-circle object-fit-cover" width="36" height="36">
+                {% else %}
+                    <img src="{% static 'images/default-user.png' %}" alt="Default Avatar" class="rounded-circle object-fit-cover" width="36" height="36" onerror="this.src='https://ui-avatars.com/api/?name={{ request.user.username }}&background=0D6EFD&color=fff'">
+                {% endif %}
+
+                <div class="profile-info d-none d-md-block text-start me-1">
+                    <h6 class="mb-0 fw-bold text-dark lh-1 small">
+                        {{ request.user.get_full_name|default:request.user.username }}
+                    </h6>
+                    <span class="badge {% if request.user.role == 'ADMIN' %}bg-danger{% elif request.user.role == 'TEACHER' %}bg-primary{% else %}bg-success{% endif %} mt-1" style="font-size: 0.65rem;">
+                        {{ request.user.role }}
+                    </span>
+                </div>
+
+                <i class="bi bi-chevron-down text-muted small me-1"></i>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2 py-2" style="min-width: 220px; z-index: 1055;">
+                <li class="px-3 py-2 border-bottom d-md-none">
+                    <strong class="d-block text-dark">{{ request.user.get_full_name|default:request.user.username }}</strong>
+                    <small class="text-muted">{{ request.user.role }}</small>
+                </li>
+
+                <li>
+                    <a class="dropdown-item py-2 px-3 d-flex align-items-center text-dark" href="{% url 'profile' %}">
+                        <i class="bi bi-person-circle text-primary me-2 fs-5"></i>
+                        <span>My Profile</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a class="dropdown-item py-2 px-3 d-flex align-items-center text-dark" href="{% url 'change_password' %}">
+                        <i class="bi bi-shield-lock text-warning me-2 fs-5"></i>
+                        <span>Change Password</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a class="dropdown-item py-2 px-3 d-flex align-items-center text-dark" href="#" id="themeToggleMenu">
+                        <i class="bi bi-moon-stars text-info me-2 fs-5"></i>
+                        <span>Dark Mode</span>
+                    </a>
+                </li>
+
+                <li><hr class="dropdown-divider my-1"></li>
+
+                <li>
+                    <a class="dropdown-item py-2 px-3 d-flex align-items-center text-danger" href="{% url 'logout' %}" onclick="return confirm('Are you sure you want to logout?');">
+                        <i class="bi bi-box-arrow-right me-2 fs-5"></i>
+                        <span class="fw-bold">Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+</nav>

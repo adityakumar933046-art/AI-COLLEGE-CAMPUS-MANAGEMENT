@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+{{ title|default:"My Profile" }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <!-- Page Title -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-person-badge text-primary me-2"></i>
+                Profile Details
+            </h3>
+            <p class="text-muted mb-0">Manage and view your personal account information.</p>
+        </div>
+        <div>
+            {% if role == "ADMIN" %}
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary me-2">
+                    <i class="bi bi-arrow-left me-1"></i> Dashboard
+                </a>
+            {% elif role == "TEACHER" %}
+                <a href="{% url 'teacher_dashboard' %}" class="btn btn-secondary me-2">
+                    <i class="bi bi-arrow-left me-1"></i> Dashboard
+                </a>
+            {% elif role == "STUDENT" %}
+                <a href="{% url 'student_dashboard' %}" class="btn btn-secondary me-2">
+                    <i class="bi bi-arrow-left me-1"></i> Dashboard
+                </a>
+            {% endif %}
+            <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary me-2">
+                <i class="bi bi-pencil-square me-1"></i> Edit Profile
+            </a>
+            <a href="{% url 'change_password' %}" class="btn btn-primary">
+                <i class="bi bi-key me-1"></i> Change Password
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Left Column: Avatar & Basic Summary -->
+        <div class="col-lg-4">
+            <div class="card shadow border-0 text-center h-100">
+                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
+                    <div class="position-relative mb-3">
+                        {% if user_obj.profile_picture %}
+                            <img src="{{ user_obj.profile_picture.url }}" class="rounded-circle img-thumbnail shadow-sm" style="width: 170px; height: 170px; object-fit: cover;" alt="Profile Photo">
+                        {% elif teacher and teacher.photo %}
+                            <img src="{{ teacher.photo.url }}" class="rounded-circle img-thumbnail shadow-sm" style="width: 170px; height: 170px; object-fit: cover;" alt="Profile Photo">
+                        {% elif student and student.photo %}
+                            <img src="{{ student.photo.url }}" class="rounded-circle img-thumbnail shadow-sm" style="width: 170px; height: 170px; object-fit: cover;" alt="Profile Photo">
+                        {% else %}
+                            <img src="{% static 'images/default-user.png' %}" class="rounded-circle img-thumbnail shadow-sm" style="width: 170px; height: 170px; object-fit: cover;" alt="Profile Photo">
+                        {% endif %}
+                    </div>
+
+                    <h4 class="fw-bold mb-1">{{ user_obj.get_full_name|default:user_obj.username }}</h4>
+                    <p class="text-muted mb-2">
+                        {% if role == "TEACHER" and teacher %}
+                            {{ teacher.designation|default:"Faculty Member" }}
+                        {% elif role == "STUDENT" and student %}
+                            Student • {{ student.department.name|default:"Academic Department" }}
+                        {% else %}
+                            System Administrator
+                        {% endif %}
+                    </p>
+
+                    <div class="mb-3">
+                        <span class="badge bg-primary px-3 py-2 fs-6 rounded-pill">
+                            <i class="bi bi-shield-check me-1"></i> {{ user_obj.role }}
+                        </span>
+                        {% if user_obj.is_active %}
+                            <span class="badge bg-success px-3 py-2 fs-6 rounded-pill ms-1">Active</span>
+                        {% else %}
+                            <span class="badge bg-danger px-3 py-2 fs-6 rounded-pill ms-1">Inactive</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="w-100 border-top pt-3 text-start small text-muted">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="bi bi-envelope me-1"></i> Email:</span>
+                            <strong class="text-dark">{{ user_obj.email|default:"N/A" }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="bi bi-telephone me-1"></i> Phone:</span>
+                            <strong class="text-dark">{{ user_obj.phone|default:"N/A" }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span><i class="bi bi-calendar-event me-1"></i> Joined:</span>
+                            <strong class="text-dark">{{ user_obj.date_joined|date:"d M Y" }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Personal, Role-Specific & Account Cards -->
+        <div class="col-lg-8">
+            <!-- 1. Personal Information Card -->
+            <div class="card shadow border-0 mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-person-fill me-2"></i>Personal Information</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Full Name</label>
+                            <span class="fw-semibold text-dark">{{ user_obj.get_full_name|default:user_obj.username }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Email Address</label>
+                            <span class="fw-semibold text-dark">{{ user_obj.email|default:"N/A" }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Phone Number</label>
+                            <span class="fw-semibold text-dark">{{ user_obj.phone|default:"N/A" }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Gender</label>
+                            <span class="fw-semibold text-dark">{{ user_obj.gender|default:"Not Specified" }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Date of Birth</label>
+                            <span class="fw-semibold text-dark">{{ user_obj.date_of_birth|default:"N/A" }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Address</label>
+                            <span class="fw-semibold text-dark">{{ user_obj.address|default:"N/A" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Role Specific Information Card -->
+            {% if role == "TEACHER" and teacher %}
+                <div class="card shadow border-0 mb-4">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-briefcase-fill me-2"></i>Professional Information</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Employee ID</label>
+                                <span class="fw-semibold text-dark">{{ teacher.employee_id|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Department</label>
+                                <span class="fw-semibold text-dark">{{ teacher.department.name|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Designation</label>
+                                <span class="fw-semibold text-dark">{{ teacher.designation|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Qualification</label>
+                                <span class="fw-semibold text-dark">{{ teacher.qualification|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Specialization</label>
+                                <span class="fw-semibold text-dark">{{ teacher.specialization|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Experience</label>
+                                <span class="fw-semibold text-dark">{{ teacher.experience }} Years</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Joining Date</label>
+                                <span class="fw-semibold text-dark">{{ teacher.joining_date|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Office Room</label>
+                                <span class="fw-semibold text-dark">{{ teacher.office_room|default:"N/A" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% elif role == "STUDENT" and student %}
+                <div class="card shadow border-0 mb-4">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-mortarboard-fill me-2"></i>Academic Information</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Admission No</label>
+                                <span class="fw-semibold text-dark">{{ student.admission_no|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Roll Number</label>
+                                <span class="fw-semibold text-dark">{{ student.roll_no|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Department</label>
+                                <span class="fw-semibold text-dark">{{ student.department.name|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Semester & Section</label>
+                                <span class="fw-semibold text-dark">Semester {{ student.semester|default:"N/A" }} ({{ student.section|default:"A" }})</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Batch / Academic Year</label>
+                                <span class="fw-semibold text-dark">{{ student.batch|default:"N/A" }} ({{ student.academic_year|default:"N/A" }})</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">CGPA</label>
+                                <span class="fw-semibold text-dark">{{ student.cgpa|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Father / Mother Name</label>
+                                <span class="fw-semibold text-dark">{{ student.father_name|default:"N/A" }} / {{ student.mother_name|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Guardian Phone</label>
+                                <span class="fw-semibold text-dark">{{ student.guardian_phone|default:"N/A" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="card shadow border-0 mb-4">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-shield-lock-fill me-2"></i>Administrative Privileges</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">System Role</label>
+                                <span class="fw-semibold text-dark">Super Administrator</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Staff Access</label>
+                                <span class="fw-semibold text-dark">Granted (Full Access)</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Account Status</label>
+                                <span class="badge bg-success px-3 py-1">Active Verified Account</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Last Login IP</label>
+                                <span class="fw-semibold text-dark">{{ user_obj.last_login_ip|default:"127.0.0.1" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            # 3. Account Details Card
+            <div class="card shadow border-0 mb-4">
+                <div class="card-header bg-dark text-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-gear-fill me-2"></i>Account Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Username</label>
+                            <span class="fw-semibold text-dark">{{ user_obj.username }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Account Role</label>
+                            <span class="fw-semibold text-dark">{{ user_obj.role }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Date Joined</label>
+                            <span class="fw-semibold text-dark">{{ user_obj.date_joined|date:"d M Y h:i A" }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block">Last Login</label>
+                            <span class="fw-semibold text-dark">{{ user_obj.last_login|date:"d M Y h:i A"|default:"Never" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

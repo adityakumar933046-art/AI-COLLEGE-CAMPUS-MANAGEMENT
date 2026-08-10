@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Delete Department
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+
+    <!-- ============================= -->
+    <!-- PAGE HEADER -->
+    <!-- ============================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold text-danger">
+
+                <i class="fas fa-trash me-2"></i>
+
+                Delete Department
+
+            </h2>
+
+            <p class="text-muted">
+
+                Confirm before deleting this department.
+
+            </p>
+
+        </div>
+
+
+        <a href="{% url 'department_detail' department.id %}"
+           class="btn btn-secondary">
+
+            <i class="fas fa-arrow-left me-1"></i>
+
+            Back
+
+        </a>
+
+
+    </div>
+
+
+
+
+    <!-- ============================= -->
+    <!-- DELETE CARD -->
+    <!-- ============================= -->
+
+
+    <div class="card shadow border-0">
+
+
+        <div class="card-body text-center py-5">
+
+
+            <div class="mb-4">
+
+
+                <i class="fas fa-triangle-exclamation text-danger"
+                   style="font-size:60px;">
+                </i>
+
+
+            </div>
+
+
+
+            <h3 class="fw-bold">
+
+                Are you sure?
+
+            </h3>
+
+
+
+            <p class="text-muted fs-5">
+
+
+                You are about to delete:
+
+
+            </p>
+
+
+
+
+            <div class="card bg-light border-0 mx-auto mb-4"
+                 style="max-width:500px;">
+
+
+                <div class="card-body">
+
+
+                    {% if department.logo %}
+
+                        <img src="{{ department.logo.url }}"
+                             width="90"
+                             height="90"
+                             class="rounded-circle mb-3"
+                             style="object-fit:cover;">
+
+
+                    {% endif %}
+
+
+
+                    <h4 class="fw-bold">
+
+                        {{ department.name }}
+
+                    </h4>
+
+
+                    <p class="mb-1">
+
+                        Code:
+
+                        <strong>
+
+                            {{ department.code }}
+
+                        </strong>
+
+                    </p>
+
+
+                    <p class="mb-0 text-muted">
+
+                        {{ department.short_name }}
+
+                    </p>
+
+
+                </div>
+
+
+            </div>
+
+
+
+
+            <div class="alert alert-danger">
+
+                <i class="fas fa-warning me-2"></i>
+
+                This action cannot be undone.
+
+                All related information may be affected.
+
+            </div>
+
+
+
+
+
+            <!-- ============================= -->
+            <!-- FORM -->
+            <!-- ============================= -->
+
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+
+                <div class="d-flex justify-content-center gap-3">
+
+
+                    <a href="{% url 'department_detail' department.id %}"
+                       class="btn btn-secondary btn-lg">
+
+                        <i class="fas fa-times me-1"></i>
+
+                        Cancel
+
+                    </a>
+
+
+
+                    <button type="submit"
+                            class="btn btn-danger btn-lg">
+
+
+                        <i class="fas fa-trash me-1"></i>
+
+                        Yes, Delete
+
+
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+
+    </div>
+
+
+
+</div>
+
+
+{% endblock %}

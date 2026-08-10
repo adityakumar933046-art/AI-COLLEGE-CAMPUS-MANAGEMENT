@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}
+Delete Student
+{% endblock %}
+
+
+
+{% block content %}
+
+
+
+<div class="container-fluid py-4">
+
+
+
+    <!-- ============================= -->
+    <!-- PAGE HEADER -->
+    <!-- ============================= -->
+
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+
+
+        <div>
+
+
+            <h2 class="fw-bold text-danger">
+
+
+                <i class="fas fa-trash me-2"></i>
+
+
+                Delete Student
+
+
+            </h2>
+
+
+
+            <p class="text-muted">
+
+
+                Confirm before deleting this student.
+
+
+            </p>
+
+
+
+        </div>
+
+
+
+
+
+        <a href="{% url 'student_detail' student.id %}"
+
+           class="btn btn-secondary">
+
+
+            <i class="fas fa-arrow-left me-1"></i>
+
+
+            Back
+
+
+        </a>
+
+
+
+    </div>
+
+
+
+
+
+
+
+    <!-- ============================= -->
+    <!-- DELETE CARD -->
+    <!-- ============================= -->
+
+
+    <div class="card shadow border-0">
+
+
+        <div class="card-body text-center py-5">
+
+
+
+
+
+            <div class="mb-4">
+
+
+                <i class="fas fa-triangle-exclamation text-danger"
+
+                   style="font-size:60px;">
+
+                </i>
+
+
+            </div>
+
+
+
+
+
+
+
+            <h3 class="fw-bold">
+
+
+                Are you sure?
+
+
+            </h3>
+
+
+
+
+
+            <p class="text-muted fs-5">
+
+
+                You are about to delete this student:
+
+
+            </p>
+
+
+
+
+
+
+
+
+            <!-- STUDENT INFO CARD -->
+
+
+            <div class="card bg-light border-0 mx-auto mb-4"
+
+                 style="max-width:500px;">
+
+
+
+                <div class="card-body">
+
+
+
+
+
+                    {% if student.photo %}
+
+
+
+                    <img src="{{ student.photo.url }}"
+
+                         width="100"
+
+                         height="100"
+
+                         class="rounded-circle mb-3 border"
+
+                         style="object-fit:cover;">
+
+
+
+                    {% else %}
+
+
+
+                    <img src="{% static 'images/default-user.png' %}"
+
+                         width="100"
+
+                         height="100"
+
+                         class="rounded-circle mb-3 border">
+
+
+
+                    {% endif %}
+
+
+
+
+
+
+
+                    <h4 class="fw-bold">
+
+
+                        {{ student.full_name }}
+
+
+                    </h4>
+
+
+
+
+
+
+
+                    <p class="mb-1">
+
+
+                        Roll No:
+
+                        <strong>
+
+
+                            {{ student.roll_no }}
+
+
+                        </strong>
+
+
+                    </p>
+
+
+
+
+
+
+
+                    <p class="mb-1">
+
+
+                        Admission No:
+
+                        <strong>
+
+
+                            {{ student.admission_no }}
+
+
+                        </strong>
+
+
+                    </p>
+
+
+
+
+
+
+
+                    <p class="text-muted mb-0">
+
+
+                        {% if student.department %}
+
+
+                            {{ student.department.name }}
+
+
+                        {% endif %}
+
+
+                    </p>
+
+
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+
+            <div class="alert alert-danger">
+
+
+                <i class="fas fa-warning me-2"></i>
+
+
+                This action cannot be undone.
+                Student account and profile data will be permanently deleted.
+
+
+            </div>
+
+
+
+
+
+
+
+
+            <!-- DELETE FORM -->
+
+
+            <form method="POST">
+
+
+                {% csrf_token %}
+
+
+
+
+
+                <div class="d-flex justify-content-center gap-3">
+
+
+
+
+
+                    <a href="{% url 'student_detail' student.id %}"
+
+                       class="btn btn-secondary btn-lg">
+
+
+                        <i class="fas fa-times me-1"></i>
+
+
+                        Cancel
+
+
+                    </a>
+
+
+
+
+
+
+
+                    <button type="submit"
+
+                            class="btn btn-danger btn-lg">
+
+
+                        <i class="fas fa-trash me-1"></i>
+
+
+                        Yes, Delete
+
+
+                    </button>
+
+
+
+
+                </div>
+
+
+
+
+            </form>
+
+
+
+
+
+        </div>
+
+
+    </div>
+
+
+
+</div>
+
+
+
+{% endblock %}

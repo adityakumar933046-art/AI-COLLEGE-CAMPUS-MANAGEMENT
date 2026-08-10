@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Update Leave Status{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-warning">
+
+            <h3>Update Leave Status</h3>
+
+        </div>
+
+        <div class="card-body">
+
+            <h5>
+
+                Applicant :
+
+                {{ leave.applicant.get_full_name }}
+
+            </h5>
+
+            <p>
+
+                {{ leave.from_date }} → {{ leave.to_date }}
+
+            </p>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                {{ form.as_p }}
+
+                <button type="submit"
+
+                        class="btn btn-outline-primary">
+
+                    Save
+
+                </button>
+
+                <a href="{% url 'leave_list' %}"
+
+                   class="btn btn-secondary">
+
+                    Cancel
+
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

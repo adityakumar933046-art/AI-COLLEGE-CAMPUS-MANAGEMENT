@@ -1,0 +1,684 @@
+/*=====================================================
+                SIDEBAR.CSS
+                  PART 1A
+======================================================*/
+
+/*=========================
+        SIDEBAR
+==========================*/
+
+.sidebar{
+
+    position:fixed;
+    top:0;
+    left:0;
+
+    width:280px;
+    height:100vh;
+
+    background:#1e293b;
+    color:#fff;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    z-index:1050;
+
+    transition:.35s ease;
+
+    display:flex;
+    flex-direction:column;
+
+    box-shadow:4px 0 20px rgba(0,0,0,.12);
+
+}
+
+
+/*=========================
+      SIDEBAR HEADER
+==========================*/
+
+.sidebar-header{
+
+    height:75px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 20px;
+
+    border-bottom:1px solid rgba(255,255,255,.08);
+
+}
+
+
+/*=========================
+          LOGO
+==========================*/
+
+.logo{
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    color:#fff;
+    font-weight:600;
+
+}
+
+.logo:hover{
+
+    color:#fff;
+
+}
+
+.logo-icon{
+
+    width:48px;
+    height:48px;
+
+    border-radius:12px;
+
+    background:#2563eb;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:22px;
+
+}
+
+.logo-text h4{
+
+    margin:0;
+    color:#fff;
+    font-size:18px;
+
+}
+
+.logo-text small{
+
+    color:#cbd5e1;
+
+}
+
+
+/*=========================
+      TOGGLE BUTTON
+==========================*/
+
+.sidebar-toggle,
+#sidebarToggle{
+
+    border:none;
+    background:none;
+    color:#fff;
+
+    font-size:22px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.sidebar-toggle:hover,
+#sidebarToggle:hover{
+
+    color:#60a5fa;
+    transform:rotate(90deg);
+
+}
+
+
+/*=========================
+      PROFILE SECTION
+==========================*/
+
+.admin-profile,
+.sidebar-profile{
+
+    padding:24px 20px;
+
+    text-align:center;
+
+    border-bottom:1px solid rgba(255,255,255,.08);
+
+}
+
+.profile-image img,
+.profile-img{
+
+    width:90px;
+    height:90px;
+
+    border-radius:50%;
+
+    object-fit:cover;
+
+    border:4px solid rgba(255,255,255,.12);
+
+    margin:auto;
+
+}
+
+.profile-info h6,
+.sidebar-profile h6{
+
+    margin-top:15px;
+    margin-bottom:4px;
+
+    color:#fff;
+
+    font-weight:600;
+
+}
+
+.profile-info span,
+.sidebar-profile small{
+
+    color:#cbd5e1;
+
+}
+
+/*=====================================================
+                SIDEBAR.CSS
+                  PART 1B
+======================================================*/
+
+
+/*=========================
+      SIDEBAR NAVIGATION
+==========================*/
+
+.sidebar-nav{
+
+    flex:1;
+
+    padding:18px 0;
+
+}
+
+.sidebar-nav ul{
+
+    margin:0;
+    padding:0;
+
+}
+
+.sidebar-nav li{
+
+    list-style:none;
+
+}
+
+
+/*=========================
+      MENU HEADINGS
+==========================*/
+
+.menu-heading{
+
+    padding:18px 24px 10px;
+
+    font-size:.72rem;
+
+    font-weight:700;
+
+    text-transform:uppercase;
+
+    letter-spacing:1px;
+
+    color:#94a3b8;
+
+    pointer-events:none;
+
+}
+
+
+/*=========================
+        NAV LINKS
+==========================*/
+
+.sidebar-nav a,
+.nav-link{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    padding:13px 22px;
+
+    margin:4px 12px;
+
+    border-radius:12px;
+
+    color:#cbd5e1;
+
+    transition:.3s ease;
+
+    position:relative;
+
+    overflow:hidden;
+
+    font-weight:500;
+
+}
+
+
+/*=========================
+        ICONS
+==========================*/
+
+.sidebar-nav a i,
+.nav-link i{
+
+    width:22px;
+
+    text-align:center;
+
+    font-size:18px;
+
+    transition:.3s ease;
+
+}
+
+
+/*=========================
+        HOVER
+==========================*/
+
+.sidebar-nav a:hover,
+.nav-link:hover{
+
+    background:rgba(37,99,235,.18);
+
+    color:#fff;
+
+    transform:translateX(6px);
+
+}
+
+.sidebar-nav a:hover i,
+.nav-link:hover i{
+
+    color:#60a5fa;
+
+    transform:scale(1.1);
+
+}
+
+
+/*=========================
+      ACTIVE MENU
+==========================*/
+
+.sidebar-nav a.active,
+.nav-link.active{
+
+    background:#2563eb;
+
+    color:#fff;
+
+    box-shadow:0 8px 20px rgba(37,99,235,.35);
+
+}
+
+.sidebar-nav a.active i,
+.nav-link.active i{
+
+    color:#fff;
+
+}
+
+
+/*=========================
+      LEFT INDICATOR
+==========================*/
+
+.sidebar-nav a.active::before,
+.nav-link.active::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    top:8px;
+
+    bottom:8px;
+
+    width:4px;
+
+    border-radius:0 4px 4px 0;
+
+    background:#fff;
+
+}
+
+
+/*=========================
+        RIPPLE
+==========================*/
+
+.sidebar-nav a::after,
+.nav-link::after{
+
+    content:"";
+
+    position:absolute;
+
+    left:50%;
+
+    top:50%;
+
+    width:0;
+
+    height:0;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.12);
+
+    transform:translate(-50%,-50%);
+
+    transition:.45s ease;
+
+}
+
+.sidebar-nav a:hover::after,
+.nav-link:hover::after{
+
+    width:260px;
+
+    height:260px;
+
+}
+
+
+/*=========================
+        BADGES
+==========================*/
+
+.sidebar-nav .badge,
+.nav-link .badge{
+
+    margin-left:auto;
+
+    font-size:.72rem;
+
+    border-radius:30px;
+
+}
+
+
+/*=========================
+      LINK TEXT
+==========================*/
+
+.sidebar-nav span,
+.nav-link span{
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+}
+/*=====================================================
+                SIDEBAR.CSS
+                  PART 1C
+======================================================*/
+
+
+/*=========================
+        SIDEBAR FOOTER
+==========================*/
+
+.sidebar-footer{
+
+    margin-top:auto;
+
+    padding:18px;
+
+    border-top:1px solid rgba(255,255,255,.08);
+
+}
+
+.sidebar-footer hr{
+
+    border-color:rgba(255,255,255,.08);
+
+    margin:.75rem 0;
+
+}
+
+.sidebar-footer .nav-link{
+
+    margin:4px 0;
+
+}
+
+
+/*=========================
+      COLLAPSED SIDEBAR
+==========================*/
+
+.sidebar.collapsed{
+
+    width:85px;
+
+}
+
+.sidebar.collapsed .logo-text,
+.sidebar.collapsed .profile-info,
+.sidebar.collapsed .sidebar-profile h6,
+.sidebar.collapsed .sidebar-profile small,
+.sidebar.collapsed .menu-heading,
+.sidebar.collapsed .nav-link span,
+.sidebar.collapsed .sidebar-footer h6,
+.sidebar.collapsed .sidebar-footer small{
+
+    display:none;
+
+}
+
+.sidebar.collapsed .logo{
+
+    justify-content:center;
+
+}
+
+.sidebar.collapsed .nav-link{
+
+    justify-content:center;
+
+    padding:14px;
+
+    margin:6px 10px;
+
+}
+
+.sidebar.collapsed .nav-link i{
+
+    margin:0;
+
+    font-size:20px;
+
+}
+
+.sidebar.collapsed .profile-image img,
+.sidebar.collapsed .profile-img{
+
+    width:55px;
+
+    height:55px;
+
+}
+
+
+/*=========================
+    MAIN CONTENT ADJUSTMENT
+==========================*/
+
+.main-content{
+
+    margin-left:280px;
+
+    min-height:100vh;
+
+    transition:.35s ease;
+
+}
+
+.main-content.expand{
+
+    margin-left:85px;
+
+}
+
+
+/*=========================
+      SIDEBAR SCROLLBAR
+==========================*/
+
+.sidebar::-webkit-scrollbar{
+
+    width:6px;
+
+}
+
+.sidebar::-webkit-scrollbar-track{
+
+    background:transparent;
+
+}
+
+.sidebar::-webkit-scrollbar-thumb{
+
+    background:rgba(255,255,255,.20);
+
+    border-radius:20px;
+
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover{
+
+    background:rgba(255,255,255,.35);
+
+}
+
+
+/*=========================
+      MOBILE OVERLAY
+==========================*/
+
+.sidebar-overlay{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(15,23,42,.55);
+
+    opacity:0;
+
+    visibility:hidden;
+
+    transition:.3s ease;
+
+    z-index:1040;
+
+}
+
+.sidebar-overlay.active{
+
+    opacity:1;
+
+    visibility:visible;
+
+}
+
+
+/*=========================
+      MOBILE SIDEBAR
+==========================*/
+
+@media(max-width:992px){
+
+    .sidebar{
+
+        transform:translateX(-100%);
+
+    }
+
+    .sidebar.show{
+
+        transform:translateX(0);
+
+    }
+
+    .main-content{
+
+        margin-left:0;
+
+    }
+
+}
+
+
+/*=========================
+      SMALL DEVICES
+==========================*/
+
+@media(max-width:576px){
+
+    .sidebar{
+
+        width:270px;
+
+    }
+
+    .sidebar-header{
+
+        padding:0 16px;
+
+    }
+
+    .admin-profile,
+    .sidebar-profile{
+
+        padding:20px 15px;
+
+    }
+
+}
+
+
+/*=========================
+      REDUCED MOTION
+==========================*/
+
+@media(prefers-reduced-motion:reduce){
+
+    .sidebar,
+    .nav-link,
+    .sidebar-toggle{
+
+        transition:none!important;
+
+    }
+
+}
+
+
+/*=========================
+            END
+==========================*/

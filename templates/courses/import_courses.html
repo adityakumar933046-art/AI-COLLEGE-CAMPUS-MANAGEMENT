@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-7">
+
+            <div class="card shadow">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h3 class="mb-0">
+                        Import Courses From Excel
+                    </h3>
+
+                </div>
+
+                <div class="card-body">
+
+                    {% if messages %}
+
+                        {% for message in messages %}
+
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+
+                        {% endfor %}
+
+                    {% endif %}
+
+                    <form method="POST" enctype="multipart/form-data">
+
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+
+                                Select Excel File
+
+                            </label>
+
+                            {{ form.excel_file }}
+
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between">
+
+                            <a href="{% url 'course_list' %}"
+                               class="btn btn-secondary">
+
+                                Back
+
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+
+                                Import Courses
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+                <div class="card-footer">
+
+                    <h6>Excel Format</h6>
+
+                    <table class="table table-bordered">
+
+                        <thead class="table-light">
+
+                        <tr>
+
+                            <th>Code</th>
+
+                            <th>Name</th>
+
+                            <th>Department ID</th>
+
+                            <th>Teacher ID</th>
+
+                            <th>Semester</th>
+
+                            <th>Credits</th>
+
+                            <th>Status</th>
+
+                        </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                        <tr>
+
+                            <td>CS101</td>
+
+                            <td>Python Programming</td>
+
+                            <td>1</td>
+
+                            <td>1</td>
+
+                            <td>1</td>
+
+                            <td>4</td>
+
+                            <td>ACTIVE</td>
+
+                        </tr>
+
+                        </tbody>
+
+                    </table>
+
+                    <a href="{% url 'download_course_sample' %}"
+                       class="btn btn-outline-primary">
+
+                        Download Sample Excel
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

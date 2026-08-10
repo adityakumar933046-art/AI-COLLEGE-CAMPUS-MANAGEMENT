@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Material{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="card shadow">
+
+        <div class="card-body text-center">
+
+            <h3>Delete Material</h3>
+
+            <p>
+
+                Are you sure you want to delete
+
+                <strong>{{ material.title }}</strong> ?
+
+            </p>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <button class="btn btn-danger">
+
+                    Yes Delete
+
+                </button>
+
+                <a href="{% url 'course_materials' material.course.id %}"
+                   class="btn btn-secondary">
+
+                    Cancel
+
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

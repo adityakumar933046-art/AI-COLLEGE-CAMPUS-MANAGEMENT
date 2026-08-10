@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Student Timetable{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold">Class Timetable</h2>
+            <p class="text-muted">Weekly Class Schedule</p>
+        </div>
+
+    </div>
+
+    <div class="card shadow">
+
+        <div class="card-header">
+            <h5 class="mb-0">Weekly Timetable</h5>
+        </div>
+
+        <div class="card-body table-responsive">
+
+            <table class="table table-bordered table-hover">
+
+                <thead class="table-primary">
+
+                    <tr>
+
+                        <th>Day</th>
+                        <th>Course</th>
+                        <th>Teacher</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Room</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for item in timetable %}
+
+                    <tr>
+
+                        <td>{{ item.day }}</td>
+
+                        <td>{{ item.course.name }}</td>
+
+                        <td>{{ item.teacher.user.get_full_name }}</td>
+
+                        <td>{{ item.start_time }}</td>
+
+                        <td>{{ item.end_time }}</td>
+
+                        <td>{{ item.room }}</td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="6" class="text-center">
+
+                            No Timetable Available
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

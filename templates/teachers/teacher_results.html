@@ -1,0 +1,449 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Teacher Results
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h3 class="fw-bold">
+
+                <i class="fas fa-poll text-primary"></i>
+
+                Student Results
+
+            </h3>
+
+            <p class="text-muted">
+
+                Manage and publish student examination results.
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <a href="{% url 'teacher_dashboard' %}"
+               class="btn btn-secondary">
+
+                <i class="fas fa-arrow-left"></i>
+
+                Dashboard
+
+            </a>
+
+            <a href="{% url 'result_create' %}"
+               class="btn btn-primary">
+
+                <i class="fas fa-plus-circle"></i>
+
+                Add Result
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- Search & Filter -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form method="GET">
+
+                <div class="row">
+
+                    <div class="col-md-3 mb-3">
+
+                        <input
+                            type="text"
+                            name="q"
+                            class="form-control"
+                            placeholder="Search Student..."
+                            value="{{ request.GET.q }}">
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <select
+                            name="course"
+                            class="form-select">
+
+                            <option value="">
+
+                                All Courses
+
+                            </option>
+
+                            {% for course in courses %}
+
+                            <option
+                                value="{{ course.id }}"
+                                {% if request.GET.course == course.id|stringformat:"s" %}
+                                selected
+                                {% endif %}>
+
+                                {{ course.course_name }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+
+                        <select
+                            name="semester"
+                            class="form-select">
+
+                            <option value="">
+
+                                Semester
+
+                            </option>
+
+                            {% for sem in semesters %}
+
+                            <option
+                                value="{{ sem }}"
+                                {% if request.GET.semester == sem|stringformat:"s" %}
+                                selected
+                                {% endif %}>
+
+                                Semester {{ sem }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+
+                        <select
+                            name="exam"
+                            class="form-select">
+
+                            <option value="">
+
+                                All Exams
+
+                            </option>
+
+                            {% for exam in exams %}
+
+                            <option
+                                value="{{ exam.id }}">
+
+                                {{ exam.name }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-2 mb-3 d-grid">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary">
+
+                            <i class="fas fa-search"></i>
+
+                            Search
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+        <!-- Results Table -->
+
+    <div class="card shadow">
+
+        <div class="card-body table-responsive">
+
+            <table class="table table-bordered table-hover align-middle">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>#</th>
+                        <th>Student</th>
+                        <th>Roll No.</th>
+                        <th>Course</th>
+                        <th>Exam</th>
+                        <th>Total Marks</th>
+                        <th>Obtained</th>
+                        <th>Grade</th>
+                        <th>Status</th>
+                        <th class="text-center">Actions</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for result in results %}
+
+                    <tr>
+
+                        <td>
+
+                            {{ forloop.counter }}
+
+                        </td>
+
+                        <td>
+
+                            {{ result.student.user.get_full_name }}
+
+                        </td>
+
+                        <td>
+
+                            {{ result.student.roll_no }}
+
+                        </td>
+
+                        <td>
+
+                            {{ result.course.course_name }}
+
+                        </td>
+
+                        <td>
+
+                            {{ result.exam.name }}
+
+                        </td>
+
+                        <td>
+
+                            {{ result.total_marks }}
+
+                        </td>
+
+                        <td>
+
+                            {{ result.obtained_marks }}
+
+                        </td>
+
+                        <td>
+
+                            <span class="badge bg-primary">
+
+                                {{ result.grade }}
+
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            {% if result.status == "PASS" %}
+
+                                <span class="badge bg-primary">
+
+                                    Pass
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary">
+
+                                    Fail
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td class="text-center">
+
+                            <a href="{% url 'result_detail' result.pk %}"
+                               class="btn btn-outline-primary btn-sm">
+
+                                <i class="fas fa-eye"></i>
+
+                            </a>
+
+                            <a href="{% url 'result_update' result.pk %}"
+                               class="btn btn-primary btn-sm">
+
+                                <i class="fas fa-edit"></i>
+
+                            </a>
+
+                            <a href="{% url 'result_delete' result.pk %}"
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Are you sure you want to delete this result?');">
+
+                                <i class="fas fa-trash"></i>
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="10"
+                            class="text-center text-danger">
+
+                            No Results Found.
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+        <!-- Pagination -->
+
+    {% if results.has_other_pages %}
+
+    <div class="card-footer bg-white">
+
+        <nav>
+
+            <ul class="pagination justify-content-center mb-0">
+
+                {% if results.has_previous %}
+
+                <li class="page-item">
+
+                    <a class="page-link"
+                       href="?page={{ results.previous_page_number }}">
+
+                        Previous
+
+                    </a>
+
+                </li>
+
+                {% else %}
+
+                <li class="page-item disabled">
+
+                    <span class="page-link">
+
+                        Previous
+
+                    </span>
+
+                </li>
+
+                {% endif %}
+
+                {% for i in results.paginator.page_range %}
+
+                    {% if results.number == i %}
+
+                        <li class="page-item active">
+
+                            <span class="page-link">
+
+                                {{ i }}
+
+                            </span>
+
+                        </li>
+
+                    {% else %}
+
+                        <li class="page-item">
+
+                            <a class="page-link"
+                               href="?page={{ i }}">
+
+                                {{ i }}
+
+                            </a>
+
+                        </li>
+
+                    {% endif %}
+
+                {% endfor %}
+
+                {% if results.has_next %}
+
+                <li class="page-item">
+
+                    <a class="page-link"
+                       href="?page={{ results.next_page_number }}">
+
+                        Next
+
+                    </a>
+
+                </li>
+
+                {% else %}
+
+                <li class="page-item disabled">
+
+                    <span class="page-link">
+
+                        Next
+
+                    </span>
+
+                </li>
+
+                {% endif %}
+
+            </ul>
+
+        </nav>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+</div>
+
+{% endblock %}

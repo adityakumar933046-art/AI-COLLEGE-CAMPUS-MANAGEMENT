@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create Timetable Slot{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-calendar-plus text-primary me-2"></i>
+                Create Timetable Slot
+            </h3>
+            <p class="text-muted mb-0">Schedule a new lecture routine for students and faculty.</p>
+        </div>
+        <div>
+            <a href="{% url 'timetable_list' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Back to Timetable
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>Lecture Slot Specification</h5>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger shadow-sm mb-4">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Department</label>
+                        {{ form.department }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Semester</label>
+                        {{ form.semester }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Section</label>
+                        {{ form.section }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Course / Subject</label>
+                        {{ form.course }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Faculty Member</label>
+                        {{ form.teacher }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Day of Week</label>
+                        {{ form.day }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Start Time</label>
+                        {{ form.start_time }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">End Time</label>
+                        {{ form.end_time }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Classroom / Laboratory</label>
+                        {{ form.classroom }}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 border-top pt-3">
+                    <a href="{% url 'timetable_list' %}" class="btn btn-secondary px-4">
+                        <i class="bi bi-x-circle me-1"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-check-circle me-1"></i> Save Schedule Slot
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

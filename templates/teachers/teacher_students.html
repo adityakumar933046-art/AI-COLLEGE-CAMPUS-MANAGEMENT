@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Teacher Students
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h3 class="fw-bold">
+
+                <i class="fas fa-user-graduate text-primary"></i>
+
+                My Students
+
+            </h3>
+
+            <p class="text-muted">
+
+                View and manage all assigned students.
+
+            </p>
+
+        </div>
+
+        <a href="{% url 'teacher_dashboard' %}"
+           class="btn btn-secondary">
+
+            <i class="fas fa-arrow-left"></i>
+
+            Dashboard
+
+        </a>
+
+    </div>
+
+    <!-- Search & Filter -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form method="GET">
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+
+                        <input
+                            type="text"
+                            name="q"
+                            class="form-control"
+                            placeholder="Search Student..."
+                            value="{{ request.GET.q }}">
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <select
+                            name="department"
+                            class="form-select">
+
+                            <option value="">
+
+                                All Departments
+
+                            </option>
+
+                            {% for department in departments %}
+
+                            <option
+                                value="{{ department.id }}"
+                                {% if request.GET.department == department.id|stringformat:"s" %}
+                                selected
+                                {% endif %}>
+
+                                {{ department.name }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <select
+                            name="semester"
+                            class="form-select">
+
+                            <option value="">
+
+                                All Semesters
+
+                            </option>
+
+                            {% for sem in semesters %}
+
+                            <option
+                                value="{{ sem }}"
+                                {% if request.GET.semester == sem|stringformat:"s" %}
+                                selected
+                                {% endif %}>
+
+                                Semester {{ sem }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-2 d-grid mb-3">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary">
+
+                            <i class="fas fa-search"></i>
+
+                            Search
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+        <!-- Students Table -->
+
+    <div class="card shadow">
+
+        <div class="card-body table-responsive">
+
+            <table class="table table-bordered table-hover align-middle">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>Photo</th>
+                        <th>Roll No.</th>
+                        <th>Student Name</th>
+                        <th>Department</th>
+                        <th>Semester</th>
+                        <th>Course</th>
+                        <th>Attendance</th>
+                        <th>Status</th>
+                        <th class="text-center">Actions</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for student in students %}
+
+                    <tr>
+
+                        <td class="text-center">
+
+                            {% if student.photo %}
+
+                                <img src="{{ student.photo.url }}"
+                                     class="rounded-circle"
+                                     width="50"
+                                     height="50">
+
+                            {% else %}
+
+                                <img src="{% static 'images/default-user.png' %}"
+                                     class="rounded-circle"
+                                     width="50"
+                                     height="50">
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {{ student.roll_no }}
+
+                        </td>
+
+                        <td>
+
+                            {{ student.user.get_full_name }}
+
+                        </td>
+
+                        <td>
+
+                            {{ student.department }}
+
+                        </td>
+
+                        <td>
+
+                            Semester {{ student.semester }}
+
+                        </td>
+
+                        <td>
+
+                            {{ student.course }}
+
+                        </td>
+
+                        <td>
+
+                            {% if student.attendance_percentage >= 75 %}
+
+                                <span class="badge bg-primary">
+
+                                    {{ student.attendance_percentage }}%
+
+                                </span>
+
+                            {% elif student.attendance_percentage >= 50 %}
+
+                                <span class="badge bg-secondary">
+
+                                    {{ student.attendance_percentage }}%
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary">
+
+                                    {{ student.attendance_percentage }}%
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if student.user.is_active %}
+
+                                <span class="badge bg-primary">
+
+                                    Active
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary">
+
+                                    Inactive
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td class="text-center">
+
+                            <a href="{% url 'student_detail' student.pk %}"
+                               class="btn btn-outline-primary btn-sm">
+
+                                <i class="fas fa-eye"></i>
+
+                            </a>
+
+                            <a href="{% url 'teacher_attendance' %}?student={{ student.pk }}"
+                               class="btn btn-primary btn-sm">
+
+                                <i class="fas fa-calendar-check"></i>
+
+                            </a>
+
+                            <a href="{% url 'teacher_results' %}?student={{ student.pk }}"
+                               class="btn btn-primary btn-sm">
+
+                                <i class="fas fa-chart-line"></i>
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="9" class="text-center text-secondary">
+
+                            No Students Found.
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+        <!-- Pagination -->
+
+    {% if students.has_other_pages %}
+
+    <div class="card-footer bg-white">
+
+        <nav>
+
+            <ul class="pagination justify-content-center mb-0">
+
+                {% if students.has_previous %}
+
+                <li class="page-item">
+
+                    <a class="page-link"
+                       href="?page={{ students.previous_page_number }}">
+
+                        Previous
+
+                    </a>
+
+                </li>
+
+                {% else %}
+
+                <li class="page-item disabled">
+
+                    <span class="page-link">
+
+                        Previous
+
+                    </span>
+
+                </li>
+
+                {% endif %}
+
+                {% for i in students.paginator.page_range %}
+
+                    {% if students.number == i %}
+
+                        <li class="page-item active">
+
+                            <span class="page-link">
+
+                                {{ i }}
+
+                            </span>
+
+                        </li>
+
+                    {% else %}
+
+                        <li class="page-item">
+
+                            <a class="page-link"
+                               href="?page={{ i }}">
+
+                                {{ i }}
+
+                            </a>
+
+                        </li>
+
+                    {% endif %}
+
+                {% endfor %}
+
+                {% if students.has_next %}
+
+                <li class="page-item">
+
+                    <a class="page-link"
+                       href="?page={{ students.next_page_number }}">
+
+                        Next
+
+                    </a>
+
+                </li>
+
+                {% else %}
+
+                <li class="page-item disabled">
+
+                    <span class="page-link">
+
+                        Next
+
+                    </span>
+
+                </li>
+
+                {% endif %}
+
+            </ul>
+
+        </nav>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+</div>
+
+{% endblock %}

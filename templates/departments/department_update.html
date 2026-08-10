@@ -1,0 +1,477 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Update Department{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <!-- ============================= -->
+    <!-- PAGE HEADER -->
+    <!-- ============================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+
+                <i class="fas fa-edit text-warning me-2"></i>
+
+                Update Department
+
+            </h2>
+
+            <p class="text-muted mb-0">
+
+                Update department information.
+
+            </p>
+
+        </div>
+
+        <a href="{% url 'department_detail' department.id %}"
+           class="btn btn-outline-primary">
+
+            <i class="fas fa-arrow-left me-1"></i>
+
+            Back
+
+        </a>
+
+    </div>
+
+    <!-- ============================= -->
+    <!-- FORM -->
+    <!-- ============================= -->
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-body">
+
+            <form method="POST"
+                  enctype="multipart/form-data">
+
+                {% csrf_token %}
+
+                <div class="row">
+
+                    <!-- Department Code -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-semibold">
+
+                            Department Code
+
+                        </label>
+
+                        {{ form.code }}
+
+                        <small class="text-danger">
+
+                            {{ form.code.errors }}
+
+                        </small>
+
+                    </div>
+
+                    <!-- Department Name -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-semibold">
+
+                            Department Name
+
+                        </label>
+
+                        {{ form.name }}
+
+                        <small class="text-danger">
+
+                            {{ form.name.errors }}
+
+                        </small>
+
+                    </div>
+
+                    <!-- Short Name -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-semibold">
+
+                            Short Name
+
+                        </label>
+
+                        {{ form.short_name }}
+
+                        <small class="text-danger">
+
+                            {{ form.short_name.errors }}
+
+                        </small>
+
+                    </div>
+
+                    <!-- Established Year -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-semibold">
+
+                            Established Year
+
+                        </label>
+
+                        {{ form.established_year }}
+
+                        <small class="text-danger">
+
+                            {{ form.established_year.errors }}
+
+                        </small>
+
+                    </div>
+
+                    <!-- Description -->
+
+                    <div class="col-12 mb-3">
+
+                        <label class="form-label fw-semibold">
+
+                            Description
+
+                        </label>
+
+                        {{ form.description }}
+
+                        <small class="text-danger">
+
+                            {{ form.description.errors }}
+
+                        </small>
+
+                    </div>
+                                        <!-- HOD -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-semibold">
+
+                            Head of Department
+
+                        </label>
+
+                        {{ form.hod }}
+
+                        <small class="text-danger">
+
+                            {{ form.hod.errors }}
+
+                        </small>
+
+                    </div>
+
+
+                    <!-- HOD Joining Date -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-semibold">
+
+                            HOD Joining Date
+
+                        </label>
+
+                        {{ form.hod_joining_date }}
+
+                        <small class="text-danger">
+
+                            {{ form.hod_joining_date.errors }}
+
+                        </small>
+
+                    </div>
+
+
+                    <!-- Office Phone -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-semibold">
+
+                            Office Phone
+
+                        </label>
+
+                        {{ form.office_phone }}
+
+                        <small class="text-danger">
+
+                            {{ form.office_phone.errors }}
+
+                        </small>
+
+                    </div>
+
+
+                    <!-- Office Email -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-semibold">
+
+                            Office Email
+
+                        </label>
+
+                        {{ form.office_email }}
+
+                        <small class="text-danger">
+
+                            {{ form.office_email.errors }}
+
+                        </small>
+
+                    </div>
+
+
+                    <!-- Building -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-semibold">
+
+                            Building
+
+                        </label>
+
+                        {{ form.building }}
+
+                        <small class="text-danger">
+
+                            {{ form.building.errors }}
+
+                        </small>
+
+                    </div>
+
+
+                    <!-- Status -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-semibold">
+
+                            Status
+
+                        </label>
+
+                        {{ form.status }}
+
+                        <small class="text-danger">
+
+                            {{ form.status.errors }}
+
+                        </small>
+
+                    </div>
+
+
+                    <!-- Total Faculty -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-semibold">
+
+                            Total Faculty
+
+                        </label>
+
+                        {{ form.total_faculty }}
+
+                        <small class="text-danger">
+
+                            {{ form.total_faculty.errors }}
+
+                        </small>
+
+                    </div>
+
+
+                    <!-- Total Students -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-semibold">
+
+                            Total Students
+
+                        </label>
+
+                        {{ form.total_students }}
+
+                        <small class="text-danger">
+
+                            {{ form.total_students.errors }}
+
+                        </small>
+
+                    </div>
+
+
+                    <!-- Logo Upload -->
+
+                    <div class="col-md-12 mb-4">
+
+                        <label class="form-label fw-semibold">
+
+                            Department Logo
+
+                        </label>
+
+
+                        {{ form.logo }}
+
+
+                        <small class="text-danger d-block">
+
+                            {{ form.logo.errors }}
+
+                        </small>
+
+
+                        <div class="mt-3">
+
+                            {% if department.logo %}
+
+                                <img id="logoPreview"
+                                     src="{{ department.logo.url }}"
+                                     width="120"
+                                     height="120"
+                                     class="rounded border"
+                                     style="object-fit:cover;">
+
+                            {% else %}
+
+                                <img id="logoPreview"
+                                     src="{% static 'images/department.png' %}"
+                                     width="120"
+                                     height="120"
+                                     class="rounded border"
+                                     style="object-fit:cover;">
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+                                        <!-- ACTION BUTTONS -->
+
+                    <div class="col-12">
+
+                        <hr>
+
+                        <div class="d-flex justify-content-end gap-2">
+
+                            <a href="{% url 'department_detail' department.id %}"
+                               class="btn btn-secondary">
+
+                                <i class="fas fa-times me-1"></i>
+
+                                Cancel
+
+                            </a>
+
+
+                            <button type="reset"
+                                    class="btn btn-outline-primary">
+
+                                <i class="fas fa-rotate-left me-1"></i>
+
+                                Reset
+
+                            </button>
+
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+
+                                <i class="fas fa-save me-1"></i>
+
+                                Update Department
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ============================= -->
+<!-- LOGO PREVIEW SCRIPT -->
+<!-- ============================= -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+
+    const input = document.getElementById("id_logo");
+
+    const preview = document.getElementById("logoPreview");
+
+
+    if(input){
+
+        input.addEventListener(
+            "change",
+            function(){
+
+                if(this.files && this.files[0]){
+
+
+                    const reader = new FileReader();
+
+
+                    reader.onload = function(e){
+
+                        preview.src = e.target.result;
+
+                    };
+
+
+                    reader.readAsDataURL(
+                        this.files[0]
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+});
+
+
+</script>
+
+
+{% endblock %}
