@@ -45,7 +45,7 @@
                             {% endif %}
                         </div>
                         <h4 class="fw-bold mb-1 text-dark">{{ top.student.full_name }}</h4>
-                        <p class="text-muted mb-2">{{ top.student.department.name }} • Roll: {{ top.student.roll_no }}</p>
+                        <p class="text-muted mb-2">{% if top.student.department %}{{ top.student.department.name }}{% else %}N/A{% endif %} • Roll: {{ top.student.roll_no }}</p>
                         
                         <div class="bg-light p-3 rounded mb-3">
                             <div class="d-flex justify-content-around">

@@ -682,3 +682,40 @@
 /*=========================
             END
 ==========================*/
+
+/* Additional Collapsed Sidebar Helpers */
+.sidebar.collapsed .sidebar-nav a span,
+.sidebar.collapsed .sidebar-nav li span {
+    display: none !important;
+}
+
+.sidebar.collapsed .sidebar-nav a {
+    justify-content: center;
+    padding: 12px 0;
+    margin: 4px 8px;
+    text-align: center;
+}
+
+.sidebar.collapsed .sidebar-nav a i {
+    margin: 0 !important;
+    font-size: 1.25rem;
+}
+
+.sidebar.collapsed .admin-profile {
+    padding: 10px 5px;
+    text-align: center;
+}
+
+.sidebar.collapsed .admin-profile .profile-image img {
+    width: 42px;
+    height: 42px;
+}
+
+.sidebar.collapsed .menu-heading {
+    display: none !important;
+}
+
+.sidebar-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}

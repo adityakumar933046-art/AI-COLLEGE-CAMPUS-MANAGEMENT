@@ -5,6 +5,8 @@ from courses import views as course_views
 from timetable import views as timetable_views
 
 urlpatterns = [
+    path('analytics/', views.academic_analytics, name='academic_analytics'),
+    path('reports/', views.academic_reports, name='academic_reports'),
     path("api/analytics/", views.analytics_api, name="analytics_api"),
     path("", views.dashboard_redirect, name="dashboard_redirect"),
     path("", views.dashboard_redirect, name="home"),

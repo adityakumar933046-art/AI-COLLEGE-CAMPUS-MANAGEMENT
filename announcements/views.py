@@ -1,3 +1,11 @@
+def clean_query_param(val):
+    if val is None:
+        return None
+    val_str = str(val).strip()
+    if val_str.lower() in ("", "none", "null", "undefined"):
+        return None
+    return val_str
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -57,7 +65,7 @@ def announcement_list(request):
                 announcements = announcements.filter(target="ALL")
 
     # Search Filter
-    search = request.GET.get("search")
+    search = clean_query_param(request.GET.get("search"))
     if search:
         announcements = announcements.filter(
             Q(title__icontains=search) |
@@ -67,11 +75,11 @@ def announcement_list(request):
             Q(created_by__last_name__icontains=search)
         )
 
-    category = request.GET.get("category")
+    category = clean_query_param(request.GET.get("category"))
     if category:
         announcements = announcements.filter(category=category)
 
-    priority = request.GET.get("priority")
+    priority = clean_query_param(request.GET.get("priority"))
     if priority:
         announcements = announcements.filter(priority=priority)
 
@@ -182,3 +190,25 @@ def my_announcements(request):
 @login_required
 def public_announcements(request):
     return redirect("announcement_list")
+
+
+# ==========================================
+# MARK NOTIFICATION READ & MARK ALL READ
+# ==========================================
+@login_required
+def mark_as_read(request, pk):
+    announcement = get_object_or_404(Announcement, pk=pk)
+    AnnouncementRead.objects.get_or_create(announcement=announcement, user=request.user)
+    messages.success(request, "Notification marked as read.")
+    return redirect(request.META.get("HTTP_REFERER", "announcement_list"))
+
+
+@login_required
+def mark_all_as_read(request):
+    user = request.user
+    now = timezone.now()
+    qs = Announcement.objects.filter(status="PUBLISHED", publish_at__lte=now)
+    for ann in qs:
+        AnnouncementRead.objects.get_or_create(announcement=ann, user=user)
+    messages.success(request, "All notifications marked as read.")
+    return redirect(request.META.get("HTTP_REFERER", "announcement_list"))

@@ -105,14 +105,10 @@ def create_student(data, created_by=None):
             ),
 
 
-            batch=data.get(
-                "batch"
-            ),
+            batch=data.get("batch") or "2026",
 
 
-            academic_year=data.get(
-                "academic_year"
-            ),
+            academic_year=data.get("academic_year") or "2026-2027",
 
 
             admission_date=data.get(
@@ -132,9 +128,7 @@ def create_student(data, created_by=None):
             ),
 
 
-            gender=data.get(
-                "gender"
-            ),
+            gender=data.get("gender") or "",
 
 
             date_of_birth=data.get(
@@ -142,46 +136,30 @@ def create_student(data, created_by=None):
             ),
 
 
-            blood_group=data.get(
-                "blood_group"
-            ),
+            blood_group=data.get("blood_group") or "",
 
 
 
-            father_name=data.get(
-                "father_name"
-            ),
+            father_name=data.get("father_name") or "",
 
 
-            mother_name=data.get(
-                "mother_name"
-            ),
+            mother_name=data.get("mother_name") or "",
 
 
-            guardian_phone=data.get(
-                "guardian_phone"
-            ),
+            guardian_phone=data.get("guardian_phone") or "",
 
 
 
-            address=data.get(
-                "address"
-            ),
+            address=data.get("address") or "",
 
 
-            city=data.get(
-                "city"
-            ),
+            city=data.get("city") or "",
 
 
-            state=data.get(
-                "state"
-            ),
+            state=data.get("state") or "",
 
 
-            pincode=data.get(
-                "pincode"
-            ),
+            pincode=data.get("pincode") or "",
 
 
 

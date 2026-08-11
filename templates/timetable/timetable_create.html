@@ -78,9 +78,17 @@
                         <label class="form-label fw-semibold">End Time</label>
                         {{ form.end_time }}
                     </div>
-                    <div class="col-md-6">
+                                        <div class="col-md-6">
                         <label class="form-label fw-semibold">Classroom / Laboratory</label>
                         {{ form.classroom }}
+                    </div>
+                    <div class="col-md-6 d-flex align-items-center">
+                        <div class="form-check mt-4">
+                            {{ form.is_active }}
+                            <label class="form-check-label fw-semibold" for="{{ form.is_active.id_for_label }}">
+                                Active Slot
+                            </label>
+                        </div>
                     </div>
                 </div>
 

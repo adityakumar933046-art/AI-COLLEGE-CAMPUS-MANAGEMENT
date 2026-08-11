@@ -231,7 +231,7 @@ Teacher Attendance
 
     <td>
 
-        {{ student.department.name }}
+        {% if student.department %}{{ student.department.name }}{% else %}N/A{% endif %}
 
     </td>
 

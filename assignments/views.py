@@ -1,3 +1,11 @@
+def clean_query_param(val):
+    if val is None:
+        return None
+    val_str = str(val).strip()
+    if val_str.lower() in ("", "none", "null", "undefined"):
+        return None
+    return val_str
+
 import os
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -40,7 +48,7 @@ def assignment_list(request):
         except StudentProfile.DoesNotExist:
             assignments = Assignment.objects.none()
 
-    search = request.GET.get("search")
+    search = clean_query_param(request.GET.get("search"))
     if search:
         assignments = assignments.filter(
             Q(title__icontains=search) |
@@ -51,9 +59,9 @@ def assignment_list(request):
             Q(teacher__user__last_name__icontains=search)
         )
 
-    course_id = request.GET.get("course")
-    if course_id:
-        assignments = assignments.filter(course_id=course_id)
+    course_id = clean_query_param(request.GET.get("course") or request.GET.get("course_id"))
+    if course_id and course_id.isdigit():
+        assignments = assignments.filter(course_id=int(course_id))
 
     assignments = assignments.distinct().order_by("due_date", "-created_at")
 
@@ -238,8 +246,9 @@ def submission_list(request):
             assignment__teacher=teacher
         )
 
-    if assignment_id:
-        submissions = submissions.filter(assignment_id=assignment_id)
+    assignment_id = clean_query_param(assignment_id)
+    if assignment_id and assignment_id.isdigit():
+        submissions = submissions.filter(assignment_id=int(assignment_id))
 
     submissions = submissions.order_by("-submitted_at")
 
@@ -279,3 +288,82 @@ def update_marks(request, pk):
         form = AssignmentMarksForm(instance=submission)
 
     return render(request, "assignments/update_marks.html", {"form": form, "submission": submission})
+
+
+# ==========================================
+# EXPORT ASSIGNMENTS EXCEL & CSV
+# ==========================================
+import csv
+from openpyxl import Workbook
+from django.http import HttpResponse
+
+
+@login_required
+def export_assignments_excel(request):
+    assignments = Assignment.objects.select_related("course", "teacher", "teacher__user").all()
+
+    if request.user.role == "TEACHER" and hasattr(request.user, "teacher_profile"):
+        assignments = assignments.filter(teacher=request.user.teacher_profile)
+    elif request.user.role == "STUDENT" and hasattr(request.user, "student_profile"):
+        st = request.user.student_profile
+        assignments = assignments.filter(course__department=st.department, course__semester=st.semester)
+
+    course_id = clean_query_param(request.GET.get("course"))
+    if course_id and course_id.isdigit():
+        assignments = assignments.filter(course_id=int(course_id))
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Academic Assignments"
+
+    ws.append(["Assignment Title", "Course Code", "Course Name", "Faculty", "Total Marks", "Due Date", "Created Date"])
+
+    for a in assignments.order_by("-due_date"):
+        ws.append([
+            a.title,
+            a.course.code if a.course else "N/A",
+            a.course.name if a.course else "N/A",
+            a.teacher.full_name if a.teacher else "Faculty Member",
+            a.total_marks,
+            a.due_date.strftime("%Y-%m-%d %H:%M") if a.due_date else "N/A",
+            a.created_at.strftime("%Y-%m-%d") if a.created_at else "N/A",
+        ])
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="academic_assignments_report.xlsx"'
+    wb.save(response)
+    return response
+
+
+@login_required
+def export_assignments_csv(request):
+    assignments = Assignment.objects.select_related("course", "teacher", "teacher__user").all()
+
+    if request.user.role == "TEACHER" and hasattr(request.user, "teacher_profile"):
+        assignments = assignments.filter(teacher=request.user.teacher_profile)
+    elif request.user.role == "STUDENT" and hasattr(request.user, "student_profile"):
+        st = request.user.student_profile
+        assignments = assignments.filter(course__department=st.department, course__semester=st.semester)
+
+    course_id = clean_query_param(request.GET.get("course"))
+    if course_id and course_id.isdigit():
+        assignments = assignments.filter(course_id=int(course_id))
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="academic_assignments_report.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(["Assignment Title", "Course Code", "Course Name", "Faculty", "Total Marks", "Due Date", "Created Date"])
+
+    for a in assignments.order_by("-due_date"):
+        writer.writerow([
+            a.title,
+            a.course.code if a.course else "N/A",
+            a.course.name if a.course else "N/A",
+            a.teacher.full_name if a.teacher else "Faculty Member",
+            a.total_marks,
+            a.due_date.strftime("%Y-%m-%d %H:%M") if a.due_date else "N/A",
+            a.created_at.strftime("%Y-%m-%d") if a.created_at else "N/A",
+        ])
+
+    return response

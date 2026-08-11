@@ -1,3 +1,11 @@
+def clean_query_param(val):
+    if val is None:
+        return None
+    val_str = str(val).strip()
+    if val_str.lower() in ("", "none", "null", "undefined"):
+        return None
+    return val_str
+
 from accounts.decorators import admin_required
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -106,6 +114,7 @@ def teacher_list(request):
         "user",
         "department",
     ).all()
+    
 
     search = request.GET.get(
         "search",
@@ -236,10 +245,7 @@ def add_teacher(request):
                 ""
             ).strip().lower()
 
-            data["password"] = request.POST.get(
-                "password",
-                ""
-            )
+
 
             try:
 

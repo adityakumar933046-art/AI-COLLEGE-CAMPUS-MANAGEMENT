@@ -95,7 +95,7 @@
                             <tr>
                                 <td><span class="badge bg-secondary">{{ student.roll_no }}</span></td>
                                 <td><strong>{{ student.full_name }}</strong></td>
-                                <td>{{ student.department.short_name|default:student.department.name }}</td>
+                                <td>{% if student.department %}{{ student.department.short_name|default:student.department.name }}{% else %}<span class="text-muted">N/A</span>{% endif %}</td>
                                 <td>Semester {{ student.semester }}</td>
                                 <td><span class="badge bg-info text-white">Sec {{ student.section|default:"A" }}</span></td>
                                 <td>{{ student.email|default:"N/A" }}</td>

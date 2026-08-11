@@ -1,3 +1,11 @@
+def clean_query_param(val):
+    if val is None:
+        return None
+    val_str = str(val).strip()
+    if val_str.lower() in ("", "none", "null", "undefined"):
+        return None
+    return val_str
+
 from results.models import Result
 from timetable.models import Timetable
 from notes.models import Note

@@ -87,13 +87,13 @@ def create_teacher(data, created_by=None):
         defaults={"employee_id": employee_id}
     )
     teacher.employee_id = employee_id
-    teacher.designation = data.get("designation")
+    teacher.designation = data.get("designation") or "Assistant Professor"
     teacher.department = data.get("department")
-    teacher.qualification = data.get("qualification")
-    teacher.specialization = data.get("specialization")
+    teacher.qualification = data.get("qualification") or ""
+    teacher.specialization = data.get("specialization") or ""
     teacher.experience = data.get("experience", 0)
     teacher.employment_type = data.get("employment_type", "FULL_TIME")
-    teacher.phone = data.get("phone")
+    teacher.phone = data.get("phone") or ""
     teacher.gender = data.get("gender", "")
     teacher.date_of_birth = data.get("date_of_birth")
     teacher.blood_group = data.get("blood_group", "")

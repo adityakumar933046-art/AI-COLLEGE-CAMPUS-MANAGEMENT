@@ -88,7 +88,7 @@
                                 <td><span class="badge bg-secondary">{{ teacher.employee_id }}</span></td>
                                 <td><strong>{{ teacher.full_name }}</strong></td>
                                 <td>{{ teacher.designation|default:"Faculty" }}</td>
-                                <td>{{ teacher.department.short_name|default:teacher.department.name }}</td>
+                                <td>{% if teacher.department %}{{ teacher.department.short_name|default:teacher.department.name }}{% else %}<span class="text-muted">N/A</span>{% endif %}</td>
                                 <td><span class="badge bg-light text-dark border">{{ teacher.office_room|default:"N/A" }}</span></td>
                                 <td>{{ teacher.email|default:"N/A" }}</td>
                                 <td>

@@ -59,3 +59,13 @@ class AssignmentMarksForm(forms.ModelForm):
             "marks": forms.NumberInput(attrs={"class": "form-control", "min": 0}),
             "feedback": forms.Textarea(attrs={"class": "form-control", "rows": 4, "placeholder": "Enter grading feedback..."}),
         }
+
+    def clean_marks(self):
+        marks = self.cleaned_data.get("marks")
+        if marks is not None:
+            total = self.instance.assignment.total_marks if self.instance and self.instance.assignment else 100
+            if marks < 0:
+                raise forms.ValidationError("Marks cannot be negative.")
+            if marks > total:
+                raise forms.ValidationError(f"Marks cannot exceed total marks for this assignment ({total}).")
+        return marks

@@ -1,3 +1,6 @@
+from departments.models import Department
+from courses.models import Course
+from teachers.models import TeacherProfile
 from django import forms
 from django.core.exceptions import ValidationError
 
@@ -9,6 +12,16 @@ from .models import Timetable
 # ==========================================================
 
 class TimetableForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["department"].queryset = Department.objects.all().order_by("name")
+        self.fields["department"].empty_label = "-- Select Department --"
+        self.fields["course"].queryset = Course.objects.all().order_by("name")
+        self.fields["course"].empty_label = "-- Select Course --"
+        self.fields["teacher"].queryset = TeacherProfile.objects.select_related("user").all()
+        self.fields["teacher"].empty_label = "-- Select Faculty --"
+        self.fields["is_active"].initial = True
+
 
     class Meta:
 
@@ -226,6 +239,13 @@ class TimetableImportForm(forms.Form):
 # ==========================================================
 
 class TimetableFilterForm(forms.Form):
+    department = forms.ModelChoiceField(
+        queryset=Department.objects.all().order_by("name"),
+        required=False,
+        empty_label="All Departments",
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+
 
     search = forms.CharField(
 

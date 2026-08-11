@@ -2,7 +2,7 @@
 <aside id="sidebar" class="sidebar">
     <div class="sidebar-header">
         <a href="{% url 'teacher_dashboard' %}" class="logo">
-            <div class="logo-icon"><i class="bi bi-person-workspace"></i></div>
+            <div class="logo-icon"><i class="bi bi-mortarboard-fill"></i></div>
             <div class="logo-text">
                 <h4>Smart Campus</h4>
                 <small>Faculty Portal</small>
@@ -21,12 +21,12 @@
         </div>
         <div class="profile-info">
             <h6>{{ request.user.get_full_name|default:request.user.username }}</h6>
-            <span class="badge bg-primary">Faculty Member</span>
+            <span class="badge bg-success">Teacher</span>
         </div>
     </div>
 
-    <nav class="sidebar-nav">
-        <ul>
+    <nav class="sidebar-nav d-flex flex-column flex-grow-1">
+        <ul class="d-flex flex-column flex-grow-1 mb-0 list-unstyled">
             <!-- MAIN -->
             <li class="menu-heading">MAIN</li>
             <li>
@@ -36,8 +36,8 @@
                 </a>
             </li>
 
-            <!-- TEACHING & CLASSES -->
-            <li class="menu-heading">TEACHING & CLASSES</li>
+            <!-- TEACHING -->
+            <li class="menu-heading">TEACHING</li>
             <li>
                 <a href="{% url 'teacher_courses' %}" class="{% if request.resolver_match.url_name == 'teacher_courses' %}active{% endif %}">
                     <i class="bi bi-journal-bookmark-fill"></i>
@@ -47,13 +47,13 @@
             <li>
                 <a href="{% url 'teacher_timetable' %}" class="{% if request.resolver_match.url_name == 'teacher_timetable' %}active{% endif %}">
                     <i class="bi bi-calendar3"></i>
-                    <span>My Timetable</span>
+                    <span>Timetable Schedule</span>
                 </a>
             </li>
             <li>
                 <a href="{% url 'attendance_session_list' %}" class="{% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="bi bi-calendar-check-fill"></i>
-                    <span>Attendance Registers</span>
+                    <span>Attendance Sessions</span>
                 </a>
             </li>
             <li>
@@ -63,6 +63,21 @@
                 </a>
             </li>
             <li>
+                <a href="{% url 'result_list' %}" class="{% if 'result' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-bar-chart-line-fill"></i>
+                    <span>Academic Results</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'my_exam_duties' %}" class="{% if request.resolver_match.url_name == 'my_exam_duties' %}active{% endif %}">
+                    <i class="bi bi-card-checklist"></i>
+                    <span>Invigilation Duties</span>
+                </a>
+            </li>
+
+            <!-- MATERIALS & REPORTS -->
+            <li class="menu-heading">MATERIALS & REPORTS</li>
+            <li>
                 <a href="{% url 'assignment_list' %}" class="{% if 'assignment' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="bi bi-journal-text"></i>
                     <span>Assignments</span>
@@ -71,18 +86,24 @@
             <li>
                 <a href="{% url 'teacher_notes' %}" class="{% if 'note' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="bi bi-file-earmark-text-fill"></i>
-                    <span>Study Materials</span>
+                    <span>Study Notes</span>
                 </a>
             </li>
             <li>
-                <a href="{% url 'result_list' %}" class="{% if 'result' in request.resolver_match.url_name %}active{% endif %}">
-                    <i class="bi bi-bar-chart-line-fill"></i>
-                    <span>Exam Results</span>
+                <a href="{% url 'academic_reports' %}" class="{% if request.resolver_match.url_name == 'academic_reports' %}active{% endif %}">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    <span>Academic Reports</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'academic_analytics' %}" class="{% if request.resolver_match.url_name == 'academic_analytics' %}active{% endif %}">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Analytics</span>
                 </a>
             </li>
 
-            <!-- ACADEMIC & NOTICES -->
-            <li class="menu-heading">ACADEMIC & NOTICES</li>
+            <!-- COMMUNICATION & LEAVE -->
+            <li class="menu-heading">COMMUNICATION & LEAVE</li>
             <li>
                 <a href="{% url 'announcement_list' %}" class="{% if 'announcement' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="bi bi-megaphone-fill"></i>
@@ -95,9 +116,15 @@
                     <span>Academic Calendar</span>
                 </a>
             </li>
+            <li>
+                <a href="{% url 'teacher_leave_list' %}" class="{% if request.resolver_match.url_name == 'teacher_leave_list' or request.resolver_match.url_name == 'leave_detail' %}active{% endif %}">
+                    <i class="bi bi-calendar-minus"></i>
+                    <span>Student Leave Requests</span>
+                </a>
+            </li>
 
-            <!-- ACCOUNT -->
-            <li class="menu-heading">ACCOUNT</li>
+            <!-- ACCOUNT (PUSHED TO BOTTOM) -->
+            <li class="menu-heading mt-auto">ACCOUNT</li>
             <li>
                 <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
                     <i class="bi bi-person-circle"></i>

@@ -54,13 +54,10 @@ class Assignment(models.Model):
 class AssignmentSubmission(models.Model):
 
     STATUS_CHOICES = (
-
         ("PENDING", "Pending"),
-
         ("SUBMITTED", "Submitted"),
-
         ("LATE", "Late"),
-
+        ("GRADED", "Graded"),
     )
 
     assignment = models.ForeignKey(
@@ -107,15 +104,11 @@ class AssignmentSubmission(models.Model):
         ]
 
     def save(self, *args, **kwargs):
-
-        if self.assignment.due_date < timezone.now().date():
-
-            self.status = "LATE"
-
-        else:
-
-            self.status = "SUBMITTED"
-
+        if self.status != "GRADED":
+            if self.assignment.due_date < timezone.now().date():
+                self.status = "LATE"
+            else:
+                self.status = "SUBMITTED"
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi bi-card-checklist me-2 text-primary"></i>Academic Examinations</h3>
+            <p class="text-muted mb-0">Create, schedule, publish, and manage institutional examination sessions.</p>
+        </div>
+        <div>
+            <a href="{% url 'exam_create' %}" class="btn btn-primary shadow-sm"><i class="bi bi-plus-lg me-1"></i>Create Examination</a>
+        </div>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Search by exam name..." value="{{ search|default:'' }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">All Statuses</option>
+                        <option value="DRAFT" {% if status_filter == 'DRAFT' %}selected{% endif %}>Draft</option>
+                        <option value="PUBLISHED" {% if status_filter == 'PUBLISHED' %}selected{% endif %}>Published</option>
+                        <option value="COMPLETED" {% if status_filter == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                        <option value="CANCELLED" {% if status_filter == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="exam_type" class="form-select form-select-sm">
+                        <option value="">All Types</option>
+                        <option value="INTERNAL" {% if type_filter == 'INTERNAL' %}selected{% endif %}>Internal Exam</option>
+                        <option value="MID_TERM" {% if type_filter == 'MID_TERM' %}selected{% endif %}>Mid-Term Exam</option>
+                        <option value="END_SEMESTER" {% if type_filter == 'END_SEMESTER' %}selected{% endif %}>End-Semester Exam</option>
+                        <option value="PRACTICAL" {% if type_filter == 'PRACTICAL' %}selected{% endif %}>Practical Exam</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-search me-1"></i>Filter</button>
+                    <a href="{% url 'exam_list' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x-lg"></i></a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Exam Table -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-0">
+            {% if exams %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Exam Name</th>
+                            <th>Type</th>
+                            <th>Department</th>
+                            <th>Semester</th>
+                            <th>Dates</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in exams %}
+                        <tr>
+                            <td class="fw-bold text-dark">{{ e.name }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ e.get_exam_type_display }}</span></td>
+                            <td>{{ e.department.name }}</td>
+                            <td>Semester {{ e.semester }}</td>
+                            <td>{{ e.start_date|date:"d M" }} - {{ e.end_date|date:"d M Y" }}</td>
+                            <td>
+                                {% if e.status == 'PUBLISHED' %}
+                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Published</span>
+                                {% elif e.status == 'DRAFT' %}
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-pencil me-1"></i>Draft</span>
+                                {% elif e.status == 'COMPLETED' %}
+                                    <span class="badge bg-info text-dark">Completed</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'exam_detail' e.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye me-1"></i>View & Schedule</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="p-5 text-center text-muted">
+                <i class="bi bi-card-heading display-4 mb-3 d-block"></i>
+                <h5>No academic examinations found.</h5>
+                <p class="mb-3">Click below to create a new examination session.</p>
+                <a href="{% url 'exam_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Create Examination</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -40,6 +40,7 @@ urlpatterns = [
     path('results/', include('results.urls')),
 
     path('leaves/', include('leaves.urls')),
+    path('exams/', include('exams.urls')),
 
     path('notes/', include('notes.urls')),
 

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi bi-calendar-event me-2 text-primary"></i>My Examination Schedule</h3>
+            <p class="text-muted mb-0">Official timetable, timing, and room allocations for your published examinations.</p>
+        </div>
+    </div>
+
+    <!-- Schedules Table -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-0">
+            {% if schedules %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Examination</th>
+                            <th>Course</th>
+                            <th>Date</th>
+                            <th>Timing</th>
+                            <th>Room</th>
+                            <th>Invigilator</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in schedules %}
+                        <tr>
+                            <td class="fw-bold text-dark">{{ s.exam.name }}</td>
+                            <td>
+                                <span class="fw-bold text-primary d-block">{{ s.course.code }}</span>
+                                <small class="text-muted">{{ s.course.name }}</small>
+                            </td>
+                            <td class="fw-bold">{{ s.date|date:"d M Y" }}</td>
+                            <td>{{ s.start_time|time:"H:i" }} - {{ s.end_time|time:"H:i" }}</td>
+                            <td><span class="badge bg-primary px-3 py-2 fs-6"><i class="bi bi-door-open me-1"></i>{{ s.room }}</span></td>
+                            <td class="small text-muted">{{ s.invigilator.full_name|default:"Unassigned" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="p-5 text-center text-muted">
+                <i class="bi bi-calendar-check display-4 mb-3 d-block"></i>
+                <h5>No upcoming published examinations scheduled for your section.</h5>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- Header Banner -->
+    <div class="card border-0 bg-primary text-white shadow-sm mb-4 rounded-3">
+        <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="bi bi-file-earmark-bar-graph me-2"></i>Academic Reports & Export Center</h2>
+                <p class="mb-0 text-white-50">Generate, analyze, and export real-time academic records across all institutional modules.</p>
+            </div>
+            <div>
+                <span class="badge bg-white text-primary px-3 py-2 fs-6 shadow-sm"><i class="bi bi-shield-check me-1"></i>Verified ERP Database</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Overview Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100 p-3 bg-light">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="p-3 bg-primary text-white rounded-circle fs-4"><i class="bi bi-people"></i></div>
+                    <div>
+                        <h6 class="text-muted mb-0 small text-uppercase">Students</h6>
+                        <h4 class="fw-bold mb-0">{{ total_students }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100 p-3 bg-light">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="p-3 bg-success text-white rounded-circle fs-4"><i class="bi bi-person-badge"></i></div>
+                    <div>
+                        <h6 class="text-muted mb-0 small text-uppercase">Faculty</h6>
+                        <h4 class="fw-bold mb-0">{{ total_teachers }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100 p-3 bg-light">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="p-3 bg-info text-white rounded-circle fs-4"><i class="bi bi-journal-bookmark"></i></div>
+                    <div>
+                        <h6 class="text-muted mb-0 small text-uppercase">Courses</h6>
+                        <h4 class="fw-bold mb-0">{{ total_courses }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100 p-3 bg-light">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="p-3 bg-warning text-dark rounded-circle fs-4"><i class="bi bi-award"></i></div>
+                    <div>
+                        <h6 class="text-muted mb-0 small text-uppercase">Results Recorded</h6>
+                        <h4 class="fw-bold mb-0">{{ total_results }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Grid -->
+    <div class="row g-4">
+
+        <!-- 1. Attendance Reports Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2 text-primary">
+                            <i class="bi bi-calendar-check fs-3"></i>
+                            <h5 class="fw-bold mb-0">Attendance Reports</h5>
+                        </div>
+                        <p class="text-muted small">Course-wise, session-wise, date-filtered attendance records and defaulters (< 75%) reports.</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <a href="{% url 'attendance_list' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye me-1"></i>View Sessions</a>
+                        <a href="{% url 'export_attendance_excel' %}" class="btn btn-sm btn-success"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+                        <a href="{% url 'export_attendance_csv' %}" class="btn btn-sm btn-secondary"><i class="bi bi-file-earmark-text me-1"></i>CSV</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Academic Results Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2 text-success">
+                            <i class="bi bi-trophy fs-3"></i>
+                            <h5 class="fw-bold mb-0">Academic Results</h5>
+                        </div>
+                        <p class="text-muted small">Examination grades, SGPA, CGPA calculations, semester marksheets, and merit lists.</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <a href="{% url 'result_list' %}" class="btn btn-sm btn-outline-success"><i class="bi bi-eye me-1"></i>View Results</a>
+                        <a href="{% url 'export_results_excel' %}" class="btn btn-sm btn-success"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+                        <a href="{% url 'export_results_csv' %}" class="btn btn-sm btn-secondary"><i class="bi bi-file-earmark-text me-1"></i>CSV</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Student Roster Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2 text-info">
+                            <i class="bi bi-people fs-3"></i>
+                            <h5 class="fw-bold mb-0">Student Roster Report</h5>
+                        </div>
+                        <p class="text-muted small">Complete student profiles, roll numbers, department, semester, and section rosters.</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <a href="{% url 'student_list' %}" class="btn btn-sm btn-outline-info"><i class="bi bi-eye me-1"></i>View Roster</a>
+                        <a href="{% url 'export_students_excel' %}" class="btn btn-sm btn-success"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+                        <a href="{% url 'export_students_csv' %}" class="btn btn-sm btn-secondary"><i class="bi bi-file-earmark-text me-1"></i>CSV</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Faculty Report Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2 text-warning">
+                            <i class="bi bi-person-badge fs-3"></i>
+                            <h5 class="fw-bold mb-0">Faculty Directory</h5>
+                        </div>
+                        <p class="text-muted small">Teacher directory, assigned departments, courses taught, and contact details.</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <a href="{% url 'teacher_list' %}" class="btn btn-sm btn-outline-warning text-dark"><i class="bi bi-eye me-1"></i>View Directory</a>
+                        <a href="{% url 'export_teachers_excel' %}" class="btn btn-sm btn-success"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+                        <a href="{% url 'export_teachers_csv' %}" class="btn btn-sm btn-secondary"><i class="bi bi-file-earmark-text me-1"></i>CSV</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Course Catalog Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2 text-danger">
+                            <i class="bi bi-journal-text fs-3"></i>
+                            <h5 class="fw-bold mb-0">Course Catalog</h5>
+                        </div>
+                        <p class="text-muted small">Academic course codes, credits, department allocation, and assigned faculty members.</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <a href="{% url 'course_list' %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-eye me-1"></i>View Courses</a>
+                        <a href="{% url 'export_courses_excel' %}" class="btn btn-sm btn-success"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+                        <a href="{% url 'export_courses_csv' %}" class="btn btn-sm btn-secondary"><i class="bi bi-file-earmark-text me-1"></i>CSV</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Timetable Schedule Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2 text-dark">
+                            <i class="bi bi-clock-history fs-3"></i>
+                            <h5 class="fw-bold mb-0">Timetable Schedule</h5>
+                        </div>
+                        <p class="text-muted small">Class schedules, classroom allocations, days, times, and faculty teaching assignments.</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <a href="{% url 'timetable_list' %}" class="btn btn-sm btn-outline-dark"><i class="bi bi-eye me-1"></i>View Schedule</a>
+                        <a href="{% url 'export_timetable_excel' %}" class="btn btn-sm btn-success"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+                        <a href="{% url 'export_timetable_csv' %}" class="btn btn-sm btn-secondary"><i class="bi bi-file-earmark-text me-1"></i>CSV</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Assignments & Homework Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2 text-primary">
+                            <i class="bi bi-file-earmark-check fs-3"></i>
+                            <h5 class="fw-bold mb-0">Assignments Report</h5>
+                        </div>
+                        <p class="text-muted small">Academic assignments, total marks, due dates, and faculty submission status.</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <a href="{% url 'assignment_list' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye me-1"></i>View Assignments</a>
+                        <a href="{% url 'export_assignments_excel' %}" class="btn btn-sm btn-success"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+                        <a href="{% url 'export_assignments_csv' %}" class="btn btn-sm btn-secondary"><i class="bi bi-file-earmark-text me-1"></i>CSV</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. Academic Calendar Events Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2 text-secondary">
+                            <i class="bi bi-calendar-event fs-3"></i>
+                            <h5 class="fw-bold mb-0">Academic Calendar</h5>
+                        </div>
+                        <p class="text-muted small">Institutional academic events, exam schedules, holidays, and workshops.</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <a href="{% url 'calendar' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye me-1"></i>View Calendar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

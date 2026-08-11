@@ -13,7 +13,7 @@
                 <i class="bi bi-calendar3 text-primary me-2"></i>
                 My Weekly Timetable
             </h3>
-            <p class="text-muted mb-0">Lecture routine enrolled for {{ student.department.name }} • Semester {{ student.semester }}</p>
+            <p class="text-muted mb-0">Lecture routine enrolled for {% if student.department %}{{ student.department.name }}{% else %}General{% endif %} • Semester {{ student.semester }}</p>
         </div>
         <div>
             <button onclick="window.print()" class="btn btn-primary">
@@ -33,7 +33,7 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 bg-success text-white p-3">
                 <h6 class="text-white-50 mb-1">Academic Department</h6>
-                <h4 class="fw-bold mb-0">{{ student.department.short_name|default:student.department.name }}</h4>
+                <h4 class="fw-bold mb-0">{% if student.department %}{{ student.department.short_name|default:student.department.name }}{% else %}N/A{% endif %}</h4>
             </div>
         </div>
         <div class="col-md-3">

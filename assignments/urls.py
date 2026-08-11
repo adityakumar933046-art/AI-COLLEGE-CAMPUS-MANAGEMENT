@@ -2,6 +2,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('export/excel/', views.export_assignments_excel, name='export_assignments_excel'),
+    path('export/csv/', views.export_assignments_csv, name='export_assignments_csv'),
+
 
     # ==========================
     # Assignment

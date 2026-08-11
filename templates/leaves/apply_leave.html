@@ -1,110 +1,96 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Apply Leave{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
 
 {% block content %}
-
-<div class="container mt-4">
-
+<div class="container-fluid py-4">
     <div class="row justify-content-center">
-
         <div class="col-lg-8">
-
-            <div class="card shadow">
-
-                <div class="card-header bg-primary text-white">
-
-                    <h3 class="mb-0">
-                        Apply Leave
-                    </h3>
-
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-file-earmark-plus me-2"></i>Apply for Academic Leave</h5>
                 </div>
-
-                <div class="card-body">
-
-                    {% if messages %}
-
-                        {% for message in messages %}
-
-                            <div class="alert alert-{{ message.tags }}">
-                                {{ message }}
-                            </div>
-
-                        {% endfor %}
-
-                    {% endif %}
-
-                    <form method="POST" enctype="multipart/form-data">
-
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
 
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                From Date
-                            </label>
-
-                            {{ form.from_date }}
-
-                        </div>
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                To Date
-                            </label>
-
-                            {{ form.to_date }}
-
-                        </div>
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                Leave Reason
-                            </label>
-
-                            {{ form.reason }}
-
-                        </div>
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                Medical Certificate (Optional)
-                            </label>
-
-                            {{ form.medical_certificate }}
-
-                            <div class="form-text">
-                                Upload PDF, JPG, JPEG or PNG (Maximum 5 MB)
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger shadow-sm rounded-3">
+                                {% for error in form.non_field_errors %}
+                                    <p class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>{{ error }}</p>
+                                {% endfor %}
                             </div>
+                        {% endif %}
 
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Leave Type <span class="text-danger">*</span></label>
+                            {{ form.leave_type }}
+                            {% if form.leave_type.errors %}
+                                <div class="text-danger small mt-1">{{ form.leave_type.errors.0 }}</div>
+                            {% endif %}
                         </div>
 
-                        <div class="d-flex justify-content-between">
-
-                            <a href="{% url 'my_leaves' %}" class="btn btn-secondary">
-                                Cancel
-                            </a>
-
-                            <button type="submit" class="btn btn-primary">
-                                Submit Leave
-                            </button>
-
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Start Date <span class="text-danger">*</span></label>
+                                {{ form.from_date }}
+                                {% if form.from_date.errors %}
+                                    <div class="text-danger small mt-1">{{ form.from_date.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">End Date <span class="text-danger">*</span></label>
+                                {{ form.to_date }}
+                                {% if form.to_date.errors %}
+                                    <div class="text-danger small mt-1">{{ form.to_date.errors.0 }}</div>
+                                {% endif %}
+                            </div>
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Reason for Leave <span class="text-danger">*</span></label>
+                            {{ form.reason }}
+                            {% if form.reason.errors %}
+                                <div class="text-danger small mt-1">{{ form.reason.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Medical Certificate <span id="cert_req_label" class="text-danger">* (Required for Medical Leave)</span></label>
+                            {{ form.medical_certificate }}
+                            <div class="form-text">Accepted formats: PDF, JPG, JPEG, PNG (Max 5 MB).</div>
+                            {% if form.medical_certificate.errors %}
+                                <div class="text-danger small mt-1">{{ form.medical_certificate.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <a href="{% url 'my_leaves' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back to My Leaves</a>
+                            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-send me-1"></i>Submit Leave Application</button>
+                        </div>
                     </form>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
 </div>
 
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const typeSelect = document.getElementById("id_leave_type");
+    const certLabel = document.getElementById("cert_req_label");
+    if (typeSelect && certLabel) {
+        function toggleReq() {
+            if (typeSelect.value === "MEDICAL") {
+                certLabel.style.display = "inline";
+            } else {
+                certLabel.style.display = "none";
+            }
+        }
+        typeSelect.addEventListener("change", toggleReq);
+        toggleReq();
+    }
+});
+</script>
 {% endblock %}

@@ -1,3 +1,11 @@
+def clean_query_param(val):
+    if val is None:
+        return None
+    val_str = str(val).strip()
+    if val_str.lower() in ("", "none", "null", "undefined"):
+        return None
+    return val_str
+
 import os
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -44,7 +52,7 @@ def note_list(request):
             notes = Note.objects.none()
 
     # Search Filter
-    search = request.GET.get("search")
+    search = clean_query_param(request.GET.get("search"))
     if search:
         notes = notes.filter(
             Q(title__icontains=search) |
@@ -56,11 +64,11 @@ def note_list(request):
             Q(teacher__user__last_name__icontains=search)
         )
 
-    course_id = request.GET.get("course")
-    if course_id:
-        notes = notes.filter(course_id=course_id)
+    course_id = clean_query_param(request.GET.get("course") or request.GET.get("course_id"))
+    if course_id and course_id.isdigit():
+        notes = notes.filter(course_id=int(course_id))
 
-    material_type = request.GET.get("material_type")
+    material_type = clean_query_param(request.GET.get("material_type"))
     if material_type:
         notes = notes.filter(material_type=material_type)
 
@@ -137,6 +145,10 @@ def note_create(request):
             note.save()
             messages.success(request, "Academic study material uploaded successfully.")
             return redirect("note_list")
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
         form = NoteForm(user=user)
 
@@ -208,7 +220,8 @@ def download_note(request, pk):
             return redirect("note_list")
 
     if not note.file or not os.path.exists(note.file.path):
-        raise Http404("File not found.")
+        messages.warning(request, "The requested study material file is no longer available on disk.")
+        return redirect("note_detail", pk=pk)
 
     # Increment Download Count
     note.download_count += 1

@@ -45,7 +45,7 @@
                             <tr>
                                 <td><strong class="text-dark">{{ item.student.full_name }}</strong></td>
                                 <td><span class="badge bg-secondary">{{ item.student.roll_no }}</span></td>
-                                <td>{{ item.student.department.short_name|default:item.student.department.name }}</td>
+                                <td>{% if item.student.department %}{{ item.student.department.short_name|default:item.student.department.name }}{% else %}<span class="text-muted">N/A</span>{% endif %}</td>
                                 <td>{{ item.total }}</td>
                                 <td><span class="text-success fw-bold">{{ item.present }}</span></td>
                                 <td><strong class="text-danger fs-6">{{ item.percentage }}%</strong></td>

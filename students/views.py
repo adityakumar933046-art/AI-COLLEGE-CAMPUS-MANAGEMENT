@@ -1,3 +1,13 @@
+import csv
+from openpyxl import Workbook
+def clean_query_param(val):
+    if val is None:
+        return None
+    val_str = str(val).strip()
+    if val_str.lower() in ("", "none", "null", "undefined"):
+        return None
+    return val_str
+
 from accounts.decorators import admin_required
 from django.shortcuts import (
     render,
@@ -29,7 +39,7 @@ from .forms import (
 from .services import (
     create_student,
     update_student,
-    delete_student,
+    delete_student as delete_student_service,
 
     activate_student,
     deactivate_student,
@@ -61,6 +71,7 @@ def student_list(request):
     ).order_by(
         "roll_no"
     )
+    
 
 
     search = request.GET.get(
@@ -423,9 +434,7 @@ def delete_student(request, pk):
     if request.method == "POST":
 
 
-        result = delete_student(
-            student
-        )
+        result = delete_student_service(student)
 
 
         if result["success"]:
@@ -945,33 +954,107 @@ def download_sample_excel(request):
 # EXPORT STUDENTS EXCEL
 # ==========================================================
 
-@staff_member_required
+# ==========================================================
+# EXPORT STUDENTS EXCEL & CSV
+# ==========================================================
+
 @login_required
 def export_students_excel(request):
+    students = StudentProfile.objects.select_related("user", "department").all()
+    
 
+    dept = clean_query_param(request.GET.get("department"))
+    if dept and dept.isdigit():
+        students = students.filter(department_id=int(dept))
 
-    file = export_students_excel()
+    sem = clean_query_param(request.GET.get("semester"))
+    if sem and sem.isdigit():
+        students = students.filter(semester=int(sem))
 
+    sec = clean_query_param(request.GET.get("section"))
+    if sec:
+        students = students.filter(section__iexact=sec)
 
-    response = HttpResponse(
+    search = clean_query_param(request.GET.get("search"))
+    if search:
+        students = students.filter(
+            Q(user__first_name__icontains=search) |
+            Q(user__last_name__icontains=search) |
+            Q(roll_no__icontains=search) |
+            Q(user__email__icontains=search)
+        )
 
-        file,
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Students Roster"
 
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    ws.append(["Roll Number", "First Name", "Last Name", "Email", "Department", "Semester", "Section", "Gender", "Phone Number"])
 
-    )
+    for s in students.order_by("roll_no"):
+        ws.append([
+            s.roll_no,
+            s.user.first_name if s.user else "",
+            s.user.last_name if s.user else "",
+            s.user.email if s.user else "",
+            s.department.name if s.department else "N/A",
+            s.semester,
+            s.section,
+            s.gender,
+            getattr(s, 'phone', getattr(s, 'phone_number', '')),
+        ])
 
-
-    response[
-        "Content-Disposition"
-    ] = 'attachment; filename="Students.xlsx"'
-
-
-
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="student_roster_report.xlsx"'
+    wb.save(response)
     return response
 
 
+@login_required
+def export_students_csv(request):
+    students = StudentProfile.objects.select_related("user", "department").all()
+    
 
+    dept = clean_query_param(request.GET.get("department"))
+    if dept and dept.isdigit():
+        students = students.filter(department_id=int(dept))
+
+    sem = clean_query_param(request.GET.get("semester"))
+    if sem and sem.isdigit():
+        students = students.filter(semester=int(sem))
+
+    sec = clean_query_param(request.GET.get("section"))
+    if sec:
+        students = students.filter(section__iexact=sec)
+
+    search = clean_query_param(request.GET.get("search"))
+    if search:
+        students = students.filter(
+            Q(user__first_name__icontains=search) |
+            Q(user__last_name__icontains=search) |
+            Q(roll_no__icontains=search) |
+            Q(user__email__icontains=search)
+        )
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="student_roster_report.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(["Roll Number", "First Name", "Last Name", "Email", "Department", "Semester", "Section", "Gender", "Phone Number"])
+
+    for s in students.order_by("roll_no"):
+        writer.writerow([
+            s.roll_no,
+            s.user.first_name if s.user else "",
+            s.user.last_name if s.user else "",
+            s.user.email if s.user else "",
+            s.department.name if s.department else "N/A",
+            s.semester,
+            s.section,
+            s.gender,
+            getattr(s, 'phone', getattr(s, 'phone_number', '')),
+        ])
+
+    return response
 
 
 # ==========================================================

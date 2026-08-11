@@ -1,3 +1,11 @@
+def clean_query_param(val):
+    if val is None:
+        return None
+    val_str = str(val).strip()
+    if val_str.lower() in ("", "none", "null", "undefined"):
+        return None
+    return val_str
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -42,55 +50,31 @@ def timetable_list(request):
         is_active=True
     )
 
-    search = request.GET.get("search")
-
+    search = clean_query_param(request.GET.get("search"))
     if search:
-
         timetables = timetables.filter(
-
             Q(course__name__icontains=search) |
-
             Q(course__code__icontains=search) |
-
             Q(teacher__user__first_name__icontains=search) |
-
             Q(teacher__user__last_name__icontains=search) |
-
             Q(classroom__icontains=search)
-
         )
 
-    department = request.GET.get("department")
+    department = clean_query_param(request.GET.get("department"))
+    if department and department.isdigit():
+        timetables = timetables.filter(department_id=int(department))
 
-    if department:
+    semester = clean_query_param(request.GET.get("semester"))
+    if semester and semester.isdigit():
+        timetables = timetables.filter(semester=int(semester))
 
-        timetables = timetables.filter(
-            department_id=department
-        )
-
-    semester = request.GET.get("semester")
-
-    if semester:
-
-        timetables = timetables.filter(
-            semester=semester
-        )
-
-    section = request.GET.get("section")
-
+    section = clean_query_param(request.GET.get("section"))
     if section:
+        timetables = timetables.filter(section__iexact=section)
 
-        timetables = timetables.filter(
-            section=section
-        )
-
-    day = request.GET.get("day")
-
+    day = clean_query_param(request.GET.get("day"))
     if day:
-
-        timetables = timetables.filter(
-            day=day
-        )
+        timetables = timetables.filter(day__iexact=day)
 
     paginator = Paginator(
         timetables.order_by(
@@ -119,6 +103,8 @@ def timetable_list(request):
         "section": section,
 
         "day": day,
+
+        "departments": Department.objects.all().order_by("name"),
 
         "filter_form": TimetableFilterForm(request.GET),
 
@@ -164,8 +150,6 @@ def timetable_detail(request, pk):
 
 @login_required
 @admin_required
-@login_required
-@admin_required
 def timetable_create(request):
     if request.method == "POST":
         form = TimetableForm(request.POST)
@@ -186,11 +170,15 @@ def timetable_create(request):
             elif Timetable.objects.filter(department=dept, semester=sem, section=sec, day=day, start_time=start_time).exists():
                 messages.error(request, f"Schedule Conflict: {dept.name} Sem {sem} Sec {sec} is already scheduled on {day} at {start_time}.")
             else:
-                form.save()
+                tt_instance = form.save(commit=False)
+                tt_instance.is_active = True
+                tt_instance.save()
                 messages.success(request, "Timetable slot created successfully.")
                 return redirect("timetable_list")
         else:
-            messages.error(request, "Please correct the errors below.")
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
         form = TimetableForm()
 

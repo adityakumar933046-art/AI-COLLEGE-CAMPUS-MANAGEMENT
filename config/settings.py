@@ -26,7 +26,9 @@ if env_file.exists():
             line = line.strip()
             if line and not line.startswith('#') and '=' in line:
                 key, value = line.split('=', 1)
-                os.environ.setdefault(key.strip(), value.strip())
+                k_clean = key.strip()
+                v_clean = value.strip().strip('"').strip("'")
+                os.environ[k_clean] = v_clean
 
 
 # Quick-start development settings - unsuitable for production
@@ -58,7 +60,8 @@ INSTALLED_APPS = [
     'courses',
     'attendance',
     'assignments',
-    'leaves','departments',
+    'leaves',
+    'exams','departments',
     'results',
     'notes',
     'announcements',
@@ -167,8 +170,8 @@ EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() in ("true", "1", "yes")
 
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "adityakumar933046@gmail.com")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "").strip().strip('"').strip("'").replace(" ", "").replace("-", "")
 
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "no-reply@smartcampus.edu")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "adityakumar933046@gmail.com")
 SITE_URL = os.getenv("SITE_URL", "http://127.0.0.1:8000")

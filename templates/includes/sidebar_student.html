@@ -25,8 +25,8 @@
         </div>
     </div>
 
-    <nav class="sidebar-nav">
-        <ul>
+    <nav class="sidebar-nav d-flex flex-column flex-grow-1">
+        <ul class="d-flex flex-column flex-grow-1 mb-0 list-unstyled">
             <!-- MAIN -->
             <li class="menu-heading">MAIN</li>
             <li>
@@ -75,23 +75,35 @@
                 </a>
             </li>
             <li>
+                <a href="{% url 'my_exams' %}" class="{% if request.resolver_match.url_name == 'my_exams' %}active{% endif %}">
+                    <i class="bi bi-card-checklist"></i>
+                    <span>My Exams</span>
+                </a>
+            </li>
+            <li>
                 <a href="{% url 'calendar' %}" class="{% if request.resolver_match.url_name == 'calendar' %}active{% endif %}">
                     <i class="bi bi-calendar-event-fill"></i>
                     <span>Academic Calendar</span>
                 </a>
             </li>
 
-            <!-- COMMUNICATION -->
-            <li class="menu-heading">COMMUNICATION</li>
+            <!-- COMMUNICATION & LEAVE -->
+            <li class="menu-heading">COMMUNICATION & LEAVE</li>
             <li>
                 <a href="{% url 'student_announcements' %}" class="{% if 'announcement' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="bi bi-megaphone-fill"></i>
                     <span>Announcements</span>
                 </a>
             </li>
+            <li>
+                <a href="{% url 'my_leaves' %}" class="{% if request.resolver_match.url_name == 'my_leaves' or request.resolver_match.url_name == 'apply_leave' or request.resolver_match.url_name == 'leave_detail' %}active{% endif %}">
+                    <i class="bi bi-calendar-minus"></i>
+                    <span>My Leaves</span>
+                </a>
+            </li>
 
-            <!-- ACCOUNT -->
-            <li class="menu-heading">ACCOUNT</li>
+            <!-- ACCOUNT (PUSHED TO BOTTOM) -->
+            <li class="menu-heading mt-auto">ACCOUNT</li>
             <li>
                 <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
                     <i class="bi bi-person-circle"></i>

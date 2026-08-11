@@ -13,7 +13,7 @@
                 <i class="bi bi-journal-bookmark-fill text-primary me-2"></i>
                 My Enrolled Courses
             </h3>
-            <p class="text-muted mb-0">Academic curriculum enrolled for {{ student.department.name }} • Semester {{ student.semester }}</p>
+            <p class="text-muted mb-0">Academic curriculum enrolled for {% if student.department %}{{ student.department.name }}{% else %}General{% endif %} • Semester {{ student.semester }}</p>
         </div>
         <div>
             <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill">
@@ -40,7 +40,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-white-50 mb-1">Academic Department</h6>
-                        <h4 class="fw-bold mb-0">{{ student.department.short_name|default:student.department.name }}</h4>
+                        <h4 class="fw-bold mb-0">{% if student.department %}{{ student.department.short_name|default:student.department.name }}{% else %}N/A{% endif %}</h4>
                     </div>
                     <i class="bi bi-building fs-1 text-white-50"></i>
                 </div>

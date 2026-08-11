@@ -33,7 +33,7 @@
             </div>
             <div class="col-md-6">
                 <table class="table table-sm table-borderless mb-0">
-                    <tr><th width="140" class="text-muted">Department:</th><td>{{ student.department.name }}</td></tr>
+                    <tr><th width="140" class="text-muted">Department:</th><td>{% if student.department %}{{ student.department.name }}{% else %}N/A{% endif %}</td></tr>
                     <tr><th class="text-muted">Semester / Section:</th><td>Semester {{ semester }} (Sec {{ student.section|default:"A" }})</td></tr>
                     <tr><th class="text-muted">Academic Batch:</th><td>{{ student.batch|default:"2026" }}</td></tr>
                 </table>

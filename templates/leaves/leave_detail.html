@@ -1,91 +1,128 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
 
-{% block title %}Leave Details{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
 
 {% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3 mb-4">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-file-earmark-text me-2 text-primary"></i>Leave Application Details</h5>
+                    <div>
+                        {% if leave.status == 'APPROVED' %}
+                            <span class="badge bg-success px-3 py-2 fs-6"><i class="bi bi-check-circle me-1"></i>Approved</span>
+                        {% elif leave.status == 'PENDING' %}
+                            <span class="badge bg-warning text-dark px-3 py-2 fs-6"><i class="bi bi-clock me-1"></i>Pending Review</span>
+                        {% elif leave.status == 'REJECTED' %}
+                            <span class="badge bg-danger px-3 py-2 fs-6"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+                        {% else %}
+                            <span class="badge bg-secondary px-3 py-2 fs-6">Cancelled</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body p-4">
 
-<div class="container mt-4">
+                    <!-- Applicant Information -->
+                    <div class="row g-3 mb-4 p-3 bg-light rounded-3">
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase d-block fw-bold">Applicant Student</small>
+                            <h6 class="fw-bold text-dark mb-0">{{ leave.applicant.get_full_name }} ({{ leave.applicant.username }})</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase d-block fw-bold">Leave Type</small>
+                            <h6 class="fw-bold text-primary mb-0">{{ leave.get_leave_type_display }}</h6>
+                        </div>
+                    </div>
 
-    <div class="card shadow">
+                    <!-- Date Range -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 text-center">
+                                <small class="text-muted text-uppercase d-block">Start Date</small>
+                                <h5 class="fw-bold mb-0 text-dark">{{ leave.from_date|date:"d F Y" }}</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 text-center">
+                                <small class="text-muted text-uppercase d-block">End Date</small>
+                                <h5 class="fw-bold mb-0 text-dark">{{ leave.to_date|date:"d F Y" }}</h5>
+                            </div>
+                        </div>
+                    </div>
 
-        <div class="card-header bg-primary text-white">
+                    <!-- Reason -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-dark mb-2">Reason for Leave</h6>
+                        <div class="p-3 bg-white border rounded-3">
+                            <p class="mb-0 text-secondary" style="white-space: pre-line;">{{ leave.reason }}</p>
+                        </div>
+                    </div>
 
-            <h3>Leave Details</h3>
+                    <!-- Medical Certificate Attachment -->
+                    {% if leave.medical_certificate %}
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-dark mb-2">Uploaded Medical Certificate</h6>
+                        <div class="d-flex align-items-center justify-content-between p-3 border border-info rounded-3 bg-light">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-file-earmark-medical text-info fs-3"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-0 text-dark">{{ leave.medical_certificate.name }}</h6>
+                                    <small class="text-muted">Verified Medical Document</small>
+                                </div>
+                            </div>
+                            <a href="{% url 'download_certificate' leave.id %}" class="btn btn-info text-white" target="_blank"><i class="bi bi-download me-1"></i>Download Document</a>
+                        </div>
+                    </div>
+                    {% endif %}
 
+                    <!-- Reviewer & Remarks -->
+                    {% if leave.reviewed_by or leave.remarks %}
+                    <div class="mb-4 p-3 bg-light border-start border-4 border-primary rounded-3">
+                        <h6 class="fw-bold text-dark mb-1">Review Remarks</h6>
+                        {% if leave.reviewed_by %}
+                            <small class="text-muted d-block mb-2">Reviewed by: {{ leave.reviewed_by.get_full_name }}</small>
+                        {% endif %}
+                        <p class="mb-0 text-dark">{{ leave.remarks|default:"No remarks recorded." }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Review Action Buttons for Faculty/Admin -->
+                    {% if can_review and leave.status == 'PENDING' %}
+                    <div class="card border-primary mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="fw-bold mb-0"><i class="bi bi-check2-square me-2"></i>Faculty Review & Decision</h6>
+                        </div>
+                        <div class="card-body p-3">
+                            <form method="post" action="{% url 'approve_leave' leave.id %}" class="mb-3">
+                                {% csrf_token %}
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold">Approval Remarks (Optional):</label>
+                                    <input type="text" name="remarks" class="form-control form-control-sm" placeholder="e.g. Approved for academic absence.">
+                                </div>
+                                <button type="submit" class="btn btn-success btn-sm w-100"><i class="bi bi-check-circle me-1"></i>Approve Leave Application</button>
+                            </form>
+                            <hr>
+                            <form method="post" action="{% url 'reject_leave' leave.id %}">
+                                {% csrf_token %}
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold text-danger">Rejection Reason (Required): <span class="text-danger">*</span></label>
+                                    <input type="text" name="remarks" class="form-control form-control-sm" placeholder="e.g. Medical certificate incomplete." required>
+                                </div>
+                                <button type="submit" class="btn btn-danger btn-sm w-100"><i class="bi bi-x-circle me-1"></i>Reject Leave Application</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{{ request.META.HTTP_REFERER|default:'/leave/my/' }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+                    </div>
+
+                </div>
+            </div>
         </div>
-
-        <div class="card-body">
-
-            <table class="table table-bordered">
-
-                <tr>
-
-                    <th width="220">Applicant</th>
-
-                    <td>{{ leave.applicant.get_full_name }}</td>
-
-                </tr>
-
-                <tr>
-
-                    <th>From Date</th>
-
-                    <td>{{ leave.from_date }}</td>
-
-                </tr>
-
-                <tr>
-
-                    <th>To Date</th>
-
-                    <td>{{ leave.to_date }}</td>
-
-                </tr>
-
-                <tr>
-
-                    <th>Status</th>
-
-                    <td>{{ leave.status }}</td>
-
-                </tr>
-
-                <tr>
-
-                    <th>Reason</th>
-
-                    <td>{{ leave.reason }}</td>
-
-                </tr>
-
-                <tr>
-
-                    <th>Remarks</th>
-
-                    <td>{{ leave.remarks }}</td>
-
-                </tr>
-
-                <tr>
-
-                    <th>Applied At</th>
-
-                    <td>{{ leave.applied_at }}</td>
-
-                </tr>
-
-            </table>
-
-            <a href="{% url 'my_leaves' %}" class="btn btn-secondary">
-
-                Back
-
-            </a>
-
-        </div>
-
     </div>
-
 </div>
-
 {% endblock %}

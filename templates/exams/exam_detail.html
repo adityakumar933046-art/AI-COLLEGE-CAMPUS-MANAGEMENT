@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- Banner Header -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <span class="badge bg-light text-primary border mb-2 px-3 py-1 fw-bold">{{ exam.get_exam_type_display }}</span>
+                <h3 class="fw-bold mb-1 text-dark">{{ exam.name }}</h3>
+                <p class="text-muted mb-0"><i class="bi bi-building me-1"></i>{{ exam.department.name }} &bull; Semester {{ exam.semester }} &bull; <i class="bi bi-calendar-event me-1"></i>{{ exam.start_date|date:"d M Y" }} to {{ exam.end_date|date:"d M Y" }}</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap align-items-center">
+                {% if exam.status == 'PUBLISHED' %}
+                    <span class="badge bg-success px-3 py-2 fs-6"><i class="bi bi-check-circle me-1"></i>Published</span>
+                {% elif exam.status == 'DRAFT' %}
+                    <span class="badge bg-warning text-dark px-3 py-2 fs-6"><i class="bi bi-pencil me-1"></i>Draft</span>
+                {% elif exam.status == 'CANCELLED' %}
+                    <span class="badge bg-danger px-3 py-2 fs-6">Cancelled</span>
+                {% else %}
+                    <span class="badge bg-info text-dark px-3 py-2 fs-6">Completed</span>
+                {% endif %}
+
+                {% if is_admin %}
+                    {% if exam.status == 'DRAFT' %}
+                        <a href="{% url 'exam_publish' exam.id %}" class="btn btn-success shadow-sm" onclick="return confirm('Publish examination schedule to students?');"><i class="bi bi-megaphone me-1"></i>Publish Schedule</a>
+                    {% endif %}
+                    {% if exam.status != 'CANCELLED' %}
+                        <a href="{% url 'exam_cancel' exam.id %}" class="btn btn-outline-danger" onclick="return confirm('Cancel this examination?');"><i class="bi bi-x-circle me-1"></i>Cancel Exam</a>
+                    {% endif %}
+                    <a href="{% url 'exam_update' exam.id %}" class="btn btn-outline-secondary"><i class="bi bi-pencil me-1"></i>Edit</a>
+                    <a href="{% url 'export_exam_schedule_excel' exam.id %}" class="btn btn-sm btn-outline-success"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedules Table Card -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history text-primary me-2"></i>Course Schedule Slots</h5>
+            {% if is_admin %}
+                <a href="{% url 'schedule_create' exam.id %}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Schedule Slot</a>
+            {% endif %}
+        </div>
+        <div class="card-body p-0">
+            {% if schedules %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Course Code & Name</th>
+                            <th>Date</th>
+                            <th>Timing</th>
+                            <th>Room</th>
+                            <th>Section</th>
+                            <th>Invigilator</th>
+                            {% if is_admin %}<th class="text-end">Actions</th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in schedules %}
+                        <tr>
+                            <td>
+                                <span class="fw-bold text-dark d-block">{{ s.course.code }}</span>
+                                <small class="text-muted">{{ s.course.name }}</small>
+                            </td>
+                            <td class="fw-bold">{{ s.date|date:"d M Y" }}</td>
+                            <td>{{ s.start_time|time:"H:i" }} - {{ s.end_time|time:"H:i" }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ s.room }}</span></td>
+                            <td>Section {{ s.section }}</td>
+                            <td>
+                                {% if s.invigilator %}
+                                    <span class="text-dark font-semibold"><i class="bi bi-person-badge me-1"></i>{{ s.invigilator.full_name }}</span>
+                                {% else %}
+                                    <span class="text-muted small">Unassigned</span>
+                                {% endif %}
+                            </td>
+                            {% if is_admin %}
+                            <td class="text-end">
+                                <a href="{% url 'schedule_update' s.id %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                                <a href="{% url 'schedule_delete' s.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete schedule slot?');"><i class="bi bi-trash"></i></a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="p-5 text-center text-muted">
+                <i class="bi bi-calendar-x display-4 mb-3 d-block"></i>
+                <h5>No course schedule slots added yet.</h5>
+                {% if is_admin %}
+                    <a href="{% url 'schedule_create' exam.id %}" class="btn btn-primary mt-2"><i class="bi bi-plus-lg me-1"></i>Add First Schedule Slot</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

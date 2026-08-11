@@ -1,3 +1,11 @@
+def clean_query_param(val):
+    if val is None:
+        return None
+    val_str = str(val).strip()
+    if val_str.lower() in ("", "none", "null", "undefined"):
+        return None
+    return val_str
+
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -132,7 +140,7 @@ def analytics_api(request):
 
         dept_labels = []
         dept_data = []
-        for d in Department.objects.annotate(std_cnt=Count("student_profile")):
+        for d in Department.objects.annotate(std_cnt=Count("students")):
             dept_labels.append(d.short_name or d.name)
             dept_data.append(d.std_cnt)
 
@@ -272,7 +280,7 @@ def dashboard_calendar(request):
         status="PUBLISHED", publish_at__lte=now
     )
 
-    category_filter = request.GET.get("category")
+    category_filter = clean_query_param(request.GET.get("category"))
     calendar_events = []
 
     # Custom Admin Events
@@ -438,3 +446,47 @@ def student_leaves(request):
 def student_announcements(request):
     from announcements.views import announcement_list
     return announcement_list(request)
+
+
+# ==========================================
+# CENTRAL ACADEMIC REPORTS HUB
+# ==========================================
+from students.models import StudentProfile
+from teachers.models import TeacherProfile
+from courses.models import Course
+from attendance.models import AttendanceSession
+from results.models import Result
+from assignments.models import Assignment
+from timetable.models import Timetable
+from notes.models import Note
+
+
+@login_required
+def academic_reports(request):
+    user = request.user
+
+    context = {
+        "title": "Academic Reports & Data Export Center",
+        "total_students": StudentProfile.objects.count(),
+        "total_teachers": TeacherProfile.objects.count(),
+        "total_courses": Course.objects.filter(status="ACTIVE").count(),
+        "total_attendance_sessions": AttendanceSession.objects.count(),
+        "total_results": Result.objects.count(),
+        "total_assignments": Assignment.objects.count(),
+        "total_timetables": Timetable.objects.filter(is_active=True).count(),
+        "total_notes": Note.objects.filter(status="PUBLISHED").count(),
+    }
+    return render(request, "dashboard/academic_reports.html", context)
+
+
+# ==========================================
+# ADVANCED ACADEMIC ANALYTICS DASHBOARD PAGE
+# ==========================================
+@login_required
+def academic_analytics(request):
+    user = request.user
+    context = {
+        "title": "Academic Performance & Analytics Dashboard",
+        "role": user.role,
+    }
+    return render(request, "dashboard/academic_analytics.html", context)

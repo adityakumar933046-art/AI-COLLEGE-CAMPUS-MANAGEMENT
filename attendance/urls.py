@@ -25,7 +25,8 @@ urlpatterns = [
     path(
         "",
         views.attendance_session_list,
-        name="attendance_session_list",
+        name="attendance_session_list"),
+    path("list/", views.attendance_session_list, name="attendance_list"
     ),
 
     path(

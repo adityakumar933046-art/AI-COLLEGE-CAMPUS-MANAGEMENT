@@ -5,7 +5,7 @@
             <div class="logo-icon"><i class="bi bi-mortarboard-fill"></i></div>
             <div class="logo-text">
                 <h4>Smart Campus</h4>
-                <small>Administrator</small>
+                <small>Admin Portal</small>
             </div>
         </a>
         <button id="sidebarToggle" class="sidebar-toggle"><i class="bi bi-list"></i></button>
@@ -21,12 +21,12 @@
         </div>
         <div class="profile-info">
             <h6>{{ request.user.get_full_name|default:request.user.username }}</h6>
-            <span class="badge bg-primary">Administrator</span>
+            <span class="badge bg-danger">Administrator</span>
         </div>
     </div>
 
-    <nav class="sidebar-nav">
-        <ul>
+    <nav class="sidebar-nav d-flex flex-column flex-grow-1">
+        <ul class="d-flex flex-column flex-grow-1 mb-0 list-unstyled">
             <!-- MAIN -->
             <li class="menu-heading">MAIN</li>
             <li>
@@ -37,7 +37,7 @@
             </li>
 
             <!-- ACADEMIC MANAGEMENT -->
-            <li class="menu-heading">ACADEMIC MANAGEMENT</li>
+            <li class="menu-heading">ACADEMICS</li>
             <li>
                 <a href="{% url 'student_list' %}" class="{% if 'student' in request.resolver_match.url_name and 'dashboard' not in request.resolver_match.url_name %}active{% endif %}">
                     <i class="bi bi-people-fill"></i>
@@ -52,7 +52,7 @@
             </li>
             <li>
                 <a href="{% url 'department_list' %}" class="{% if 'department' in request.resolver_match.url_name %}active{% endif %}">
-                    <i class="bi bi-building-fill"></i>
+                    <i class="bi bi-building"></i>
                     <span>Departments</span>
                 </a>
             </li>
@@ -77,12 +77,18 @@
             <li>
                 <a href="{% url 'result_list' %}" class="{% if 'result' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="bi bi-bar-chart-line-fill"></i>
-                    <span>Examination Results</span>
+                    <span>Results</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'exam_list' %}" class="{% if request.resolver_match.url_name == 'exam_list' or request.resolver_match.url_name == 'exam_detail' %}active{% endif %}">
+                    <i class="bi bi-card-checklist"></i>
+                    <span>Examinations</span>
                 </a>
             </li>
 
-            <!-- ACADEMIC CONTENT -->
-            <li class="menu-heading">ACADEMIC CONTENT</li>
+            <!-- MATERIALS & REPORTS -->
+            <li class="menu-heading">MATERIALS & REPORTS</li>
             <li>
                 <a href="{% url 'assignment_list' %}" class="{% if 'assignment' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="bi bi-journal-text"></i>
@@ -96,6 +102,21 @@
                 </a>
             </li>
             <li>
+                <a href="{% url 'academic_reports' %}" class="{% if request.resolver_match.url_name == 'academic_reports' %}active{% endif %}">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    <span>Academic Reports</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'academic_analytics' %}" class="{% if request.resolver_match.url_name == 'academic_analytics' %}active{% endif %}">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Analytics</span>
+                </a>
+            </li>
+
+            <!-- COMMUNICATION & LEAVE -->
+            <li class="menu-heading">COMMUNICATION & LEAVE</li>
+            <li>
                 <a href="{% url 'announcement_list' %}" class="{% if 'announcement' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="bi bi-megaphone-fill"></i>
                     <span>Announcements</span>
@@ -104,12 +125,18 @@
             <li>
                 <a href="{% url 'calendar' %}" class="{% if request.resolver_match.url_name == 'calendar' %}active{% endif %}">
                     <i class="bi bi-calendar-event-fill"></i>
-                    <span>Academic Calendar</span>
+                    <span>Calendar</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'leave_list' %}" class="{% if request.resolver_match.url_name == 'leave_list' or request.resolver_match.url_name == 'leave_detail' %}active{% endif %}">
+                    <i class="bi bi-calendar-minus"></i>
+                    <span>Leave Management</span>
                 </a>
             </li>
 
-            <!-- ACCOUNT -->
-            <li class="menu-heading">ACCOUNT</li>
+            <!-- ACCOUNT (PUSHED TO BOTTOM) -->
+            <li class="menu-heading mt-auto">ACCOUNT</li>
             <li>
                 <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
                     <i class="bi bi-person-circle"></i>
@@ -134,7 +161,7 @@
     <div class="sidebar-footer">
         <div class="text-center">
             <h6 class="mb-1">Smart Campus ERP</h6>
-            <small class="text-muted">Administrator Portal</small>
+            <small class="text-muted">Admin Portal</small>
             <hr class="my-2">
             <small class="text-secondary">&copy; 2026 Smart Campus</small>
         </div>

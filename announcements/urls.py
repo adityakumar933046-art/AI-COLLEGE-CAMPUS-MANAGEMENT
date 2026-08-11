@@ -2,6 +2,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('<int:pk>/mark-read/', views.mark_as_read, name='mark_as_read'),
+    path('mark-all-read/', views.mark_all_as_read, name='mark_all_as_read'),
+
 
     # ==========================================
     # ANNOUNCEMENT LIST

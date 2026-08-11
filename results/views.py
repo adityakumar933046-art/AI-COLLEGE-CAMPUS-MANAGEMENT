@@ -1,3 +1,11 @@
+def clean_query_param(val):
+    if val is None:
+        return None
+    val_str = str(val).strip()
+    if val_str.lower() in ("", "none", "null", "undefined"):
+        return None
+    return val_str
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -33,14 +41,24 @@ def result_list(request):
     if request.user.role == "TEACHER" and hasattr(request.user, "teacher_profile"):
         results = results.filter(teacher=request.user.teacher_profile)
 
-    semester_filter = request.GET.get("semester")
-    course_filter = request.GET.get("course")
-    search = request.GET.get("search", "")
+    def clean_query_param(val):
+        if val is None:
+            return None
+        val_str = str(val).strip()
+        if val_str.lower() in ("", "none", "null", "undefined"):
+            return None
+        return val_str
 
-    if semester_filter:
-        results = results.filter(semester=semester_filter)
-    if course_filter:
-        results = results.filter(course_id=course_filter)
+    semester_filter = clean_query_param(request.GET.get("semester"))
+    course_filter = clean_query_param(request.GET.get("course"))
+    search = clean_query_param(request.GET.get("search"))
+
+    if semester_filter and semester_filter.isdigit():
+        results = results.filter(semester=int(semester_filter))
+
+    if course_filter and course_filter.isdigit():
+        results = results.filter(course_id=int(course_filter))
+
     if search:
         results = results.filter(
             Q(student__user__first_name__icontains=search) |
@@ -92,7 +110,9 @@ def result_create(request):
             messages.success(request, "Result entry recorded successfully.")
             return redirect("result_list")
         else:
-            messages.error(request, "Please correct the errors below.")
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
         form = ResultForm()
         if request.user.role == "TEACHER" and hasattr(request.user, "teacher_profile"):
@@ -273,3 +293,103 @@ def toppers(request):
             "title": "Academic Toppers & Merit List",
         },
     )
+
+
+# ==========================================
+# EXPORT RESULTS EXCEL & CSV
+# ==========================================
+import csv
+from openpyxl import Workbook
+from django.http import HttpResponse
+
+
+def clean_query_param(val):
+    if val is None:
+        return None
+    val_str = str(val).strip()
+    if val_str.lower() in ("", "none", "null", "undefined"):
+        return None
+    return val_str
+
+
+@login_required
+def export_results_excel(request):
+    results = Result.objects.select_related("student", "student__user", "course", "teacher", "teacher__user").all()
+    
+    if request.user.role == "TEACHER" and hasattr(request.user, "teacher_profile"):
+        results = results.filter(teacher=request.user.teacher_profile)
+    elif request.user.role == "STUDENT" and hasattr(request.user, "student_profile"):
+        results = results.filter(student=request.user.student_profile)
+
+    sem = clean_query_param(request.GET.get("semester"))
+    if sem and sem.isdigit():
+        results = results.filter(semester=int(sem))
+
+    course_id = clean_query_param(request.GET.get("course"))
+    if course_id and course_id.isdigit():
+        results = results.filter(course_id=int(course_id))
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Academic Results"
+
+    ws.append(["Student Name", "Roll No", "Course Code", "Course Name", "Semester", "Exam Type", "Marks Obtained", "Total Marks", "Grade", "Grade Point"])
+
+    for r in results.order_by("semester", "student__roll_no"):
+        ws.append([
+            r.student.user.get_full_name() if r.student and r.student.user else "N/A",
+            r.student.roll_no if r.student else "N/A",
+            r.course.code if r.course else "N/A",
+            r.course.name if r.course else "N/A",
+            r.semester,
+            r.exam_type,
+            r.marks_obtained,
+            r.total_marks,
+            r.grade,
+            r.grade_point,
+        ])
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="academic_results_report.xlsx"'
+    wb.save(response)
+    return response
+
+
+@login_required
+def export_results_csv(request):
+    results = Result.objects.select_related("student", "student__user", "course", "teacher", "teacher__user").all()
+    
+    if request.user.role == "TEACHER" and hasattr(request.user, "teacher_profile"):
+        results = results.filter(teacher=request.user.teacher_profile)
+    elif request.user.role == "STUDENT" and hasattr(request.user, "student_profile"):
+        results = results.filter(student=request.user.student_profile)
+
+    sem = clean_query_param(request.GET.get("semester"))
+    if sem and sem.isdigit():
+        results = results.filter(semester=int(sem))
+
+    course_id = clean_query_param(request.GET.get("course"))
+    if course_id and course_id.isdigit():
+        results = results.filter(course_id=int(course_id))
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="academic_results_report.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(["Student Name", "Roll No", "Course Code", "Course Name", "Semester", "Exam Type", "Marks Obtained", "Total Marks", "Grade", "Grade Point"])
+
+    for r in results.order_by("semester", "student__roll_no"):
+        writer.writerow([
+            r.student.user.get_full_name() if r.student and r.student.user else "N/A",
+            r.student.roll_no if r.student else "N/A",
+            r.course.code if r.course else "N/A",
+            r.course.name if r.course else "N/A",
+            r.semester,
+            r.exam_type,
+            r.marks_obtained,
+            r.total_marks,
+            r.grade,
+            r.grade_point,
+        ])
+
+    return response

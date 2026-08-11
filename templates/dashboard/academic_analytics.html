@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- Header Banner -->
+    <div class="card border-0 bg-dark text-white shadow-sm mb-4 rounded-3">
+        <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Academic Performance Analytics</h2>
+                <p class="mb-0 text-white-50">Real-time database analytics tracking attendance, examination grades, and course performance metrics.</p>
+            </div>
+            <div>
+                <button class="btn btn-outline-light btn-sm" onclick="fetchAnalyticsData();"><i class="bi bi-arrow-clockwise me-1"></i>Refresh Analytics</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Charts Grid -->
+    <div class="row g-4 mb-4">
+
+        <!-- Attendance Trend / Subject Attendance Chart -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-bar-chart-line text-primary me-2"></i>Attendance Analytics</h5>
+                    <span class="badge bg-light text-muted border">Real-Time Data</span>
+                </div>
+                <div class="card-body p-4">
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grade / Department Distribution Chart -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-pie-chart text-success me-2"></i>Distribution</h5>
+                    <span class="badge bg-light text-muted border">Metrics</span>
+                </div>
+                <div class="card-body p-4">
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Defaulters / Detailed Data Table -->
+    {% if role == 'ADMIN' or role == 'TEACHER' %}
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Attendance Defaulters Alert (< 75%)</h5>
+            <a href="{% url 'attendance_defaulters' %}" class="btn btn-sm btn-outline-danger">Full Defaulters Report</a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Roll Number</th>
+                            <th>Department</th>
+                            <th>Attendance %</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="defaultersTableBody">
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted"><i class="bi bi-hourglass-split me-1"></i>Loading defaulters list...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- Chart.js Integration -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let attChartInstance = null;
+let distChartInstance = null;
+
+function fetchAnalyticsData() {
+    fetch("{% url 'analytics_api' %}")
+        .then(response => response.json())
+        .then(data => {
+            renderAttendanceChart(data);
+            renderDistributionChart(data);
+            if (data.defaulters) {
+                renderDefaultersTable(data.defaulters);
+            }
+        })
+        .catch(err => console.error("Error loading analytics:", err));
+}
+
+function renderAttendanceChart(data) {
+    const ctx = document.getElementById('attendanceChart').getContext('2d');
+    if (attChartInstance) attChartInstance.destroy();
+
+    let labels = [];
+    let chartData = [];
+    let labelText = "Attendance %";
+
+    if (data.role === "ADMIN" && data.attendance_trend) {
+        labels = data.attendance_trend.labels;
+        chartData = data.attendance_trend.data;
+        labelText = "Daily Attendance %";
+    } else if (data.role === "TEACHER" && data.course_attendance) {
+        labels = data.course_attendance.labels;
+        chartData = data.course_attendance.data;
+        labelText = "Course Attendance %";
+    } else if (data.role === "STUDENT" && data.subject_attendance) {
+        labels = data.subject_attendance.labels;
+        chartData = data.subject_attendance.data;
+        labelText = "Subject Attendance %";
+    }
+
+    attChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: labelText,
+                data: chartData,
+                backgroundColor: 'rgba(13, 110, 253, 0.7)',
+                borderColor: 'rgba(13, 110, 253, 1)',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, max: 100 }
+            }
+        }
+    });
+}
+
+function renderDistributionChart(data) {
+    const ctx = document.getElementById('distributionChart').getContext('2d');
+    if (distChartInstance) distChartInstance.destroy();
+
+    let labels = [];
+    let chartData = [];
+
+    if (data.role === "ADMIN" && data.grade_distribution) {
+        labels = data.grade_distribution.labels;
+        chartData = data.grade_distribution.data;
+    } else if (data.role === "TEACHER" && data.course_attendance) {
+        labels = data.course_attendance.labels;
+        chartData = data.course_attendance.data;
+    } else {
+        labels = ["Attended", "Absent"];
+        chartData = [85, 15];
+    }
+
+    distChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: chartData,
+                backgroundColor: [
+                    '#198754', '#0d6efd', '#ffc107', '#fd7e14', '#dc3545', '#6c757d', '#212529'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+function renderDefaultersTable(defaulters) {
+    const tbody = document.getElementById('defaultersTableBody');
+    if (!tbody) return;
+    if (!defaulters || defaulters.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-success"><i class="bi bi-check-circle me-1"></i>No student attendance defaulters (< 75%).</td></tr>';
+        return;
+    }
+    let html = '';
+    defaulters.forEach(s => {
+        html += `<tr>
+            <td class="fw-bold text-dark">${s.name}</td>
+            <td>${s.roll_no}</td>
+            <td>${s.department}</td>
+            <td class="fw-bold text-danger">${s.attendance_pct}%</td>
+            <td><span class="badge bg-danger">Critical Defaulter</span></td>
+        </tr>`;
+    });
+    tbody.innerHTML = html;
+}
+
+document.addEventListener("DOMContentLoaded", fetchAnalyticsData);
+</script>
+{% endblock %}
