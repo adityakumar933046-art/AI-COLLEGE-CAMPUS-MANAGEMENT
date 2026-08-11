@@ -92,12 +92,12 @@
                data-bs-toggle="dropdown"
                aria-expanded="false">
 
-                {% if request.user.student_profile and request.user.student_profile.photo %}
+                {% if request.user.role == 'STUDENT' and request.user.student_profile and request.user.student_profile.photo %}
                     <img src="{{ request.user.student_profile.photo.url }}" alt="Profile Photo" class="rounded-circle object-fit-cover" width="36" height="36">
-                {% elif request.user.teacher_profile and request.user.teacher_profile.photo %}
+                {% elif request.user.role == 'TEACHER' and request.user.teacher_profile and request.user.teacher_profile.photo %}
                     <img src="{{ request.user.teacher_profile.photo.url }}" alt="Profile Photo" class="rounded-circle object-fit-cover" width="36" height="36">
                 {% else %}
-                    <img src="{% static 'images/default-user.png' %}" alt="Default Avatar" class="rounded-circle object-fit-cover" width="36" height="36" onerror="this.src='https://ui-avatars.com/api/?name={{ request.user.username }}&background=0D6EFD&color=fff'">
+                    <img src="{% static 'images/default-user.png' %}" alt="Default Avatar" class="rounded-circle object-fit-cover" width="36" height="36">
                 {% endif %}
 
                 <div class="profile-info d-none d-md-block text-start me-1">
