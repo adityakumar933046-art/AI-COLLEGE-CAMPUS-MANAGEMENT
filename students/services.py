@@ -37,6 +37,23 @@ def create_student(data, created_by=None):
 
 
     try:
+        # Sanitize empty string dates to None
+        admission_date = data.get("admission_date") or None
+        if admission_date == "":
+            admission_date = None
+
+        date_of_birth = data.get("date_of_birth") or None
+        if date_of_birth == "":
+            date_of_birth = None
+
+        cgpa_val = data.get("cgpa")
+        if cgpa_val in [None, "", ""]:
+            cgpa_val = 0.00
+        else:
+            try:
+                cgpa_val = float(cgpa_val)
+            except (ValueError, TypeError):
+                cgpa_val = 0.00
 
         # ==========================
         # CREATE USER
@@ -111,9 +128,7 @@ def create_student(data, created_by=None):
             academic_year=data.get("academic_year") or "2026-2027",
 
 
-            admission_date=data.get(
-                "admission_date"
-            ),
+            admission_date=admission_date,
 
 
 
@@ -131,9 +146,7 @@ def create_student(data, created_by=None):
             gender=data.get("gender") or "",
 
 
-            date_of_birth=data.get(
-                "date_of_birth"
-            ),
+            date_of_birth=date_of_birth,
 
 
             blood_group=data.get("blood_group") or "",
@@ -163,7 +176,7 @@ def create_student(data, created_by=None):
 
 
 
-            cgpa=data.get("cgpa") if data.get("cgpa") is not None else 0.00,
+            cgpa=cgpa_val,
 
             status=data.get("status") or "ACTIVE",
 

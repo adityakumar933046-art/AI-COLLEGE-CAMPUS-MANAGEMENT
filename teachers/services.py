@@ -52,7 +52,13 @@ def generate_username(first_name, employee_id):
 # ==========================================================
 
 @transaction.atomic
+@transaction.atomic
 def create_teacher(data, created_by=None):
+    dob_val = data.get("date_of_birth") or None
+    if dob_val == "": dob_val = None
+    
+    jd_val = data.get("joining_date") or None
+    if jd_val == "": jd_val = None
 
     first_name = data.get("first_name", "").strip()
     last_name = data.get("last_name", "").strip()
@@ -95,9 +101,9 @@ def create_teacher(data, created_by=None):
     teacher.employment_type = data.get("employment_type", "FULL_TIME")
     teacher.phone = data.get("phone") or ""
     teacher.gender = data.get("gender", "")
-    teacher.date_of_birth = data.get("date_of_birth")
+    teacher.date_of_birth = dob_val
     teacher.blood_group = data.get("blood_group", "")
-    teacher.joining_date = data.get("joining_date")
+    teacher.joining_date = jd_val
     teacher.office_room = data.get("office_room", "")
     teacher.is_hod = data.get("is_hod", False)
     teacher.status = data.get("status", "ACTIVE")
