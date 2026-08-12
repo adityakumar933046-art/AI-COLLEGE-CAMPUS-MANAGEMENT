@@ -116,6 +116,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
+IS_RENDER = os.environ.get("RENDER") == "true" or os.environ.get("RENDER_SERVICE_ID") is not None
+
 if DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.parse(
@@ -124,9 +126,12 @@ if DATABASE_URL:
             conn_health_checks=True,
         )
     }
-elif not DEBUG:
+elif IS_RENDER or not DEBUG:
     from django.core.exceptions import ImproperlyConfigured
-    raise ImproperlyConfigured("DATABASE_URL is required in production when DEBUG=False.")
+    raise ImproperlyConfigured(
+        "DATABASE_URL is required on Render / production environments. "
+        "Please attach a PostgreSQL database or set DATABASE_URL in Render Environment settings."
+    )
 else:
     DATABASES = {
         "default": {
