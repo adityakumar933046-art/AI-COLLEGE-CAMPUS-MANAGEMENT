@@ -43,7 +43,7 @@ DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 't')
 
 raw_allowed = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost')
 ALLOWED_HOSTS = [h.strip() for h in raw_allowed.split(',') if h.strip()]
-for default_host in ['.onrender.com', 'ai-college-campus-management.onrender.com', 'localhost', '127.0.0.1']:
+for default_host in ['.onrender.com', 'ai-college-campus-management.onrender.com', '.railway.app', '.up.railway.app', 'localhost', '127.0.0.1']:
     if default_host not in ALLOWED_HOSTS:
         ALLOWED_HOSTS.append(default_host)
 
@@ -211,6 +211,8 @@ else:
         "http://localhost:8000",
         "https://ai-college-campus-management.onrender.com",
         "https://*.onrender.com",
+        "https://*.railway.app",
+        "https://*.up.railway.app",
     ]
 
 # Production HTTPS & Security Settings (active when DEBUG=False)
