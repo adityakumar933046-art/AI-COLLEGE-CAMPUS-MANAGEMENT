@@ -845,3 +845,21 @@ body.dark-mode .activity-content p{
 /*=========================
             END
 ==========================*/
+/* ==========================================
+   CONSISTENT FORM INPUT STYLES
+========================================== */
+.card .form-control,
+.card .form-select {
+    min-height: 44px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.9rem;
+    padding: 0.6rem 0.85rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.card .form-control:focus,
+.card .form-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+}
