@@ -43,7 +43,7 @@ def announcement_list(request):
 
         if user.role == "STUDENT":
             try:
-                student = StudentProfile.objects.get(user=user)
+                student = StudentProfile.objects.filter(user=user).first()
                 announcements = announcements.filter(
                     Q(target__in=["ALL", "STUDENT"]) |
                     Q(target="DEPARTMENT", department=student.department) |
@@ -54,7 +54,7 @@ def announcement_list(request):
 
         elif user.role == "TEACHER":
             try:
-                teacher = TeacherProfile.objects.get(user=user)
+                teacher = TeacherProfile.objects.filter(user=user).first()
                 announcements = announcements.filter(
                     Q(target__in=["ALL", "TEACHER"]) |
                     Q(target="DEPARTMENT", department=teacher.department) |

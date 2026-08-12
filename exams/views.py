@@ -289,7 +289,7 @@ def schedule_delete(request, pk):
 @login_required
 def my_exams(request):
     try:
-        student = StudentProfile.objects.get(user=request.user)
+        student = StudentProfile.objects.filter(user=request.user).first()
     except StudentProfile.DoesNotExist:
         messages.error(request, "Student profile not found.")
         return redirect("dashboard_redirect")
@@ -319,7 +319,7 @@ def my_exams(request):
 @admin_or_teacher_required
 def my_exam_duties(request):
     try:
-        teacher = TeacherProfile.objects.get(user=request.user)
+        teacher = TeacherProfile.objects.filter(user=request.user).first()
     except TeacherProfile.DoesNotExist:
         messages.error(request, "Teacher profile not found.")
         return redirect("dashboard_redirect")

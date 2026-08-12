@@ -78,7 +78,7 @@ def teacher_leave_list(request):
         return redirect("leave_list")
 
     try:
-        teacher = TeacherProfile.objects.get(user=request.user)
+        teacher = TeacherProfile.objects.filter(user=request.user).first()
     except TeacherProfile.DoesNotExist:
         messages.error(request, "Teacher profile not found.")
         return redirect("dashboard_redirect")

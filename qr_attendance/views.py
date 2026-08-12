@@ -218,7 +218,7 @@ def scan_qr(request, token):
         return render(request, "qr_attendance/attendance_failed.html", {"message": "QR Code Expired. Please scan the latest QR code."})
 
     try:
-        student = StudentProfile.objects.get(user=request.user)
+        student = StudentProfile.objects.filter(user=request.user).first()
     except StudentProfile.DoesNotExist:
         return render(request, "qr_attendance/attendance_failed.html", {"message": "Unauthorized. Only registered students can mark attendance."})
 

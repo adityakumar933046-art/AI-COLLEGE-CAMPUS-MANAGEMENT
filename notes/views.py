@@ -35,7 +35,7 @@ def note_list(request):
         notes = Note.objects.select_related("course", "teacher", "teacher__user").all()
     elif user.role == "TEACHER":
         try:
-            teacher = TeacherProfile.objects.get(user=user)
+            teacher = TeacherProfile.objects.filter(user=user).first()
             notes = Note.objects.select_related("course", "teacher", "teacher__user").filter(
                 Q(teacher=teacher) | Q(course__teacher=teacher)
             )
@@ -43,7 +43,7 @@ def note_list(request):
             notes = Note.objects.none()
     else:  # STUDENT
         try:
-            student = StudentProfile.objects.get(user=user)
+            student = StudentProfile.objects.filter(user=user).first()
             notes = Note.objects.select_related("course", "teacher", "teacher__user").filter(
                 course__department=student.department, course__semester=student.semester,
                 status="PUBLISHED"
@@ -110,7 +110,7 @@ def note_detail(request, pk):
     # Permission check for students
     if user.role == "STUDENT":
         try:
-            student = StudentProfile.objects.get(user=user)
+            student = StudentProfile.objects.filter(user=user).first()
             if not Course.objects.filter(id=note.course_id, department=student.department, semester=student.semester).exists():
                 messages.error(request, "You are not enrolled in the course for this study note.")
                 return redirect("note_list")
@@ -212,7 +212,7 @@ def download_note(request, pk):
     # Security check for student access
     if user.role == "STUDENT":
         try:
-            student = StudentProfile.objects.get(user=user)
+            student = StudentProfile.objects.filter(user=user).first()
             if not Course.objects.filter(id=note.course_id, department=student.department, semester=student.semester).exists():
                 messages.error(request, "Access denied: You are not enrolled in this course.")
                 return redirect("note_list")

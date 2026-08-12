@@ -52,3 +52,6 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
 
 ]
+handler404 = 'django.views.defaults.page_not_found'
+handler500 = 'django.views.defaults.server_error'
+handler403 = 'django.views.defaults.permission_denied'

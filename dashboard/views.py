@@ -86,7 +86,7 @@ def admin_dashboard(request):
 @login_required
 def teacher_dashboard(request):
     try:
-        teacher = TeacherProfile.objects.get(user=request.user)
+        teacher = TeacherProfile.objects.filter(user=request.user).first()
     except TeacherProfile.DoesNotExist:
         return redirect("admin_dashboard")
 
@@ -107,7 +107,7 @@ def teacher_dashboard(request):
 @login_required
 def student_dashboard(request):
     try:
-        student = StudentProfile.objects.get(user=request.user)
+        student = StudentProfile.objects.filter(user=request.user).first()
     except StudentProfile.DoesNotExist:
         return redirect("admin_dashboard")
 
@@ -226,7 +226,7 @@ def dashboard_calendar(request):
         custom_events_qs = custom_events_qs.filter(status="PUBLISHED", start_time__lte=now + timezone.timedelta(days=365))
         if user.role == "STUDENT":
             try:
-                student = StudentProfile.objects.get(user=user)
+                student = StudentProfile.objects.filter(user=user).first()
                 custom_events_qs = custom_events_qs.filter(
                     Q(target__in=["ALL", "STUDENT"]) |
                     Q(target="DEPARTMENT", department=student.department) |
@@ -236,7 +236,7 @@ def dashboard_calendar(request):
                 custom_events_qs = custom_events_qs.filter(target="ALL")
         elif user.role == "TEACHER":
             try:
-                teacher = TeacherProfile.objects.get(user=user)
+                teacher = TeacherProfile.objects.filter(user=user).first()
                 custom_events_qs = custom_events_qs.filter(
                     Q(target__in=["ALL", "TEACHER"]) |
                     Q(target="DEPARTMENT", department=teacher.department) |
@@ -249,13 +249,13 @@ def dashboard_calendar(request):
     timetable_qs = Timetable.objects.select_related("course", "teacher", "department").all()
     if user.role == "STUDENT":
         try:
-            student = StudentProfile.objects.get(user=user)
+            student = StudentProfile.objects.filter(user=user).first()
             timetable_qs = timetable_qs.filter(department=student.department, semester=student.semester)
         except StudentProfile.DoesNotExist:
             pass
     elif user.role == "TEACHER":
         try:
-            teacher = TeacherProfile.objects.get(user=user)
+            teacher = TeacherProfile.objects.filter(user=user).first()
             timetable_qs = timetable_qs.filter(teacher=teacher)
         except TeacherProfile.DoesNotExist:
             pass
@@ -264,13 +264,13 @@ def dashboard_calendar(request):
     assignment_qs = Assignment.objects.select_related("course", "teacher", "teacher__user").all()
     if user.role == "STUDENT":
         try:
-            student = StudentProfile.objects.get(user=user)
+            student = StudentProfile.objects.filter(user=user).first()
             assignment_qs = assignment_qs.filter(course__department=student.department, course__semester=student.semester)
         except StudentProfile.DoesNotExist:
             pass
     elif user.role == "TEACHER":
         try:
-            teacher = TeacherProfile.objects.get(user=user)
+            teacher = TeacherProfile.objects.filter(user=user).first()
             assignment_qs = assignment_qs.filter(teacher=teacher)
         except TeacherProfile.DoesNotExist:
             pass

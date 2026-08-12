@@ -35,13 +35,13 @@ def assignment_list(request):
         assignments = Assignment.objects.select_related("course", "teacher", "teacher__user").all()
     elif user.role == "TEACHER":
         try:
-            teacher = TeacherProfile.objects.get(user=user)
+            teacher = TeacherProfile.objects.filter(user=user).first()
             assignments = Assignment.objects.select_related("course", "teacher", "teacher__user").filter(teacher=teacher)
         except TeacherProfile.DoesNotExist:
             assignments = Assignment.objects.none()
     else:  # STUDENT
         try:
-            student = StudentProfile.objects.get(user=user)
+            student = StudentProfile.objects.filter(user=user).first()
             assignments = Assignment.objects.select_related("course", "teacher", "teacher__user").filter(
                 course__department=student.department, course__semester=student.semester
             )
