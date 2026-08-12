@@ -295,17 +295,22 @@ def add_student(request):
                 user_obj = result["user"]
                 temp_pwd = result["password"]
                 
-                email_sent, email_err = send_student_credentials_email(user_obj, temp_pwd, request=request)
-                
-                if email_sent:
-                    messages.success(
-                        request,
-                        f"Student account created successfully. Login credentials have been sent to {user_obj.email}."
-                    )
-                else:
+                try:
+                    email_sent, email_err = send_student_credentials_email(user_obj, temp_pwd, request=request)
+                    if email_sent:
+                        messages.success(
+                            request,
+                            f"Student account created successfully. Login credentials have been sent to {user_obj.email}."
+                        )
+                    else:
+                        messages.warning(
+                            request,
+                            f"Student account created successfully, but the credentials email could not be sent to {user_obj.email}. (Error: {email_err})"
+                        )
+                except Exception as mail_exc:
                     messages.warning(
                         request,
-                        f"Student account created successfully, but the credentials email could not be sent to {user_obj.email}. (Error: {email_err})"
+                        f"Student account created successfully, but sending credentials email failed: {str(mail_exc)}"
                     )
 
 

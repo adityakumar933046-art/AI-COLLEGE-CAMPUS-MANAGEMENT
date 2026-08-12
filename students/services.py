@@ -168,7 +168,7 @@ def create_student(data, created_by=None):
             status=data.get("status") or "ACTIVE",
 
 
-            created_by=created_by,
+            created_by=created_by if (created_by and getattr(created_by, 'is_authenticated', False)) else None,
 
         )
 
