@@ -19,3 +19,8 @@ env/
 # OS generated files
 desktop.ini
 .DS_Store
+
+data.json
+db_backup_before_railway.sqlite3
+db_backup.sqlite3
+db.sqlite3
