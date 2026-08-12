@@ -73,7 +73,7 @@ def login_view(request):
             return redirect("admin_dashboard")
 
         elif request.user.role == User.Roles.TEACHER:
-            redirect("teacher_dashboard")
+            return redirect("teacher_dashboard")
         return redirect("student_dashboard")
 
     form = LoginForm(request.POST or None, request = request,)
