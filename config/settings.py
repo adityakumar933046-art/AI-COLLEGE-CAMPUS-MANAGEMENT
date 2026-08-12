@@ -19,7 +19,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Simple .env file parser
+# Simple .env file parser (preserves existing environment variables)
 env_file = BASE_DIR / '.env'
 if env_file.exists():
     with open(env_file, 'r', encoding='utf-8') as f:
@@ -29,7 +29,8 @@ if env_file.exists():
                 key, value = line.split('=', 1)
                 k_clean = key.strip()
                 v_clean = value.strip().strip('"').strip("'")
-                os.environ[k_clean] = v_clean
+                if k_clean not in os.environ or not os.environ[k_clean]:
+                    os.environ[k_clean] = v_clean
 
 
 # Quick-start development settings - unsuitable for production
@@ -115,8 +116,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
+raw_db_url = os.environ.get("DATABASE_URL") or os.environ.get("INTERNAL_DATABASE_URL")
+DATABASE_URL = raw_db_url.strip() if raw_db_url and raw_db_url.strip() else None
 IS_RENDER = os.environ.get("RENDER") == "true" or os.environ.get("RENDER_SERVICE_ID") is not None
+
+print(f"[SETTINGS] DATABASE_URL present: {bool(DATABASE_URL)}")
 
 if DATABASE_URL:
     DATABASES = {
