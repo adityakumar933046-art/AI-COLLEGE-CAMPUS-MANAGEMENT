@@ -3,12 +3,30 @@
 ========================================== */
 
 .topbar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
     height: 66px;
     background-color: var(--topbar-bg, #ffffff);
     color: var(--text-color, #1e293b);
     padding: 0 1.5rem;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
+    position: sticky;
+    top: 0;
     z-index: 1020;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 .topbar .btn-icon {
@@ -19,6 +37,7 @@
     justify-content: center;
     color: var(--text-muted, #64748b);
     background: transparent;
+    border-radius: 50%;
     transition: all 0.2s ease-in-out;
 }
 
@@ -29,6 +48,7 @@
 
 .topbar-search {
     width: 320px;
+    max-width: 100%;
 }
 
 .topbar-search input {
