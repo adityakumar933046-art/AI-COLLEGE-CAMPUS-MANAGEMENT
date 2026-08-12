@@ -40,7 +40,7 @@ if env_file.exists():
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 't')
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 't')
 
 raw_allowed = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost')
 ALLOWED_HOSTS = [h.strip() for h in raw_allowed.split(',') if h.strip()]
@@ -121,6 +121,7 @@ DATABASE_URL = raw_db_url.strip() if raw_db_url and raw_db_url.strip() else None
 IS_RENDER = os.environ.get("RENDER") == "true" or os.environ.get("RENDER_SERVICE_ID") is not None
 
 print(f"[SETTINGS] DATABASE_URL present: {bool(DATABASE_URL)}")
+print(f"[SETTINGS] DEBUG: {DEBUG}")
 
 if DATABASE_URL:
     DATABASES = {
