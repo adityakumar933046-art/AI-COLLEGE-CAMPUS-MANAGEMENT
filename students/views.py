@@ -1158,28 +1158,45 @@ def resend_student_credentials(request, pk):
     student = get_object_or_404(StudentProfile.objects.select_related("user"), pk=pk)
     user = student.user
 
+    if not user:
+        messages.error(request, "This student profile does not have an associated user account.")
+        return redirect("student_list")
+
     if request.method == "POST":
-        from django.utils.crypto import get_random_string
-        from accounts.services import send_account_credentials_email
+        try:
+            from django.utils.crypto import get_random_string
+            from accounts.services import send_account_credentials_email
 
-        new_temp_password = get_random_string(10)
-        user.set_password(new_temp_password)
-        user.must_change_password = True
-        user.save()
+            new_temp_password = get_random_string(10)
+            user.set_password(new_temp_password)
+            user.must_change_password = True
+            user.save()
 
-        email_ok, email_err = send_account_credentials_email(
-            user, new_temp_password, role="STUDENT", request=request
-        )
+            if not user.email:
+                messages.warning(
+                    request,
+                    f"Credentials regenerated for {user.username}, but no email address is registered for this student."
+                )
+                return redirect("student_list")
 
-        if email_ok:
-            messages.success(
-                request,
-                f"New login credentials have been sent to {user.email}."
+            email_ok, email_err = send_account_credentials_email(
+                user, new_temp_password, role="STUDENT", request=request
             )
-        else:
-            messages.warning(
+
+            if email_ok:
+                messages.success(
+                    request,
+                    f"New login credentials have been sent to {user.email}."
+                )
+            else:
+                messages.warning(
+                    request,
+                    f"Credentials were regenerated, but the email could not be sent to {user.email}. (Error: {email_err})"
+                )
+        except Exception as exc:
+            messages.error(
                 request,
-                f"Credentials were regenerated, but the email could not be sent to {user.email}. (Error: {email_err})"
+                f"An error occurred while resending credentials: {str(exc)}"
             )
 
         return redirect("student_list")
