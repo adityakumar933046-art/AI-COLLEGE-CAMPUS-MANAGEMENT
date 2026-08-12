@@ -37,23 +37,18 @@
           DESKTOP (1200px)
 =====================================*/
 
-@media (max-width:1200px){
-
-    .sidebar{
-
-        width:250px;
-
-    }
+/* Cleaned 1200px media query to preserve desktop sidebar layout */
+@media (max-width: 1200px) {
+    .topbar-search { width: 240px; }
+}
 
     .topbar{
 
-        left:0 !important;
 
     }
 
     .main-content{
 
-        margin-left:0 !important;
 
     }
 
@@ -65,13 +60,11 @@
 
     .sidebar.collapsed ~ .main-content{
 
-        margin-left:0 !important;
 
     }
 
     .sidebar.collapsed ~ .main-content .topbar{
 
-        left:0 !important;
 
     }
 
