@@ -13,8 +13,10 @@
     padding: 0 1.5rem;
     position: sticky !important;
     top: 0 !important;
+    left: 0 !important;
     margin: 0 !important;
     z-index: 1020 !important;
+    box-sizing: border-box !important;
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 

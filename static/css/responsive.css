@@ -47,13 +47,13 @@
 
     .topbar{
 
-        left:250px;
+        left:0 !important;
 
     }
 
     .main-content{
 
-        margin-left:250px;
+        margin-left:0 !important;
 
     }
 
@@ -65,13 +65,13 @@
 
     .sidebar.collapsed ~ .main-content{
 
-        margin-left:85px;
+        margin-left:0 !important;
 
     }
 
     .sidebar.collapsed ~ .main-content .topbar{
 
-        left:85px;
+        left:0 !important;
 
     }
 

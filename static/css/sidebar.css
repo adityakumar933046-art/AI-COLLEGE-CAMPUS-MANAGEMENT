@@ -719,3 +719,7 @@
     opacity: 1;
     visibility: visible;
 }
+
+.sidebar.collapsed ~ .main-content {
+    margin-left: 85px !important;
+}
