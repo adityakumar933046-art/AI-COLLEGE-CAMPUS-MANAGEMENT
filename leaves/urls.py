@@ -5,6 +5,7 @@ urlpatterns = [
     path('', views.leave_list, name='leave_list'),
     path('teacher/', views.teacher_leave_list, name='teacher_leave_list'),
     path('my/', views.my_leaves, name='my_leaves'),
+    path('my-leaves/', views.my_leaves, name='my_leaves_alias'),
     path('apply/', views.apply_leave, name='apply_leave'),
     path('<int:pk>/', views.leave_detail, name='leave_detail'),
     path('<int:pk>/approve/', views.approve_leave, name='approve_leave'),
