@@ -391,69 +391,89 @@ class StudentCreateForm(forms.ModelForm):
 
 class StudentUpdateForm(StudentCreateForm):
 
-
     password = forms.CharField(
         required=False,
         widget=forms.PasswordInput(
             attrs={
-                "class":"form-control",
-                "placeholder":"Leave blank to keep old password"
+                "class": "form-control",
+                "placeholder": "Leave blank to keep old password"
             }
         )
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk and hasattr(self.instance, 'user') and self.instance.user:
+            user = self.instance.user
+            self.fields['username'].initial = user.username
+            self.fields['first_name'].initial = user.first_name
+            self.fields['last_name'].initial = user.last_name
+            self.fields['email'].initial = user.email
 
+    def clean_email(self):
+        email = self.cleaned_data.get("email", "").strip().lower()
+        if not email:
+            raise ValidationError("Email address is required.")
+        from accounts.models import User
+        user_pk = self.instance.user.pk if (self.instance and hasattr(self.instance, 'user') and self.instance.user) else None
+        qs = User.objects.filter(email=email)
+        if user_pk:
+            qs = qs.exclude(pk=user_pk)
+        if qs.exists():
+            raise ValidationError("A student or user account with this email address already exists.")
+        return email
+
+    def clean_username(self):
+        username = self.cleaned_data.get("username", "").strip()
+        if username:
+            from accounts.models import User
+            user_pk = self.instance.user.pk if (self.instance and hasattr(self.instance, 'user') and self.instance.user) else None
+            qs = User.objects.filter(username=username)
+            if user_pk:
+                qs = qs.exclude(pk=user_pk)
+            if qs.exists():
+                raise ValidationError("Username already taken.")
+        return username
 
     def clean_roll_no(self):
-
-        roll_no = self.cleaned_data.get(
-            "roll_no"
-        )
-
-
-        qs = StudentProfile.objects.filter(
-            roll_no=roll_no
-        ).exclude(
-            pk=self.instance.pk
-        )
-
-
-        if qs.exists():
-
-            raise ValidationError(
-                "Roll number already exists."
-            )
-
-
+        roll_no = self.cleaned_data.get("roll_no")
+        if roll_no:
+            qs = StudentProfile.objects.filter(roll_no=roll_no)
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise ValidationError("Roll number already exists.")
         return roll_no
 
-
-
     def clean_admission_no(self):
-
-        admission_no = self.cleaned_data.get(
-            "admission_no"
-        )
-
-
-        qs = StudentProfile.objects.filter(
-            admission_no=admission_no
-        ).exclude(
-            pk=self.instance.pk
-        )
-
-
-        if qs.exists():
-
-            raise ValidationError(
-                "Admission number already exists."
-            )
-
-
+        admission_no = self.cleaned_data.get("admission_no")
+        if admission_no:
+            qs = StudentProfile.objects.filter(admission_no=admission_no)
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise ValidationError("Admission number already exists.")
         return admission_no
 
-
-
+    def save(self, commit=True):
+        student = super().save(commit=False)
+        if hasattr(student, 'user') and student.user:
+            user = student.user
+            user.first_name = self.cleaned_data.get('first_name', user.first_name)
+            user.last_name = self.cleaned_data.get('last_name', user.last_name)
+            user.email = self.cleaned_data.get('email', user.email)
+            username = self.cleaned_data.get('username')
+            if username:
+                user.username = username
+            pwd = self.cleaned_data.get('password')
+            if pwd:
+                user.set_password(pwd)
+            if commit:
+                user.save()
+        if commit:
+            student.save()
+            self.save_m2m()
+        return student
 
 
 # ==========================================================

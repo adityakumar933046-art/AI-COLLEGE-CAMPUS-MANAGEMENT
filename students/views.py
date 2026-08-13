@@ -1,3 +1,4 @@
+from django.db import transaction
 import csv
 from openpyxl import Workbook
 def clean_query_param(val):
@@ -365,50 +366,43 @@ def add_student(request):
 
 @staff_member_required
 @login_required
+@transaction.atomic
 def update_student(request, pk):
-
     student = get_object_or_404(
         StudentProfile,
         id=pk
     )
 
-
     if request.method == "POST":
-
         form = StudentUpdateForm(
             request.POST,
             request.FILES,
             instance=student
         )
 
-
         if form.is_valid():
-
-            obj = form.save(commit=False)
-
-            obj.updated_by = request.user
-
-            obj.save()
-
+            student = form.save(commit=True)
+            student.updated_by = request.user
+            student.save()
 
             messages.success(
                 request,
                 "Student updated successfully."
             )
 
-
             return redirect(
                 "student_detail",
                 pk=student.id
             )
-
-
+        else:
+            messages.error(
+                request,
+                "Please correct the validation errors below."
+            )
     else:
-
         form = StudentUpdateForm(
             instance=student
         )
-
 
     return render(
         request,
@@ -418,6 +412,7 @@ def update_student(request, pk):
             "student": student
         }
     )
+
 # ==========================================================
 # DELETE STUDENT
 # ==========================================================
