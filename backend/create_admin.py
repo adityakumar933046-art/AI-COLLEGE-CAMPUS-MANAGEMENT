@@ -1,6 +1,6 @@
 """
-One-time script to create the initial admin superuser.
-Delete this file after the admin account has been created.
+One-time admin creation — runs automatically on startup.
+Safe to re-run: skips if admin already exists.
 """
 import os
 import sys
@@ -16,31 +16,41 @@ EMAIL = "adityakumar933046@gmail.com"
 PASSWORD = "Admin@campus2026"
 
 try:
-    if User.objects.filter(username=USERNAME).exists():
-        user = User.objects.get(username=USERNAME)
-        # Ensure role is ADMIN even if user already exists
+    user, created = User.objects.get_or_create(
+        username=USERNAME,
+        defaults={
+            "email": EMAIL,
+            "role": "ADMIN",
+            "is_staff": True,
+            "is_superuser": True,
+            "is_active": True,
+            "is_active_account": True,
+            "must_change_password": False,
+        }
+    )
+    if created:
+        user.set_password(PASSWORD)
+        user.save()
+        print(f"[CREATE_ADMIN] Admin user '{USERNAME}' created successfully.")
+    else:
+        # Fix role if needed
+        changed = False
         if user.role != "ADMIN":
             user.role = "ADMIN"
+            changed = True
+        if not user.is_staff:
             user.is_staff = True
+            changed = True
+        if not user.is_superuser:
             user.is_superuser = True
+            changed = True
+        if not user.is_active:
             user.is_active = True
-            user.is_active_account = True
+            changed = True
+        if changed:
             user.save()
-            print(f"[CREATE_ADMIN] Updated existing user '{USERNAME}' role to ADMIN.")
+            print(f"[CREATE_ADMIN] Fixed user '{USERNAME}' — role set to ADMIN.")
         else:
-            print(f"[CREATE_ADMIN] User '{USERNAME}' already exists with role ADMIN. Skipping.")
-    else:
-        user = User.objects.create_superuser(
-            username=USERNAME,
-            email=EMAIL,
-            password=PASSWORD,
-        )
-        user.role = "ADMIN"
-        user.is_active = True
-        user.is_active_account = True
-        user.must_change_password = False
-        user.save()
-        print(f"[CREATE_ADMIN] Admin user '{USERNAME}' created successfully with role ADMIN.")
+            print(f"[CREATE_ADMIN] User '{USERNAME}' already exists with role ADMIN.")
 except Exception as e:
     print(f"[CREATE_ADMIN] Error: {e}", file=sys.stderr)
-    # Don't crash the deploy - just log the error
