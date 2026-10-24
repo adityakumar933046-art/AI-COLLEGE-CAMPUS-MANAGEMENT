@@ -18,7 +18,6 @@ from django.shortcuts import (
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
 
 from django.core.paginator import Paginator
 
@@ -62,7 +61,7 @@ from .services import (
 # ==========================================================
 
 @login_required
-@staff_member_required
+@admin_required
 def student_list(request):
 
 
@@ -225,7 +224,7 @@ def student_list(request):
 # ==========================================================
 
 @login_required
-@staff_member_required
+@admin_required
 def student_detail(request, pk):
 
 
@@ -257,7 +256,7 @@ def student_detail(request, pk):
 # ADD STUDENT
 # ==========================================================
 
-@staff_member_required
+@admin_required
 @login_required
 def add_student(request):
 
@@ -364,7 +363,7 @@ def add_student(request):
 # UPDATE STUDENT
 # ==========================================================
 
-@staff_member_required
+@admin_required
 @login_required
 @transaction.atomic
 def update_student(request, pk):
@@ -417,7 +416,7 @@ def update_student(request, pk):
 # DELETE STUDENT
 # ==========================================================
 
-@staff_member_required
+@admin_required
 @login_required
 def delete_student(request, pk):
 
@@ -488,7 +487,7 @@ def delete_student(request, pk):
 # ACTIVATE STUDENT
 # ==========================================================
 
-@staff_member_required
+@admin_required
 @login_required
 def activate_student_view(request, pk):
 
@@ -537,7 +536,7 @@ def activate_student_view(request, pk):
 # DEACTIVATE STUDENT
 # ==========================================================
 
-@staff_member_required
+@admin_required
 @login_required
 def deactivate_student_view(request, pk):
 
@@ -586,7 +585,7 @@ def deactivate_student_view(request, pk):
 # STUDENT DASHBOARD
 # ==========================================================
 
-@staff_member_required
+@admin_required
 @login_required
 def student_dashboard(request):
 
@@ -669,7 +668,7 @@ def student_dashboard(request):
 # IMPORT STUDENTS FROM EXCEL
 # ==========================================================
 
-@staff_member_required
+@admin_required
 @login_required
 def import_students(request):
 
@@ -792,7 +791,7 @@ def import_students(request):
 # DOWNLOAD CREDENTIALS EXCEL
 # ==========================================================
 
-@staff_member_required
+@admin_required
 @login_required
 def download_credentials(request):
 
@@ -856,7 +855,7 @@ def download_credentials(request):
 # DOWNLOAD ERROR REPORT
 # ==========================================================
 
-@staff_member_required
+@admin_required
 @login_required
 def download_error_report(request):
 
@@ -920,7 +919,7 @@ def download_error_report(request):
 # DOWNLOAD SAMPLE EXCEL
 # ==========================================================
 
-@staff_member_required
+@admin_required
 @login_required
 def download_sample_excel(request):
 
@@ -1061,7 +1060,7 @@ def export_students_csv(request):
 # EXPORT STUDENTS CSV
 # ==========================================================
 
-@staff_member_required
+@admin_required
 @login_required
 def export_students_csv(request):
 
@@ -1081,7 +1080,7 @@ def student_profile(request):
 
 
 @login_required
-@staff_member_required
+@admin_required
 def bulk_activate_students(request):
 
     if request.method == "POST":
@@ -1119,7 +1118,7 @@ def bulk_activate_students(request):
 # ==========================================================
 
 @login_required
-@staff_member_required
+@admin_required
 def bulk_deactivate_students(request):
 
     if request.method == "POST":
