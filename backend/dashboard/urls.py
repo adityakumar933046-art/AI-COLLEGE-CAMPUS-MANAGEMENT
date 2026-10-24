@@ -9,6 +9,7 @@ urlpatterns = [
     path('reports/', views.academic_reports, name='academic_reports'),
     path("api/analytics/", views.analytics_api, name="analytics_api"),
     path("", views.dashboard_redirect, name="dashboard_redirect"),
+    path("", views.dashboard_redirect, name="dashboard"),
     path("", views.dashboard_redirect, name="home"),
 
     path("admin/", views.admin_dashboard, name="admin_dashboard"),
