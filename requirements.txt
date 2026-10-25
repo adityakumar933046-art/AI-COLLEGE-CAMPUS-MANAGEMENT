@@ -1,0 +1,8 @@
+Django>=5.0
+Pillow
+openpyxl
+gunicorn
+whitenoise
+dj-database-url
+psycopg2-binary
+pandas
