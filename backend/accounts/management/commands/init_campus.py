@@ -1,6 +1,7 @@
 import os
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
+from django.conf import settings
 from accounts.models import User
 
 
@@ -15,8 +16,20 @@ class Command(BaseCommand):
 
         # 2. Check if database has users; if empty, load seed_data.json
         if not User.objects.exists():
-            fixture_path = "seed_data.json"
-            if os.path.exists(fixture_path):
+            # Check possible locations for seed_data.json
+            candidate_paths = [
+                os.path.join(settings.BASE_DIR, "seed_data.json"),
+                os.path.join(settings.BASE_DIR, "..", "seed_data.json"),
+                "seed_data.json",
+                "backend/seed_data.json",
+            ]
+            fixture_path = None
+            for p in candidate_paths:
+                if os.path.exists(p):
+                    fixture_path = os.path.abspath(p)
+                    break
+
+            if fixture_path:
                 self.stdout.write(f"[init_campus] Database is empty. Loading initial fixture from {fixture_path}...")
                 try:
                     call_command("loaddata", fixture_path)
@@ -50,7 +63,6 @@ class Command(BaseCommand):
             admin_user.save()
             self.stdout.write(self.style.SUCCESS(f"[init_campus] Created admin user '{admin_username}'."))
         else:
-            # Ensure admin has full superuser permissions
             needs_save = False
             if admin_user.role != "ADMIN":
                 admin_user.role = "ADMIN"

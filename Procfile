@@ -1,1 +1,1 @@
-web: python manage.py migrate --noinput && python manage.py init_campus && python manage.py collectstatic --noinput && gunicorn config.wsgi:application
+web: cd backend && python manage.py migrate --noinput && python manage.py init_campus && python manage.py collectstatic --noinput && gunicorn config.wsgi:application
