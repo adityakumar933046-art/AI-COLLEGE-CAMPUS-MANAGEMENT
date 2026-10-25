@@ -74,7 +74,9 @@ class LoginForm(forms.Form):
 
         if login_id and password:
 
-            # Email login
+            login_id = login_id.strip()
+
+            # Email or Username login (case-insensitive)
             if "@" in login_id:
 
                 try:
@@ -91,7 +93,11 @@ class LoginForm(forms.Form):
 
             else:
 
-                username = login_id
+                user_obj = User.objects.filter(username__iexact=login_id).first()
+                if user_obj:
+                    username = user_obj.username
+                else:
+                    username = login_id
 
             user = authenticate(
 

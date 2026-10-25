@@ -50,6 +50,7 @@ urlpatterns = [
 
     path('qr/', include('qr_attendance.urls')),
     path('dashboard/', include('dashboard.urls')),
+    path('ai/', include('ai.urls')),
 
 ]
 handler404 = 'django.views.defaults.page_not_found'

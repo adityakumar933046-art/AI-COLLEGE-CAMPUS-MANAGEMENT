@@ -35,6 +35,12 @@
                     <span>Dashboard</span>
                 </a>
             </li>
+            <li>
+                <a href="{% url 'ai_chat' %}" class="{% if 'ai' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-robot"></i>
+                    <span>Campus AI</span>
+                </a>
+            </li>
 
             <!-- TEACHING -->
             <li class="menu-heading">TEACHING</li>

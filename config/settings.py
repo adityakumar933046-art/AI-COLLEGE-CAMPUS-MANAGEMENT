@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'timetable',
     'qr_attendance',
     'dashboard',
+    'ai.apps.AiConfig',
 
 ]
 
