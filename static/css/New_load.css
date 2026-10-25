@@ -1,0 +1,203 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background:
+        linear-gradient(
+            rgba(0, 0, 0, 0.20),
+            rgba(0, 0, 0, 0.20)
+        ),
+        url("../images/login-bg.jpg") no-repeat center center fixed !important;
+    background-size: cover !important;
+    background-color: #1e293b;
+}
+
+.login-wrapper {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+}
+
+.card.login-card,
+.login-card {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    border-radius: 28px !important;
+    background: rgba(255, 255, 255, 0.22) !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1.5px solid rgba(255, 255, 255, 0.40) !important;
+    box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.50) !important;
+    transition: all 0.35s ease;
+    animation: fadeUp 0.8s ease;
+}
+
+.card.login-card:hover,
+.login-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        0 35px 90px rgba(0, 0, 0, 0.40),
+        inset 0 1px 0 rgba(255, 255, 255, 0.60) !important;
+}
+
+.login-card .card-body {
+    background: transparent !important;
+    padding: 44px 42px !important;
+}
+
+/* Logo Badge */
+.login-logo {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.login-logo img,
+.logo-img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: contain;
+    background: #ffffff;
+    padding: 10px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+    display: inline-block;
+}
+
+.login-title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    color: #111827;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+}
+
+.login-subtitle {
+    text-align: center;
+    font-size: 15px;
+    color: #4b5563;
+    margin-bottom: 28px;
+    font-weight: 400;
+}
+
+/* Input Fields */
+.input-group {
+    background: rgba(255, 255, 255, 0.82) !important;
+    border-radius: 14px !important;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    transition: all 0.25s ease;
+}
+
+.input-group:focus-within {
+    background: #ffffff !important;
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18) !important;
+}
+
+.input-group .input-group-text {
+    background: transparent !important;
+    border: none !important;
+    width: 52px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #4b5563;
+    font-size: 17px;
+}
+
+.input-group .form-control {
+    background: transparent !important;
+    border: none !important;
+    height: 52px !important;
+    font-size: 15px;
+    color: #1f2937;
+    padding-left: 6px;
+    box-shadow: none !important;
+}
+
+.input-group .form-control::placeholder {
+    color: #6b7280;
+    font-weight: 400;
+}
+
+.input-group .btn-outline-primary,
+.input-group .toggle-pw-btn {
+    background: transparent !important;
+    border: none !important;
+    color: #2563eb !important;
+    padding: 0 16px;
+    font-size: 16px;
+    box-shadow: none !important;
+}
+
+.form-check-label {
+    font-size: 14px;
+    color: #374151;
+    font-weight: 500;
+}
+
+.forgot-pw-link {
+    font-size: 14px;
+    color: #1d4ed8;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.forgot-pw-link:hover {
+    color: #1e40af;
+    text-decoration: underline;
+}
+
+/* Button */
+.login-btn {
+    width: 100%;
+    height: 52px;
+    border: none !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    color: #ffffff !important;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.38) !important;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px rgba(37, 99, 235, 0.48) !important;
+    color: #ffffff !important;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(35px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

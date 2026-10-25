@@ -25,9 +25,12 @@ from django.core.wsgi import get_wsgi_application
 
 application = get_wsgi_application()
 
-# Safe auto-initialization hook on startup (runs migrations and seeds admin/users if empty)
+# Safe auto-initialization hook on startup (collects static files, runs migrations, seeds admin/users if empty)
 try:
     from django.core.management import call_command
+    print("[WSGI] Running automatic startup static files collection (collectstatic)...")
+    call_command("collectstatic", "--noinput")
+    print("[WSGI] Static files collected successfully.")
     print("[WSGI] Running automatic startup database check (init_campus)...")
     call_command("init_campus")
     print("[WSGI] Startup database check completed successfully.")

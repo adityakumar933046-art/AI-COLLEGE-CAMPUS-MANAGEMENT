@@ -172,6 +172,9 @@ STORAGES = {
     },
 }
 
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_MANIFEST_STRICT = False
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = ROOT_DIR / 'media'
 LOGIN_URL = '/login/'

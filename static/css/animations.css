@@ -1,0 +1,727 @@
+/*=====================================================
+                ANIMATIONS.CSS
+                  PART 1A
+======================================================*/
+
+
+/*=========================
+        FADE ANIMATIONS
+==========================*/
+
+@keyframes fadeIn{
+
+    from{
+
+        opacity:0;
+
+    }
+
+    to{
+
+        opacity:1;
+
+    }
+
+}
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(25px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+@keyframes fadeDown{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(-25px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+@keyframes fadeLeft{
+
+    from{
+
+        opacity:0;
+
+        transform:translateX(-30px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateX(0);
+
+    }
+
+}
+
+@keyframes fadeRight{
+
+    from{
+
+        opacity:0;
+
+        transform:translateX(30px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateX(0);
+
+    }
+
+}
+
+
+/*=========================
+      SCALE ANIMATIONS
+==========================*/
+
+@keyframes zoomIn{
+
+    from{
+
+        opacity:0;
+
+        transform:scale(.8);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:scale(1);
+
+    }
+
+}
+
+@keyframes zoomOut{
+
+    from{
+
+        opacity:0;
+
+        transform:scale(1.15);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:scale(1);
+
+    }
+
+}
+
+
+/*=========================
+      COMMON CLASSES
+==========================*/
+
+.fade-in{
+
+    animation:fadeIn .5s ease forwards;
+
+}
+
+.fade-up{
+
+    animation:fadeUp .6s ease forwards;
+
+}
+
+.fade-down{
+
+    animation:fadeDown .6s ease forwards;
+
+}
+
+.fade-left{
+
+    animation:fadeLeft .6s ease forwards;
+
+}
+
+.fade-right{
+
+    animation:fadeRight .6s ease forwards;
+
+}
+
+.zoom-in{
+
+    animation:zoomIn .45s ease forwards;
+
+}
+
+.zoom-out{
+
+    animation:zoomOut .45s ease forwards;
+
+}
+/*=====================================================
+                ANIMATIONS.CSS
+                  PART 1B
+======================================================*/
+
+
+/*=========================
+        SLIDE ANIMATIONS
+==========================*/
+
+@keyframes slideUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(60px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+@keyframes slideDown{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(-60px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+@keyframes slideLeft{
+
+    from{
+
+        opacity:0;
+
+        transform:translateX(-60px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateX(0);
+
+    }
+
+}
+
+@keyframes slideRight{
+
+    from{
+
+        opacity:0;
+
+        transform:translateX(60px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateX(0);
+
+    }
+
+}
+
+
+/*=========================
+        BOUNCE EFFECT
+==========================*/
+
+@keyframes bounce{
+
+    0%,20%,50%,80%,100%{
+
+        transform:translateY(0);
+
+    }
+
+    40%{
+
+        transform:translateY(-12px);
+
+    }
+
+    60%{
+
+        transform:translateY(-6px);
+
+    }
+
+}
+
+
+/*=========================
+        PULSE EFFECT
+==========================*/
+
+@keyframes pulse{
+
+    0%{
+
+        transform:scale(1);
+
+    }
+
+    50%{
+
+        transform:scale(1.08);
+
+    }
+
+    100%{
+
+        transform:scale(1);
+
+    }
+
+}
+
+
+/*=========================
+        SHAKE EFFECT
+==========================*/
+
+@keyframes shake{
+
+    0%,100%{
+
+        transform:translateX(0);
+
+    }
+
+    20%{
+
+        transform:translateX(-6px);
+
+    }
+
+    40%{
+
+        transform:translateX(6px);
+
+    }
+
+    60%{
+
+        transform:translateX(-4px);
+
+    }
+
+    80%{
+
+        transform:translateX(4px);
+
+    }
+
+}
+
+
+/*=========================
+        ROTATE EFFECT
+==========================*/
+
+@keyframes rotate360{
+
+    from{
+
+        transform:rotate(0deg);
+
+    }
+
+    to{
+
+        transform:rotate(360deg);
+
+    }
+
+}
+
+
+/*=========================
+      ANIMATION CLASSES
+==========================*/
+
+.slide-up{
+
+    animation:slideUp .6s ease forwards;
+
+}
+
+.slide-down{
+
+    animation:slideDown .6s ease forwards;
+
+}
+
+.slide-left{
+
+    animation:slideLeft .6s ease forwards;
+
+}
+
+.slide-right{
+
+    animation:slideRight .6s ease forwards;
+
+}
+
+.bounce{
+
+    animation:bounce 1s ease;
+
+}
+
+.pulse{
+
+    animation:pulse 1.5s infinite;
+
+}
+
+.shake{
+
+    animation:shake .45s ease;
+
+}
+
+.rotate{
+
+    animation:rotate360 1s linear infinite;
+
+}
+/*=====================================================
+                ANIMATIONS.CSS
+                  PART 1C
+======================================================*/
+
+
+/*=========================
+        RIPPLE EFFECT
+==========================*/
+
+.ripple{
+
+    position:relative;
+
+    overflow:hidden;
+
+}
+
+.ripple::after{
+
+    content:"";
+
+    position:absolute;
+
+    left:50%;
+
+    top:50%;
+
+    width:0;
+
+    height:0;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.35);
+
+    transform:translate(-50%,-50%);
+
+    transition:width .6s ease,
+               height .6s ease,
+               opacity .6s ease;
+
+    opacity:0;
+
+}
+
+.ripple:active::after{
+
+    width:250px;
+
+    height:250px;
+
+    opacity:1;
+
+}
+
+
+/*=========================
+      FLOAT ANIMATION
+==========================*/
+
+@keyframes floating{
+
+    0%,100%{
+
+        transform:translateY(0);
+
+    }
+
+    50%{
+
+        transform:translateY(-8px);
+
+    }
+
+}
+
+.float{
+
+    animation:floating 3s ease-in-out infinite;
+
+}
+
+
+/*=========================
+        GLOW EFFECT
+==========================*/
+
+@keyframes glow{
+
+    0%{
+
+        box-shadow:0 0 0 rgba(37,99,235,.2);
+
+    }
+
+    50%{
+
+        box-shadow:0 0 20px rgba(37,99,235,.45);
+
+    }
+
+    100%{
+
+        box-shadow:0 0 0 rgba(37,99,235,.2);
+
+    }
+
+}
+
+.glow{
+
+    animation:glow 2s ease-in-out infinite;
+
+}
+
+
+/*=========================
+      LOADING SPINNER
+==========================*/
+
+.spinner{
+
+    width:40px;
+
+    height:40px;
+
+    border:4px solid #e2e8f0;
+
+    border-top-color:var(--primary);
+
+    border-radius:50%;
+
+    animation:rotate360 .8s linear infinite;
+
+}
+
+
+/*=========================
+      SKELETON LOADING
+==========================*/
+
+@keyframes skeleton{
+
+    0%{
+
+        background-position:-200px 0;
+
+    }
+
+    100%{
+
+        background-position:calc(200px + 100%) 0;
+
+    }
+
+}
+
+.skeleton{
+
+    background:linear-gradient(
+        90deg,
+        #f1f5f9 25%,
+        #e2e8f0 37%,
+        #f1f5f9 63%
+    );
+
+    background-size:400px 100%;
+
+    animation:skeleton 1.4s infinite linear;
+
+    border-radius:8px;
+
+}
+
+
+/*=========================
+      HOVER EFFECTS
+==========================*/
+
+.hover-lift{
+
+    transition:.3s ease;
+
+}
+
+.hover-lift:hover{
+
+    transform:translateY(-6px);
+
+}
+
+.hover-scale{
+
+    transition:.3s ease;
+
+}
+
+.hover-scale:hover{
+
+    transform:scale(1.05);
+
+}
+
+.hover-rotate{
+
+    transition:.3s ease;
+
+}
+
+.hover-rotate:hover{
+
+    transform:rotate(3deg);
+
+}
+
+
+/*=========================
+      ANIMATION DELAYS
+==========================*/
+
+.delay-1{
+
+    animation-delay:.1s;
+
+}
+
+.delay-2{
+
+    animation-delay:.2s;
+
+}
+
+.delay-3{
+
+    animation-delay:.3s;
+
+}
+
+.delay-4{
+
+    animation-delay:.4s;
+
+}
+
+.delay-5{
+
+    animation-delay:.5s;
+
+}
+
+
+/*=========================
+      REDUCED MOTION
+==========================*/
+
+@media (prefers-reduced-motion:reduce){
+
+    *{
+
+        animation:none !important;
+
+        transition:none !important;
+
+        scroll-behavior:auto !important;
+
+    }
+
+}
+
+
+/*=========================
+            END
+==========================*/
