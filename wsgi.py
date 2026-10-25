@@ -1,10 +1,13 @@
 import os
 import sys
+from pathlib import Path
 
-# Ensure backend directory is in sys.path
-backend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'backend')
-if backend_dir not in sys.path:
-    sys.path.insert(0, backend_dir)
+ROOT_DIR = Path(__file__).resolve().parent
+BACKEND_DIR = ROOT_DIR / "backend"
+
+for p in [str(ROOT_DIR), str(BACKEND_DIR)]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
