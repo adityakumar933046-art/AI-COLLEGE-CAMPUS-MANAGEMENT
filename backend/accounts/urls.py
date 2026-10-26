@@ -91,4 +91,9 @@ urlpatterns = [
     path("verify-otp/", views.verify_otp_view, name="verify_otp"),
     path("resend-otp/", views.resend_otp_view, name="resend_otp"),
     path("reset-password/", views.reset_password_view, name="reset_password"),
+
+    # ==========================================================
+    # EMAIL DIAGNOSTICS (ADMIN SECURE)
+    # ==========================================================
+    path("admin/email-diagnostics/", views.email_diagnostics_view, name="email_diagnostics"),
 ]

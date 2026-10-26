@@ -193,25 +193,19 @@ EMAIL_BACKEND = os.getenv(
 
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
-
-EMAIL_USE_TLS = (
-    os.getenv("EMAIL_USE_TLS", "True").strip().lower()
-    in ("true", "1", "yes")
-)
-
-EMAIL_USE_SSL = (
-    os.getenv("EMAIL_USE_SSL", "False").strip().lower()
-    in ("true", "1", "yes")
-)
-
-if EMAIL_USE_TLS and EMAIL_USE_SSL:
-    raise ValueError(
-        "EMAIL_USE_TLS and EMAIL_USE_SSL cannot both be True."
-    )
-
 EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "15"))
 
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "").strip()
+raw_use_ssl = os.getenv("EMAIL_USE_SSL", "False").strip().lower() in ("true", "1", "yes")
+raw_use_tls = os.getenv("EMAIL_USE_TLS", "True").strip().lower() in ("true", "1", "yes")
+
+if raw_use_ssl:
+    EMAIL_USE_SSL = True
+    EMAIL_USE_TLS = False
+else:
+    EMAIL_USE_SSL = False
+    EMAIL_USE_TLS = raw_use_tls
+
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "adityakumar933046@gmail.com").strip()
 
 EMAIL_HOST_PASSWORD = (
     os.getenv("EMAIL_HOST_PASSWORD", "")
@@ -219,11 +213,12 @@ EMAIL_HOST_PASSWORD = (
     .strip('"')
     .strip("'")
     .replace(" ", "")
+    .replace("-", "")
 )
 
 DEFAULT_FROM_EMAIL = os.getenv(
     "DEFAULT_FROM_EMAIL",
-    EMAIL_HOST_USER
+    EMAIL_HOST_USER or "adityakumar933046@gmail.com"
 )
 
 SITE_URL = os.getenv(
@@ -231,7 +226,10 @@ SITE_URL = os.getenv(
     "https://ai-college-campus-management.onrender.com"
 )
 
-
+# HTTPS Email Provider Support (Optional alternative to SMTP on cloud hosts)
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "").strip()
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "").strip()
+BREVO_API_KEY = os.getenv("BREVO_API_KEY", "").strip()
 
 # CSRF Trusted Origins
 csrf_origins_env = os.environ.get("CSRF_TRUSTED_ORIGINS", "")
