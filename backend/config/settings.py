@@ -181,17 +181,57 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/student-dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
-# EMAIL CONFIGURATION
-EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+
+# ==========================================================
+# EMAIL CONFIGURATION (ENVIRONMENT DRIVEN)
+# ==========================================================
+
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.smtp.EmailBackend"
+)
+
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
-EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() in ("true", "1", "yes")
 
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "adityakumar933046@gmail.com")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "").strip().strip('"').strip("'").replace(" ", "").replace("-", "")
+EMAIL_USE_TLS = (
+    os.getenv("EMAIL_USE_TLS", "True").strip().lower()
+    in ("true", "1", "yes")
+)
 
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "adityakumar933046@gmail.com")
-SITE_URL = os.getenv("SITE_URL", "http://127.0.0.1:8000")
+EMAIL_USE_SSL = (
+    os.getenv("EMAIL_USE_SSL", "False").strip().lower()
+    in ("true", "1", "yes")
+)
+
+if EMAIL_USE_TLS and EMAIL_USE_SSL:
+    raise ValueError(
+        "EMAIL_USE_TLS and EMAIL_USE_SSL cannot both be True."
+    )
+
+EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "15"))
+
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "").strip()
+
+EMAIL_HOST_PASSWORD = (
+    os.getenv("EMAIL_HOST_PASSWORD", "")
+    .strip()
+    .strip('"')
+    .strip("'")
+    .replace(" ", "")
+)
+
+DEFAULT_FROM_EMAIL = os.getenv(
+    "DEFAULT_FROM_EMAIL",
+    EMAIL_HOST_USER
+)
+
+SITE_URL = os.getenv(
+    "SITE_URL",
+    "https://ai-college-campus-management.onrender.com"
+)
+
+
 
 # CSRF Trusted Origins
 csrf_origins_env = os.environ.get("CSRF_TRUSTED_ORIGINS", "")
