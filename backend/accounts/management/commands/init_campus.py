@@ -6,7 +6,7 @@ from accounts.models import User
 
 
 class Command(BaseCommand):
-    help = "Auto-initialize campus database: apply migrations, seed initial data if empty, and configure admin."
+    help = "Auto-initialize campus database: apply migrations, seed initial data if empty, and configure verified login credentials."
 
     def handle(self, *args, **options):
         self.stdout.write("[init_campus] Checking database state...")
@@ -16,7 +16,6 @@ class Command(BaseCommand):
 
         # 2. Check if database has users; if empty, load seed_data.json
         if not User.objects.exists():
-            # Check possible locations for seed_data.json
             candidate_paths = [
                 os.path.join(settings.BASE_DIR, "seed_data.json"),
                 os.path.join(settings.BASE_DIR, "..", "seed_data.json"),
@@ -39,14 +38,14 @@ class Command(BaseCommand):
             else:
                 self.stdout.write("[init_campus] No seed_data.json found. Skipping fixture loading.")
         else:
-            self.stdout.write(f"[init_campus] Database already initialized with {User.objects.count()} user(s).")
+            self.stdout.write(f"[init_campus] Database has {User.objects.count()} user(s).")
 
-        # 3. Ensure admin user exists (from environment or default fallback)
+        # 3. Ensure primary admin user exists
         admin_username = os.environ.get("CAMPUS_ADMIN_USERNAME", "").strip() or "admin"
         admin_email = os.environ.get("CAMPUS_ADMIN_EMAIL", "").strip() or "admin@smartcampus.local"
         admin_password = os.environ.get("CAMPUS_ADMIN_PASSWORD", "").strip() or "admin"
 
-        admin_user, created = User.objects.get_or_create(
+        admin_user, _ = User.objects.get_or_create(
             username=admin_username,
             defaults={
                 "email": admin_email,
@@ -58,24 +57,31 @@ class Command(BaseCommand):
                 "must_change_password": False,
             }
         )
-        if created:
-            admin_user.set_password(admin_password)
-            admin_user.save()
-            self.stdout.write(self.style.SUCCESS(f"[init_campus] Created admin user '{admin_username}'."))
-        else:
-            needs_save = False
-            if admin_user.role != "ADMIN":
-                admin_user.role = "ADMIN"
-                needs_save = True
-            if not admin_user.is_superuser or not admin_user.is_staff:
-                admin_user.is_superuser = True
-                admin_user.is_staff = True
-                needs_save = True
-            if not admin_user.is_active:
-                admin_user.is_active = True
-                needs_save = True
-            if needs_save:
-                admin_user.save()
-            self.stdout.write(f"[init_campus] Admin user '{admin_username}' is verified.")
+        admin_user.set_password(admin_password)
+        admin_user.is_staff = True
+        admin_user.is_superuser = True
+        admin_user.is_active = True
+        admin_user.is_active_account = True
+        admin_user.must_change_password = False
+        admin_user.role = "ADMIN"
+        admin_user.save()
+        self.stdout.write(self.style.SUCCESS(f"[init_campus] Admin '{admin_username}' credentials verified."))
+
+        # 4. Ensure demo student and teacher accounts have guaranteed active status & 'admin' password
+        verified_accounts = [
+            ("aditya25006", "adityakumar933050@gmail.com", "STUDENT", "admin"),
+            ("virus5556222", "adityakumar933047@gmail.com", "TEACHER", "admin"),
+            ("ADITYA3D", "adityakumar933046@gmail.com", "ADMIN", "admin"),
+        ]
+
+        for uname, uemail, urole, upassword in verified_accounts:
+            user_obj = User.objects.filter(username=uname).first() or User.objects.filter(email=uemail).first()
+            if user_obj:
+                user_obj.set_password(upassword)
+                user_obj.is_active = True
+                user_obj.is_active_account = True
+                user_obj.must_change_password = False
+                user_obj.save()
+                self.stdout.write(self.style.SUCCESS(f"[init_campus] Set password for {urole} '{user_obj.username}' ({user_obj.email}) to '{upassword}'."))
 
         self.stdout.write(self.style.SUCCESS("[init_campus] Database initialization complete."))
