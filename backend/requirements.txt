@@ -6,3 +6,4 @@ whitenoise
 dj-database-url
 psycopg2-binary
 pandas
+resend>=2.0.0

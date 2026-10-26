@@ -590,36 +590,64 @@ import logging
 campus_email_logger = logging.getLogger("campus_email")
 
 
-def send_campus_email(to_email, subject, text_content, html_content=None, from_email=None):
+def _sanitize_error(err_str, secrets=None):
+    """Remove sensitive keys or passwords from error strings."""
+    if not err_str:
+        return ""
+    clean = str(err_str)
+    if secrets:
+        for s in secrets:
+            if s and len(s) > 3:
+                clean = clean.replace(s, "[REDACTED]")
+    return clean
+
+
+def _send_via_resend(recipient, sender, subject, text_content, html_content, resend_key):
     """
-    Robust central dispatcher for sending email across Smart Campus.
-    Features:
-    1. Resend HTTPS API (port 443) if RESEND_API_KEY is configured (bypasses SMTP, ideal for Render).
-    2. Standard Django SMTP backend with explicit finite timeout (default 10s).
-    3. Handles connection failures, SMTP exceptions, and socket timeouts without hanging Gunicorn.
-    4. Logs useful diagnostic information without exposing credentials or secrets.
-    Returns: (bool, str) -> (success, message_or_error)
+    Deliver email via Resend HTTPS API (port 443).
+    Supports official Resend Python SDK with standard library urllib fallback.
+    Never falls back to SMTP. Never logs secret keys or passwords.
     """
-    import os
     import json
-    import socket
-    import smtplib
     import urllib.request
     import urllib.error
     from django.conf import settings
-    from django.core.mail import EmailMultiAlternatives, get_connection
 
-    sender = from_email or getattr(settings, 'DEFAULT_FROM_EMAIL', None) or 'adityakumar933046@gmail.com'
-    recipient = to_email.strip() if isinstance(to_email, str) else str(to_email)
+    if not resend_key:
+        campus_email_logger.error("Resend API key missing while Resend provider selected.")
+        return False, "Resend API key is not configured. Please set the RESEND_API_KEY environment variable in Render."
 
-    if not recipient:
-        return False, "Recipient email address is missing."
+    # Strategy 1: Official Resend Python SDK
+    try:
+        import resend
 
-    # --- Strategy A: HTTPS REST API (Resend) if configured ---
-    resend_key = getattr(settings, 'RESEND_API_KEY', '') or os.environ.get('RESEND_API_KEY', '')
-    if resend_key:
+        resend.api_key = resend_key
+        params = {
+            "from": sender,
+            "to": [recipient],
+            "subject": subject,
+            "html": html_content or text_content,
+        }
+        if text_content:
+            params["text"] = text_content
+
+        campus_email_logger.info("Submitting email via Resend Python SDK to %s", recipient)
+        response = resend.Emails.send(params)
+
+        email_id = ""
+        if isinstance(response, dict):
+            email_id = response.get("id", "")
+        elif hasattr(response, "id"):
+            email_id = getattr(response, "id", "")
+
+        id_suffix = f" (ID: {email_id})" if email_id else ""
+        campus_email_logger.info("Email submitted successfully via Resend API to %s%s", recipient, id_suffix)
+        return True, f"Email submitted successfully via Resend API{id_suffix}."
+
+    except ImportError:
+        # Fallback to direct HTTPS API using standard library urllib
         try:
-            campus_email_logger.info("Attempting email dispatch via Resend HTTPS API to %s", recipient)
+            campus_email_logger.info("Submitting email via Resend direct HTTPS API to %s", recipient)
             payload = {
                 "from": sender,
                 "to": [recipient],
@@ -636,24 +664,51 @@ def send_campus_email(to_email, subject, text_content, html_content=None, from_e
             }
             req = urllib.request.Request(
                 "https://api.resend.com/emails",
-                data=json.dumps(payload).encode('utf-8'),
+                data=json.dumps(payload).encode("utf-8"),
                 headers=headers,
-                method="POST"
+                method="POST",
             )
-            with urllib.request.urlopen(req, timeout=int(getattr(settings, 'EMAIL_TIMEOUT', None) or 10)) as resp:
-                if 200 <= resp.status < 300:
-                    campus_email_logger.info("Email sent successfully via Resend HTTPS API to %s", recipient)
-                    return True, "Email sent successfully via HTTPS API."
-                return False, f"HTTPS API returned status {resp.status}."
-        except urllib.error.HTTPError as he:
-            err_body = he.read().decode('utf-8', errors='ignore')
-            campus_email_logger.warning("Resend HTTPS API error (%s): %s", he.code, err_body)
-            # Fall through to SMTP if HTTPS API failed
-        except Exception as exc:
-            campus_email_logger.warning("Resend HTTPS API request exception: %s. Falling back to SMTP...", exc)
+            timeout_val = int(getattr(settings, "EMAIL_TIMEOUT", None) or 15)
+            with urllib.request.urlopen(req, timeout=timeout_val) as resp:
+                resp_body = resp.read().decode("utf-8")
+                resp_data = json.loads(resp_body) if resp_body else {}
+                email_id = resp_data.get("id", "")
+                id_suffix = f" (ID: {email_id})" if email_id else ""
+                campus_email_logger.info("Email submitted successfully via Resend HTTPS API to %s%s", recipient, id_suffix)
+                return True, f"Email submitted successfully via Resend API{id_suffix}."
 
-    # --- Strategy B: Django SMTP Backend with Finite Timeout Guard ---
-    timeout_val = int(getattr(settings, 'EMAIL_TIMEOUT', None) or 10)
+        except urllib.error.HTTPError as he:
+            err_body = he.read().decode("utf-8", errors="ignore")
+            safe_body = _sanitize_error(err_body, [resend_key])
+            campus_email_logger.warning("Resend HTTPS API returned error %s for %s: %s", he.code, recipient, safe_body)
+            return False, f"Resend API error ({he.code}): {safe_body}"
+        except urllib.error.URLError as ue:
+            safe_err = _sanitize_error(str(ue.reason), [resend_key])
+            campus_email_logger.warning("Resend network error for %s: %s", recipient, safe_err)
+            return False, f"Resend network connection error: {safe_err}"
+        except Exception as exc:
+            safe_err = _sanitize_error(str(exc), [resend_key])
+            campus_email_logger.warning("Resend exception for %s: %s", recipient, safe_err)
+            return False, f"Resend API error: {safe_err}"
+
+    except Exception as exc:
+        raw_msg = str(exc)
+        safe_msg = _sanitize_error(raw_msg, [resend_key])
+        campus_email_logger.warning("Resend SDK error for %s: %s", recipient, safe_msg)
+        return False, f"Resend API error: {safe_msg}"
+
+
+def _send_via_smtp(recipient, sender, subject, text_content, html_content):
+    """
+    Standard Django SMTP backend with explicit finite timeout guard.
+    Used when EMAIL_PROVIDER is explicitly set to 'smtp'.
+    """
+    import socket
+    import smtplib
+    from django.conf import settings
+    from django.core.mail import EmailMultiAlternatives, get_connection
+
+    timeout_val = int(getattr(settings, 'EMAIL_TIMEOUT', None) or 15)
     host = getattr(settings, 'EMAIL_HOST', 'smtp.gmail.com')
     port = int(getattr(settings, 'EMAIL_PORT', 587) or 587)
 
@@ -697,6 +752,56 @@ def send_campus_email(to_email, subject, text_content, html_content=None, from_e
         err_msg = f"Email delivery error: {str(e)}"
         campus_email_logger.error("Unexpected email error for %s: %s", recipient, err_msg)
         return False, err_msg
+
+
+def send_campus_email(to_email, subject, text_content, html_content=None, from_email=None):
+    """
+    Robust central dispatcher for sending email across Smart Campus.
+    Uses Resend HTTPS API when EMAIL_PROVIDER is 'resend' or RESEND_API_KEY is configured.
+    Never falls back to SMTP when Resend fails.
+    Returns: (bool, str) -> (success, message_or_error)
+    """
+    import os
+    from django.conf import settings
+
+    sender = from_email or getattr(settings, 'DEFAULT_FROM_EMAIL', None) or 'adityakumar933046@gmail.com'
+    recipient = to_email.strip() if isinstance(to_email, str) else str(to_email)
+
+    if not recipient:
+        return False, "Recipient email address is missing."
+
+    provider = (
+        getattr(settings, 'EMAIL_PROVIDER', '').strip().lower()
+        or os.environ.get('EMAIL_PROVIDER', '').strip().lower()
+    )
+    resend_key = (
+        getattr(settings, 'RESEND_API_KEY', '').strip()
+        or os.environ.get('RESEND_API_KEY', '').strip()
+    )
+
+    # Use Resend if:
+    # 1. EMAIL_PROVIDER is explicitly 'resend'
+    # 2. RESEND_API_KEY is provided and EMAIL_PROVIDER is not explicitly 'smtp'
+    use_resend = (provider == 'resend') or (bool(resend_key) and provider != 'smtp')
+
+    if use_resend:
+        return _send_via_resend(
+            recipient=recipient,
+            sender=sender,
+            subject=subject,
+            text_content=text_content,
+            html_content=html_content,
+            resend_key=resend_key,
+        )
+
+    # Strategy B: SMTP (used only when EMAIL_PROVIDER is 'smtp')
+    return _send_via_smtp(
+        recipient=recipient,
+        sender=sender,
+        subject=subject,
+        text_content=text_content,
+        html_content=html_content,
+    )
 
 
 def send_account_credentials_email(user, temporary_password, role=None, request=None):

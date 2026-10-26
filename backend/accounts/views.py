@@ -811,8 +811,8 @@ def reset_password_view(request):
 def email_diagnostics_view(request):
     """
     Secure diagnostic dashboard for Administrators to verify email configuration,
-    DNS, TCP socket reachability, TLS handshake, SMTP authentication, and send test emails.
-    Protected by @admin_required. Never reveals sensitive passwords.
+    Resend API status, DNS, TCP socket reachability, and send live test emails.
+    Protected by @admin_required. Never reveals sensitive passwords or API keys.
     """
     import os
     import socket
@@ -823,12 +823,17 @@ def email_diagnostics_view(request):
 
     host = getattr(settings, "EMAIL_HOST", "smtp.gmail.com")
     port = int(getattr(settings, "EMAIL_PORT", 587) or 587)
-    timeout = int(getattr(settings, "EMAIL_TIMEOUT", None) or 10)
+    timeout = int(getattr(settings, "EMAIL_TIMEOUT", None) or 15)
     use_tls = getattr(settings, "EMAIL_USE_TLS", True)
     use_ssl = getattr(settings, "EMAIL_USE_SSL", False)
     user = getattr(settings, "EMAIL_HOST_USER", "")
     password = getattr(settings, "EMAIL_HOST_PASSWORD", "")
-    resend_key = getattr(settings, "RESEND_API_KEY", "") or os.environ.get("RESEND_API_KEY", "")
+    resend_key = getattr(settings, "RESEND_API_KEY", "").strip() or os.environ.get("RESEND_API_KEY", "").strip()
+    provider = getattr(settings, "EMAIL_PROVIDER", "").strip().lower()
+    if not provider:
+        provider = "resend" if resend_key else "smtp"
+
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "") or user or "adityakumar933046@gmail.com"
 
     test_result = None
 
@@ -841,148 +846,151 @@ def email_diagnostics_view(request):
             ok, msg = send_campus_email(
                 to_email=test_recipient,
                 subject="Smart Campus - Live Diagnostic Verification",
-                text_content=f"Hello!\n\nThis is a verified live diagnostic email from Smart Campus ({base_url}).\nIf you received this, your email delivery pipeline is fully functional!",
+                text_content=f"Hello!\n\nThis is a verified live diagnostic email from Smart Campus ({base_url}).\nProvider: {provider.upper()}\n\nIf you received this, your email delivery pipeline is fully functional!",
             )
             test_result = {"success": ok, "message": msg, "recipient": test_recipient}
 
     checks = []
 
-    # Check 1: Settings
+    # Check 1: Active Provider & Environment
     checks.append({
-        "name": "Configuration & Environment",
-        "status": "PASS" if user and password else "WARN",
-        "details": f"Host={host}, Port={port}, Timeout={timeout}s, TLS={use_tls}, SSL={use_ssl}, User={user or '(missing)'}, Password={'[Configured - ' + str(len(password)) + ' chars]' if password else '[NOT SET]'}",
+        "name": "Active Email Provider",
+        "status": "PASS" if (provider == "resend" and resend_key) or (provider == "smtp" and user and password) else "WARN",
+        "details": f"EMAIL_PROVIDER={provider.upper()} | DEFAULT_FROM_EMAIL={from_email}",
     })
 
-    # Check 2: DNS
-    t0 = time.time()
-    try:
-        infos = socket.getaddrinfo(host, port, socket.AF_UNSPEC, socket.SOCK_STREAM)
-        ips = sorted(list({i[4][0] for i in infos}))
-        elapsed = (time.time() - t0) * 1000
+    # Check 2: Resend API Configuration
+    if provider == "resend" or resend_key:
         checks.append({
-            "name": "DNS Resolution",
-            "status": "PASS",
-            "details": f"Resolved '{host}' to {ips[:3]} in {elapsed:.1f}ms",
-        })
-    except Exception as e:
-        checks.append({
-            "name": "DNS Resolution",
-            "status": "FAIL",
-            "details": f"Failed to resolve '{host}': {e}",
+            "name": "Resend HTTPS API (Port 443)",
+            "status": "PASS" if resend_key else "FAIL",
+            "details": f"RESEND_API_KEY is {'configured (' + str(len(resend_key)) + ' chars). Outbound HTTPS active.' if resend_key else 'MISSING. Please configure RESEND_API_KEY in Render environment.'}",
         })
 
-    # Check 3: TCP Socket Connect (5s timeout max for UI responsiveness)
-    t0 = time.time()
-    tcp_ok = False
-    try:
-        sock = socket.create_connection((host, port), timeout=min(timeout, 5))
-        elapsed = (time.time() - t0) * 1000
-        sock.close()
-        tcp_ok = True
+    # If Resend is primary, we skip slow/blocked SMTP tests to avoid blocking the page
+    if provider == "resend" and resend_key:
         checks.append({
-            "name": f"TCP Socket ({host}:{port})",
-            "status": "PASS",
-            "details": f"Successfully opened TCP connection to port {port} in {elapsed:.1f}ms",
+            "name": "SMTP Port 587 Check",
+            "status": "SKIP",
+            "details": "Skipped: Resend HTTPS API (port 443) is the primary provider. SMTP is bypassed.",
         })
-    except (socket.timeout, TimeoutError):
-        checks.append({
-            "name": f"TCP Socket ({host}:{port})",
-            "status": "FAIL",
-            "details": f"Connection timed out after 5.0s. Outbound SMTP traffic to port {port} is blocked or hanging.",
-        })
-    except Exception as e:
-        checks.append({
-            "name": f"TCP Socket ({host}:{port})",
-            "status": "FAIL",
-            "details": f"TCP connection error: {e}",
-        })
-
-    # Check 4: SMTP Handshake & TLS
-    if tcp_ok:
+    else:
+        # Check: DNS
+        t0 = time.time()
         try:
-            if use_ssl:
-                s = smtplib.SMTP_SSL(host, port, timeout=5)
-                s.ehlo()
-                checks.append({
-                    "name": "SMTP Handshake (SSL)",
-                    "status": "PASS",
-                    "details": "Connected and negotiated SSL channel.",
-                })
-            else:
-                s = smtplib.SMTP(host, port, timeout=5)
-                s.ehlo()
-                if use_tls:
-                    s.starttls()
-                    s.ehlo()
-                    checks.append({
-                        "name": "SMTP Handshake (STARTTLS)",
-                        "status": "PASS",
-                        "details": "STARTTLS negotiation successful. Encrypted connection established.",
-                    })
-                else:
-                    checks.append({
-                        "name": "SMTP Handshake (Plain)",
-                        "status": "WARN",
-                        "details": "Connected without TLS encryption.",
-                    })
-
-            # Check 5: Authentication
-            if user and password:
-                try:
-                    s.login(user, password)
-                    checks.append({
-                        "name": "SMTP Authentication",
-                        "status": "PASS",
-                        "details": f"Successfully authenticated as {user}",
-                    })
-                except smtplib.SMTPAuthenticationError as auth_e:
-                    checks.append({
-                        "name": "SMTP Authentication",
-                        "status": "FAIL",
-                        "details": f"Authentication rejected by mail server ({auth_e}). Check Gmail App Password.",
-                    })
-                except Exception as auth_e:
-                    checks.append({
-                        "name": "SMTP Authentication",
-                        "status": "FAIL",
-                        "details": f"Auth error: {auth_e}",
-                    })
-            else:
-                checks.append({
-                    "name": "SMTP Authentication",
-                    "status": "WARN",
-                    "details": "Skipped: EMAIL_HOST_USER or EMAIL_HOST_PASSWORD is not set in environment.",
-                })
-
-            try:
-                s.quit()
-            except Exception:
-                pass
+            infos = socket.getaddrinfo(host, port, socket.AF_UNSPEC, socket.SOCK_STREAM)
+            ips = sorted(list({i[4][0] for i in infos}))
+            elapsed = (time.time() - t0) * 1000
+            checks.append({
+                "name": "DNS Resolution",
+                "status": "PASS",
+                "details": f"Resolved '{host}' to {ips[:3]} in {elapsed:.1f}ms",
+            })
         except Exception as e:
             checks.append({
-                "name": "SMTP Handshake & TLS",
+                "name": "DNS Resolution",
                 "status": "FAIL",
-                "details": f"Handshake failed: {e}",
+                "details": f"Failed to resolve '{host}': {e}",
             })
-    else:
-        checks.append({
-            "name": "SMTP Handshake & TLS",
-            "status": "SKIP",
-            "details": "Skipped because TCP connection to port failed.",
-        })
-        checks.append({
-            "name": "SMTP Authentication",
-            "status": "SKIP",
-            "details": "Skipped because TCP connection failed.",
-        })
 
-    # Check 6: HTTPS API alternative
-    checks.append({
-        "name": "Resend HTTPS API (Alternative Provider)",
-        "status": "PASS" if resend_key else "INFO",
-        "details": f"RESEND_API_KEY is {'configured. Port 443 HTTPS dispatch active.' if resend_key else 'not configured. Standard SMTP backend will be used.'}",
-    })
+        # Check: TCP Socket Connect (3s timeout for responsiveness)
+        t0 = time.time()
+        tcp_ok = False
+        try:
+            sock = socket.create_connection((host, port), timeout=3)
+            elapsed = (time.time() - t0) * 1000
+            sock.close()
+            tcp_ok = True
+            checks.append({
+                "name": f"TCP Socket ({host}:{port})",
+                "status": "PASS",
+                "details": f"Successfully opened TCP connection to port {port} in {elapsed:.1f}ms",
+            })
+        except (socket.timeout, TimeoutError):
+            checks.append({
+                "name": f"TCP Socket ({host}:{port})",
+                "status": "FAIL",
+                "details": f"Connection timed out. Outbound SMTP traffic to port {port} is blocked or hanging.",
+            })
+        except Exception as e:
+            checks.append({
+                "name": f"TCP Socket ({host}:{port})",
+                "status": "FAIL",
+                "details": f"TCP connection error: {e}",
+            })
+
+        # Check: SMTP Handshake & TLS
+        if tcp_ok:
+            try:
+                if use_ssl:
+                    s = smtplib.SMTP_SSL(host, port, timeout=5)
+                    s.ehlo()
+                    checks.append({
+                        "name": "SMTP Handshake (SSL)",
+                        "status": "PASS",
+                        "details": "Connected and negotiated SSL channel.",
+                    })
+                else:
+                    s = smtplib.SMTP(host, port, timeout=5)
+                    s.ehlo()
+                    if use_tls:
+                        s.starttls()
+                        s.ehlo()
+                        checks.append({
+                            "name": "SMTP Handshake (STARTTLS)",
+                            "status": "PASS",
+                            "details": "STARTTLS negotiation successful. Encrypted connection established.",
+                        })
+                    else:
+                        checks.append({
+                            "name": "SMTP Handshake (Plain)",
+                            "status": "WARN",
+                            "details": "Connected without TLS encryption.",
+                        })
+
+                if user and password:
+                    try:
+                        s.login(user, password)
+                        checks.append({
+                            "name": "SMTP Authentication",
+                            "status": "PASS",
+                            "details": f"Successfully authenticated as {user}",
+                        })
+                    except smtplib.SMTPAuthenticationError as auth_e:
+                        checks.append({
+                            "name": "SMTP Authentication",
+                            "status": "FAIL",
+                            "details": f"Authentication rejected by mail server ({auth_e}). Check Gmail App Password.",
+                        })
+                    except Exception as auth_e:
+                        checks.append({
+                            "name": "SMTP Authentication",
+                            "status": "FAIL",
+                            "details": f"Auth error: {auth_e}",
+                        })
+                else:
+                    checks.append({
+                        "name": "SMTP Authentication",
+                        "status": "WARN",
+                        "details": "Skipped: EMAIL_HOST_USER or EMAIL_HOST_PASSWORD is not set in environment.",
+                    })
+
+                try:
+                    s.quit()
+                except Exception:
+                    pass
+            except Exception as e:
+                checks.append({
+                    "name": "SMTP Handshake & TLS",
+                    "status": "FAIL",
+                    "details": f"Handshake failed: {e}",
+                })
+        else:
+            checks.append({
+                "name": "SMTP Handshake & TLS",
+                "status": "SKIP",
+                "details": "Skipped because TCP connection to port failed.",
+            })
 
     context = {
         "checks": checks,
@@ -990,7 +998,10 @@ def email_diagnostics_view(request):
         "host": host,
         "port": port,
         "user": user,
+        "provider": provider,
+        "from_email": from_email,
         "has_password": bool(password),
         "has_resend": bool(resend_key),
     }
     return render(request, "accounts/email_diagnostics.html", context)
+

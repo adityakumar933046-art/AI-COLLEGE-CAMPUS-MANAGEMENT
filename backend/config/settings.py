@@ -219,14 +219,19 @@ EMAIL_HOST_PASSWORD = (
 DEFAULT_FROM_EMAIL = os.getenv(
     "DEFAULT_FROM_EMAIL",
     EMAIL_HOST_USER or "adityakumar933046@gmail.com"
-)
+).strip()
 
 SITE_URL = os.getenv(
     "SITE_URL",
     "https://ai-college-campus-management.onrender.com"
-)
+).strip()
 
-# HTTPS Email Provider Support (Optional alternative to SMTP on cloud hosts)
+# Email Provider Configuration (resend or smtp)
+EMAIL_PROVIDER = os.getenv("EMAIL_PROVIDER", "").strip().lower()
+if not EMAIL_PROVIDER:
+    EMAIL_PROVIDER = "resend" if os.getenv("RESEND_API_KEY") else "smtp"
+
+# HTTPS Email Provider Support (Resend API / SDK)
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "").strip()
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "").strip()
 BREVO_API_KEY = os.getenv("BREVO_API_KEY", "").strip()
