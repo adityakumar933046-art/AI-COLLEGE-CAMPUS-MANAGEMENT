@@ -85,13 +85,21 @@ def admin_dashboard(request):
 # ==========================================================
 @login_required
 def teacher_dashboard(request):
-    try:
-        teacher = TeacherProfile.objects.filter(user=request.user).first()
-    except TeacherProfile.DoesNotExist:
-        return redirect("admin_dashboard")
+    teacher = TeacherProfile.objects.filter(user=request.user).first()
+    if not teacher:
+        dept = Department.objects.first()
+        if dept:
+            teacher, _ = TeacherProfile.objects.get_or_create(
+                user=request.user,
+                defaults={
+                    "employee_id": request.user.username or "TCH-001",
+                    "department": dept,
+                    "designation": "Assistant Professor",
+                }
+            )
 
-    assigned_courses = Course.objects.filter(teacher=teacher)
-    today_schedule = Timetable.objects.filter(teacher=teacher)
+    assigned_courses = Course.objects.filter(teacher=teacher) if teacher else Course.objects.none()
+    today_schedule = Timetable.objects.filter(teacher=teacher) if teacher else Timetable.objects.none()
 
     context = {
         "teacher": teacher,
@@ -106,12 +114,24 @@ def teacher_dashboard(request):
 # ==========================================================
 @login_required
 def student_dashboard(request):
-    try:
-        student = StudentProfile.objects.filter(user=request.user).first()
-    except StudentProfile.DoesNotExist:
-        return redirect("admin_dashboard")
+    student = StudentProfile.objects.filter(user=request.user).first()
+    if not student:
+        dept = Department.objects.first()
+        if dept:
+            student, _ = StudentProfile.objects.get_or_create(
+                user=request.user,
+                defaults={
+                    "roll_no": request.user.username or "STD-001",
+                    "department": dept,
+                    "semester": 1,
+                    "section": "A",
+                }
+            )
 
-    enrolled_courses = Course.objects.filter(department=student.department, semester=student.semester)
+    if student and student.department:
+        enrolled_courses = Course.objects.filter(department=student.department, semester=student.semester or 1)
+    else:
+        enrolled_courses = Course.objects.all()[:5]
 
     context = {
         "student": student,
