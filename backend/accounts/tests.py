@@ -1,8 +1,10 @@
 import os
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
 from django.template.loader import render_to_string
+from google.auth.exceptions import RefreshError
+import googleapiclient.errors
 
 from accounts.services import (
     send_campus_email,
@@ -16,10 +18,11 @@ from students.services import create_student
 User = get_user_model()
 
 
-class ResendEmailIntegrationTests(TestCase):
+class GmailApiEmailIntegrationTests(TestCase):
     """
-    Test suite for Resend email integration, error handling,
-    secret redaction, template rendering, and student account safety.
+    Comprehensive test suite for Gmail API OAuth 2.0 integration,
+    mocked token refresh, error handling, secret sanitization,
+    student creation preservation, and credential resending.
     """
 
     def setUp(self):
@@ -32,65 +35,148 @@ class ResendEmailIntegrationTests(TestCase):
         )
 
     # -------------------------------------------------------------
-    # 1. Successful Resend API response handled correctly
+    # 1. Successful Gmail API sending
     # -------------------------------------------------------------
-    @override_settings(EMAIL_PROVIDER="resend", RESEND_API_KEY="re_test_dummy_key_12345")
-    def test_resend_api_success_handling(self):
-        mock_response = {"id": "resend_msg_test_abc123"}
-        with patch("resend.Emails.send", return_value=mock_response) as mock_send:
-            ok, msg = send_campus_email(
-                to_email="test@example.com",
-                subject="Test Subject",
-                text_content="Plain text content",
-                html_content="<p>HTML content</p>",
-            )
-            self.assertTrue(ok)
-            self.assertIn("resend_msg_test_abc123", msg)
-            self.assertIn("Email submitted successfully", msg)
-            mock_send.assert_called_once()
-            call_params = mock_send.call_args[0][0]
-            self.assertEqual(call_params["to"], ["test@example.com"])
-            self.assertEqual(call_params["subject"], "Test Subject")
+    @override_settings(
+        EMAIL_PROVIDER="gmail_api",
+        GOOGLE_CLIENT_ID="mock_client_id_12345",
+        GOOGLE_CLIENT_SECRET="mock_client_secret_67890",
+        GOOGLE_REFRESH_TOKEN="mock_refresh_token_abcde",
+        GMAIL_SENDER_EMAIL="smartcampus.in.org@gmail.com",
+    )
+    def test_gmail_api_successful_sending(self):
+        mock_service = MagicMock()
+        mock_messages = MagicMock()
+        mock_send = MagicMock()
+        mock_send.execute.return_value = {"id": "gmail_msg_18a1b2c3d4e5f6"}
+        mock_messages.send.return_value = mock_send
+        mock_service.users.return_value.messages.return_value = mock_messages
+
+        with patch("accounts.services.build", return_value=mock_service, create=True) as mock_build:
+            with patch("googleapiclient.discovery.build", return_value=mock_service):
+                ok, msg = send_campus_email(
+                    to_email="student@example.com",
+                    subject="Your Smart Campus Credentials",
+                    text_content="Welcome to Smart Campus. Username: student123",
+                    html_content="<p>Welcome to Smart Campus. Username: student123</p>",
+                )
+                self.assertTrue(ok)
+                self.assertIn("Email accepted by Gmail API", msg)
+                self.assertIn("gmail_msg_18a1b2c3d4e5f6", msg)
+                mock_messages.send.assert_called_once()
+                call_kwargs = mock_messages.send.call_args[1]
+                self.assertEqual(call_kwargs["userId"], "me")
+                self.assertIn("raw", call_kwargs["body"])
 
     # -------------------------------------------------------------
-    # 2. Resend API error produces a safe failure result
+    # 2. Missing Configuration Handling
     # -------------------------------------------------------------
-    @override_settings(EMAIL_PROVIDER="resend", RESEND_API_KEY="re_test_dummy_key_12345")
-    def test_resend_api_error_produces_safe_failure(self):
-        with patch("resend.Emails.send", side_effect=Exception("Domain not verified: example.com")):
+    @override_settings(
+        EMAIL_PROVIDER="gmail_api",
+        GOOGLE_CLIENT_ID="",
+        GOOGLE_CLIENT_SECRET="",
+        GOOGLE_REFRESH_TOKEN="",
+    )
+    def test_gmail_api_missing_configuration_handled_clearly(self):
+        with patch.dict(os.environ, {
+            "GOOGLE_CLIENT_ID": "",
+            "GOOGLE_CLIENT_SECRET": "",
+            "GOOGLE_REFRESH_TOKEN": "",
+        }):
             ok, msg = send_campus_email(
-                to_email="test@example.com",
+                to_email="student@example.com",
                 subject="Test Subject",
-                text_content="Plain text content",
+                text_content="Content",
             )
             self.assertFalse(ok)
-            self.assertIn("Resend API error", msg)
-            self.assertIn("Domain not verified", msg)
+            self.assertIn("Gmail API configuration incomplete", msg)
+            self.assertIn("GOOGLE_CLIENT_ID", msg)
+            self.assertIn("GOOGLE_CLIENT_SECRET", msg)
+            self.assertIn("GOOGLE_REFRESH_TOKEN", msg)
 
     # -------------------------------------------------------------
-    # 3. Missing RESEND_API_KEY handled clearly
+    # 3. Revoked or Expired Refresh Token (RefreshError)
     # -------------------------------------------------------------
-    @override_settings(EMAIL_PROVIDER="resend", RESEND_API_KEY="")
-    def test_missing_resend_api_key_handled_clearly(self):
-        with patch.dict(os.environ, {"RESEND_API_KEY": ""}):
+    @override_settings(
+        EMAIL_PROVIDER="gmail_api",
+        GOOGLE_CLIENT_ID="mock_client_id_12345",
+        GOOGLE_CLIENT_SECRET="mock_client_secret_67890",
+        GOOGLE_REFRESH_TOKEN="mock_revoked_token_abcde",
+        GMAIL_SENDER_EMAIL="smartcampus.in.org@gmail.com",
+    )
+    def test_gmail_api_revoked_or_expired_token(self):
+        with patch("googleapiclient.discovery.build", side_effect=RefreshError("invalid_grant: Token has been expired or revoked.")):
             ok, msg = send_campus_email(
-                to_email="test@example.com",
+                to_email="student@example.com",
                 subject="Test Subject",
-                text_content="Plain text content",
+                text_content="Content",
             )
             self.assertFalse(ok)
-            self.assertIn("Resend API key is not configured", msg)
+            self.assertIn("Gmail API authorization failed", msg)
+            self.assertIn("invalid, expired, or has been revoked", msg)
 
     # -------------------------------------------------------------
-    # 4. Student creation still works when email sending fails
+    # 4. Gmail API HttpError (Quota / Permission 403)
+    # -------------------------------------------------------------
+    @override_settings(
+        EMAIL_PROVIDER="gmail_api",
+        GOOGLE_CLIENT_ID="mock_client_id_12345",
+        GOOGLE_CLIENT_SECRET="mock_client_secret_67890",
+        GOOGLE_REFRESH_TOKEN="mock_refresh_token_abcde",
+        GMAIL_SENDER_EMAIL="smartcampus.in.org@gmail.com",
+    )
+    def test_gmail_api_http_error_quota_or_rate_limit(self):
+        mock_resp = MagicMock()
+        mock_resp.status = 403
+        mock_resp.reason = "Forbidden"
+        http_err = googleapiclient.errors.HttpError(resp=mock_resp, content=b"Daily sending quota exceeded")
+
+        mock_service = MagicMock()
+        mock_messages = MagicMock()
+        mock_send = MagicMock()
+        mock_send.execute.side_effect = http_err
+        mock_messages.send.return_value = mock_send
+        mock_service.users.return_value.messages.return_value = mock_messages
+
+        with patch("googleapiclient.discovery.build", return_value=mock_service):
+            ok, msg = send_campus_email(
+                to_email="student@example.com",
+                subject="Test Subject",
+                text_content="Content",
+            )
+            self.assertFalse(ok)
+            self.assertIn("permission or quota error (403)", msg)
+
+    # -------------------------------------------------------------
+    # 5. Network Timeout Handling
+    # -------------------------------------------------------------
+    @override_settings(
+        EMAIL_PROVIDER="gmail_api",
+        GOOGLE_CLIENT_ID="mock_client_id_12345",
+        GOOGLE_CLIENT_SECRET="mock_client_secret_67890",
+        GOOGLE_REFRESH_TOKEN="mock_refresh_token_abcde",
+        GMAIL_SENDER_EMAIL="smartcampus.in.org@gmail.com",
+    )
+    def test_gmail_api_timeout_handling(self):
+        with patch("googleapiclient.discovery.build", side_effect=TimeoutError("The read operation timed out")):
+            ok, msg = send_campus_email(
+                to_email="student@example.com",
+                subject="Test Subject",
+                text_content="Content",
+            )
+            self.assertFalse(ok)
+            self.assertIn("connection timed out", msg.lower())
+
+    # -------------------------------------------------------------
+    # 6. Student Creation Works Even When Email Sending Fails
     # -------------------------------------------------------------
     def test_student_creation_succeeds_even_when_email_fails(self):
         student_data = {
             "first_name": "Alice",
             "last_name": "Smith",
-            "email": "alice@example.com",
-            "admission_no": "ADM2026001",
-            "roll_no": "CS101",
+            "email": "alice_test@example.com",
+            "admission_no": "ADM2026GMAIL01",
+            "roll_no": "CS201",
             "semester": 1,
             "section": "A",
             "phone": "9876543210",
@@ -101,25 +187,26 @@ class ResendEmailIntegrationTests(TestCase):
         new_user = result["user"]
         temp_pwd = result["password"]
 
-        # Simulate email failure
-        with patch("accounts.services.send_campus_email", return_value=(False, "Resend API error: timeout")):
+        # Simulate Gmail API failure during sending
+        with patch("accounts.services.send_campus_email", return_value=(False, "Gmail API dispatch error: simulated failure")):
             email_ok, email_err = send_student_credentials_email(new_user, temp_pwd)
             self.assertFalse(email_ok)
+            self.assertIn("Gmail API dispatch error", email_err)
 
-        # Confirm student user and profile exist in database
-        self.assertTrue(User.objects.filter(email="alice@example.com").exists())
+        # Confirm student user and profile remain safely in database
+        self.assertTrue(User.objects.filter(email="alice_test@example.com").exists())
         self.assertTrue(StudentProfile.objects.filter(user=new_user).exists())
 
     # -------------------------------------------------------------
-    # 5. Resending credentials does not create duplicate accounts
+    # 7. Resending Credentials Does Not Create Duplicate Accounts
     # -------------------------------------------------------------
     def test_resending_credentials_does_not_duplicate_accounts(self):
         student_data = {
             "first_name": "Bob",
             "last_name": "Jones",
-            "email": "bob@example.com",
-            "admission_no": "ADM2026002",
-            "roll_no": "CS102",
+            "email": "bob_test@example.com",
+            "admission_no": "ADM2026GMAIL02",
+            "roll_no": "CS202",
             "semester": 1,
             "section": "A",
             "phone": "9876543211",
@@ -130,12 +217,12 @@ class ResendEmailIntegrationTests(TestCase):
         initial_user_count = User.objects.count()
         initial_student_count = StudentProfile.objects.count()
 
-        # Simulate resend workflow: change password and send email
-        bob_user.set_password("NewTempPass123!")
+        # Simulate resend workflow: change password and send email via Gmail API
+        bob_user.set_password("NewSecureTempPass999!")
         bob_user.save()
 
-        with patch("accounts.services.send_account_credentials_email", return_value=(True, "Email submitted")):
-            ok, _ = send_account_credentials_email(bob_user, "NewTempPass123!", role="STUDENT")
+        with patch("accounts.services.send_campus_email", return_value=(True, "Email accepted by Gmail API")):
+            ok, _ = send_account_credentials_email(bob_user, "NewSecureTempPass999!", role="STUDENT")
             self.assertTrue(ok)
 
         # User and StudentProfile counts must remain identical (no duplicate records)
@@ -143,17 +230,18 @@ class ResendEmailIntegrationTests(TestCase):
         self.assertEqual(StudentProfile.objects.count(), initial_student_count)
 
     # -------------------------------------------------------------
-    # 6. No plaintext password or API key is exposed/written
+    # 8. Secret Redaction Helper
     # -------------------------------------------------------------
-    def test_sanitization_helper_redacts_secrets(self):
-        raw_error = "Failed to connect with secret re_live_abcdef123456789 and password SuperSecret123"
-        sanitized = _sanitize_error(raw_error, ["re_live_abcdef123456789", "SuperSecret123"])
-        self.assertNotIn("re_live_abcdef123456789", sanitized)
-        self.assertNotIn("SuperSecret123", sanitized)
+    def test_sanitization_helper_redacts_google_secrets(self):
+        raw_error = "Error with client secret 12345SECRET and refresh token 1//04REFRESH_TOKEN and password TempPass123"
+        sanitized = _sanitize_error(raw_error, ["12345SECRET", "1//04REFRESH_TOKEN", "TempPass123"])
+        self.assertNotIn("12345SECRET", sanitized)
+        self.assertNotIn("1//04REFRESH_TOKEN", sanitized)
+        self.assertNotIn("TempPass123", sanitized)
         self.assertIn("[REDACTED]", sanitized)
 
     # -------------------------------------------------------------
-    # 7. Existing email templates and credential content remain intact
+    # 9. Existing Email Templates and Credential Content Integrity
     # -------------------------------------------------------------
     def test_email_template_rendering_integrity(self):
         context = {

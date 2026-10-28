@@ -1,19 +1,15 @@
 {% extends "base.html" %}
-{% load static %}
 
-{% block title %}Email Delivery Diagnostics | Smart Campus{% endblock %}
+{% block title %}Email Diagnostics & Gmail API - Smart Campus{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4 mb-5">
+<div class="container py-4">
 
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h3 class="fw-bold mb-1">
-                <i class="bi bi-envelope-check text-primary me-2"></i>
-                Email Delivery Diagnostics
-            </h3>
-            <p class="text-muted mb-0">Live step-by-step verification of DNS, TCP connectivity, TLS handshake, and SMTP authentication.</p>
+            <h3 class="fw-bold mb-1"><i class="bi bi-envelope-check text-primary me-2"></i>Email Delivery & Gmail API Diagnostics</h3>
+            <p class="text-muted small mb-0">Inspect Gmail REST API connectivity, OAuth 2.0 authorization, and send live verification messages.</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-2">
@@ -32,7 +28,7 @@
                 <i class="bi bi-{% if test_result.success %}check-circle-fill fs-4{% else %}exclamation-triangle-fill fs-4{% endif %} me-3"></i>
                 <div>
                     <h6 class="fw-bold mb-1">
-                        {% if test_result.success %}Test Email Delivered Successfully!{% else %}Test Email Failed to Send{% endif %}
+                        {% if test_result.success %}Test Email Accepted by Provider!{% else %}Test Email Failed to Send{% endif %}
                     </h6>
                     <p class="mb-0 small">{{ test_result.message }} {% if test_result.recipient %}(Target: <code>{{ test_result.recipient }}</code>){% endif %}</p>
                 </div>
@@ -41,31 +37,48 @@
         </div>
     {% endif %}
 
+    <!-- OAuth Status Alert if Refresh Token Missing -->
+    {% if not has_refresh_token %}
+        <div class="card border-0 shadow-sm border-start border-warning border-4 mb-4">
+            <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <h5 class="fw-bold text-dark mb-1"><i class="bi bi-shield-exclamation text-warning me-2"></i>Gmail API Authorization Required</h5>
+                    <p class="text-muted small mb-0">Authorize your Gmail account to enable permanent, secure email delivery over HTTPS (port 443). Bypasses Render's SMTP block completely.</p>
+                </div>
+                <div>
+                    <a href="{% url 'gmail_oauth_init' %}" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm text-nowrap">
+                        <i class="bi bi-google me-2"></i> Authorize Gmail API Account
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
     <!-- Environment Summary Row -->
     <div class="row g-3 mb-4">
         <div class="col-md-3">
             <div class="card border-0 shadow-sm p-3 h-100">
-                <small class="text-muted text-uppercase fw-semibold">SMTP Host & Port</small>
-                <h5 class="fw-bold mt-1 mb-0">{{ host }}:{{ port }}</h5>
+                <small class="text-muted text-uppercase fw-semibold">Delivery Protocol</small>
+                <h6 class="fw-bold mt-1 mb-0 text-primary">Gmail REST API (Port 443)</h6>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card border-0 shadow-sm p-3 h-100">
                 <small class="text-muted text-uppercase fw-semibold">Sender Account</small>
-                <h6 class="fw-bold mt-1 mb-0 text-truncate" title="{{ user }}">{{ user|default:"(Not Set)" }}</h6>
+                <h6 class="fw-bold mt-1 mb-0 text-truncate" title="{{ from_email }}">{{ from_email|default:"(Not Set)" }}</h6>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card border-0 shadow-sm p-3 h-100">
-                <small class="text-muted text-uppercase fw-semibold">Password Status</small>
+                <small class="text-muted text-uppercase fw-semibold">OAuth Credentials</small>
                 <div class="mt-1">
-                    {% if has_password %}
+                    {% if has_client_id and has_client_secret %}
                         <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                            <i class="bi bi-shield-lock-fill me-1"></i> Configured in Environment
+                            <i class="bi bi-shield-lock-fill me-1"></i> Client ID & Secret Set
                         </span>
                     {% else %}
                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
-                            <i class="bi bi-x-circle me-1"></i> Missing / Empty
+                            <i class="bi bi-x-circle me-1"></i> Missing Client Secrets
                         </span>
                     {% endif %}
                 </div>
@@ -73,15 +86,15 @@
         </div>
         <div class="col-md-3">
             <div class="card border-0 shadow-sm p-3 h-100">
-                <small class="text-muted text-uppercase fw-semibold">HTTPS API Fallback</small>
+                <small class="text-muted text-uppercase fw-semibold">Refresh Token</small>
                 <div class="mt-1">
-                    {% if has_resend %}
+                    {% if has_refresh_token %}
                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
-                            <i class="bi bi-cloud-check-fill me-1"></i> Resend Active (Port 443)
+                            <i class="bi bi-cloud-check-fill me-1"></i> Authorized & Active
                         </span>
                     {% else %}
-                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
-                            <i class="bi bi-dash-circle me-1"></i> SMTP Only
+                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">
+                            <i class="bi bi-exclamation-circle me-1"></i> Authorization Needed
                         </span>
                     {% endif %}
                 </div>
@@ -92,16 +105,16 @@
     <!-- Diagnostic Step Table -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white py-3 border-0">
-            <h5 class="fw-bold mb-0"><i class="bi bi-cpu text-primary me-2"></i>Live Protocol Connectivity Pipeline</h5>
+            <h5 class="fw-bold mb-0"><i class="bi bi-cpu text-primary me-2"></i>System Configuration & Readiness Pipeline</h5>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
                         <th width="40" class="text-center">#</th>
-                        <th width="240">Pipeline Step</th>
+                        <th width="260">Pipeline Check</th>
                         <th width="120" class="text-center">Status</th>
-                        <th>Diagnostic Details & Latency</th>
+                        <th>Details</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -119,7 +132,7 @@
                                 {% elif check.status == "INFO" %}
                                     <span class="badge bg-info text-dark px-2 py-1"><i class="bi bi-info-circle me-1"></i> INFO</span>
                                 {% else %}
-                                    <span class="badge bg-secondary px-2 py-1">SKIPPED</span>
+                                    <span class="badge bg-secondary px-2 py-1">SKIP</span>
                                 {% endif %}
                             </td>
                             <td><code class="text-dark">{{ check.details }}</code></td>
@@ -135,7 +148,7 @@
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm h-100 p-4">
                 <h5 class="fw-bold mb-2"><i class="bi bi-send text-primary me-2"></i>Send Verification Test Email</h5>
-                <p class="text-muted small mb-3">Send a real verification email through the active pipeline to test end-to-end delivery.</p>
+                <p class="text-muted small mb-3">Send a real test email through Gmail API to confirm credentials and token validity.</p>
                 <form method="POST">
                     {% csrf_token %}
                     <div class="mb-3">
@@ -145,27 +158,30 @@
                     <button type="submit" name="test_email" value="1" class="btn btn-primary">
                         <i class="bi bi-send me-1"></i> Deliver Test Email
                     </button>
+                    {% if not has_refresh_token %}
+                        <a href="{% url 'gmail_oauth_init' %}" class="btn btn-outline-success ms-2">
+                            <i class="bi bi-google me-1"></i> Authorize Account
+                        </a>
+                    {% endif %}
                 </form>
             </div>
         </div>
 
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm h-100 p-4 bg-light">
-                <h5 class="fw-bold mb-2"><i class="bi bi-lightbulb text-warning me-2"></i>Troubleshooting & Cloud Egress</h5>
-                <ul class="small text-muted mb-0 ps-3">
-                    <li class="mb-2">
-                        <strong>If TCP Socket Connection Times Out:</strong> Cloud providers (like Render free tier) frequently drop or block outbound SMTP traffic on port 587/25 to prevent spam.
+                <h5 class="fw-bold mb-2"><i class="bi bi-google text-danger me-2"></i>Google Cloud OAuth Setup Guide</h5>
+                <p class="small text-muted mb-2">Follow these steps in <a href="https://console.cloud.google.com" target="_blank" rel="noopener noreferrer">Google Cloud Console</a>:</p>
+                <ol class="small text-muted ps-3 mb-3">
+                    <li class="mb-1">Create or select a project in Google Cloud Console.</li>
+                    <li class="mb-1">Enable the <strong>Gmail API</strong> under APIs & Services.</li>
+                    <li class="mb-1">Under <em>OAuth consent screen</em>, select <strong>External</strong>, set Publishing status to <strong>Testing</strong>, and add your Gmail address as a <strong>Test User</strong>.</li>
+                    <li class="mb-1">Create an <strong>OAuth Client ID</strong> (Application type: <em>Web application</em>).</li>
+                    <li class="mb-1">
+                        Add Authorized Redirect URI:<br>
+                        <code class="user-select-all bg-white px-2 py-1 rounded border d-inline-block mt-1">{{ redirect_uri }}</code>
                     </li>
-                    <li class="mb-2">
-                        <strong>Solution 1 (HTTPS API):</strong> Add <code>RESEND_API_KEY</code> in Render Environment variables. Resend uses standard HTTPS port 443 which is never blocked and delivers in &lt;200ms.
-                    </li>
-                    <li class="mb-2">
-                        <strong>Solution 2 (SSL Port 465):</strong> Set <code>EMAIL_PORT=465</code> and <code>EMAIL_USE_SSL=True</code> in Render Environment variables.
-                    </li>
-                    <li>
-                        <strong>If SMTP Authentication Fails:</strong> For Gmail, ensure 2-Factor Authentication is active and use a generated 16-character <em>App Password</em> (without spaces) instead of your normal account password.
-                    </li>
-                </ul>
+                    <li>Copy the Client ID and Client Secret into your Render Environment Variables as <code>GOOGLE_CLIENT_ID</code> and <code>GOOGLE_CLIENT_SECRET</code>.</li>
+                </ol>
             </div>
         </div>
     </div>

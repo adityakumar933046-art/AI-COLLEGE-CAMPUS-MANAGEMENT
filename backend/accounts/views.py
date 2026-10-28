@@ -808,32 +808,154 @@ def reset_password_view(request):
 
 @login_required
 @admin_required
-def email_diagnostics_view(request):
+def gmail_oauth_init_view(request):
     """
-    Secure diagnostic dashboard for Administrators to verify email configuration,
-    Resend API status, DNS, TCP socket reachability, and send live test emails.
-    Protected by @admin_required. Never reveals sensitive passwords or API keys.
+    Start OAuth 2.0 flow to authorize Gmail API sending.
+    Requires GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in environment.
+    Redirects admin to Google's consent screen.
     """
     import os
-    import socket
-    import smtplib
+    import urllib.parse
+    from django.conf import settings
+    from django.shortcuts import redirect
+    from django.contrib import messages
+    from django.utils.crypto import get_random_string
+
+    client_id = getattr(settings, "GOOGLE_CLIENT_ID", "").strip() or os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+    client_secret = getattr(settings, "GOOGLE_CLIENT_SECRET", "").strip() or os.environ.get("GOOGLE_CLIENT_SECRET", "").strip()
+
+    if not client_id or not client_secret:
+        messages.error(
+            request,
+            "Cannot initiate Gmail authorization: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be configured in Render environment variables first."
+        )
+        return redirect("email_diagnostics")
+
+    # Generate secure random state token to protect against CSRF
+    state = get_random_string(32)
+    request.session["gmail_oauth_state"] = state
+
+    site_url = getattr(settings, "SITE_URL", "").rstrip("/")
+    if site_url:
+        redirect_uri = f"{site_url}/admin/gmail/oauth/callback/"
+    else:
+        redirect_uri = request.build_absolute_uri("/admin/gmail/oauth/callback/")
+
+    params = {
+        "client_id": client_id,
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": "https://www.googleapis.com/auth/gmail.send",
+        "access_type": "offline",
+        "prompt": "consent",  # Ensures refresh token is always returned
+        "state": state,
+    }
+    auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urllib.parse.urlencode(params)}"
+    return redirect(auth_url)
+
+
+@login_required
+@admin_required
+def gmail_oauth_callback_view(request):
+    """
+    Handle Google OAuth 2.0 callback, exchange code for refresh token,
+    and display secure copyable configuration for Render environment variables.
+    Protected with state verification against CSRF and admin check.
+    """
+    import os
+    import json
+    import urllib.request
+    import urllib.parse
+    from django.conf import settings
+    from django.shortcuts import render, redirect
+    from django.contrib import messages
+
+    expected_state = request.session.pop("gmail_oauth_state", None)
+    received_state = request.GET.get("state")
+
+    if not expected_state or not received_state or expected_state != received_state:
+        messages.error(request, "OAuth state verification failed (possible CSRF attempt or expired session). Please try again.")
+        return redirect("email_diagnostics")
+
+    error = request.GET.get("error")
+    if error:
+        messages.error(request, f"Google OAuth access declined: {error}")
+        return redirect("email_diagnostics")
+
+    code = request.GET.get("code")
+    if not code:
+        messages.error(request, "Google OAuth response did not contain an authorization code.")
+        return redirect("email_diagnostics")
+
+    client_id = getattr(settings, "GOOGLE_CLIENT_ID", "").strip() or os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+    client_secret = getattr(settings, "GOOGLE_CLIENT_SECRET", "").strip() or os.environ.get("GOOGLE_CLIENT_SECRET", "").strip()
+
+    site_url = getattr(settings, "SITE_URL", "").rstrip("/")
+    if site_url:
+        redirect_uri = f"{site_url}/admin/gmail/oauth/callback/"
+    else:
+        redirect_uri = request.build_absolute_uri("/admin/gmail/oauth/callback/")
+
+    token_payload = {
+        "code": code,
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "redirect_uri": redirect_uri,
+        "grant_type": "authorization_code",
+    }
+
+    try:
+        req = urllib.request.Request(
+            "https://oauth2.googleapis.com/token",
+            data=urllib.parse.urlencode(token_payload).encode("utf-8"),
+            headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "SmartCampus/1.0"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            token_data = json.loads(resp.read().decode("utf-8"))
+
+        refresh_token = token_data.get("refresh_token")
+        if not refresh_token:
+            messages.warning(
+                request,
+                "Authorization succeeded, but Google did not return a new refresh token (already authorized). "
+                "If you need a new refresh token, re-authorize by clicking 'Authorize Gmail API'."
+            )
+            return redirect("email_diagnostics")
+
+        context = {
+            "refresh_token": refresh_token,
+            "title": "Gmail API Authorization Successful",
+        }
+        return render(request, "accounts/gmail_oauth_success.html", context)
+
+    except Exception as exc:
+        messages.error(request, f"Failed to exchange authorization code for tokens: {exc}")
+        return redirect("email_diagnostics")
+
+
+@login_required
+@admin_required
+def email_diagnostics_view(request):
+    """
+    Secure diagnostic dashboard for Administrators to verify Gmail API configuration,
+    OAuth tokens, and send live verification emails over HTTPS port 443.
+    Protected by @admin_required. Never reveals sensitive secrets.
+    """
+    import os
     import time
     from django.conf import settings
     from .services import send_campus_email
 
-    host = getattr(settings, "EMAIL_HOST", "smtp.gmail.com")
-    port = int(getattr(settings, "EMAIL_PORT", 587) or 587)
-    timeout = int(getattr(settings, "EMAIL_TIMEOUT", None) or 15)
-    use_tls = getattr(settings, "EMAIL_USE_TLS", True)
-    use_ssl = getattr(settings, "EMAIL_USE_SSL", False)
-    user = getattr(settings, "EMAIL_HOST_USER", "")
-    password = getattr(settings, "EMAIL_HOST_PASSWORD", "")
-    resend_key = getattr(settings, "RESEND_API_KEY", "").strip() or os.environ.get("RESEND_API_KEY", "").strip()
     provider = getattr(settings, "EMAIL_PROVIDER", "").strip().lower()
     if not provider:
-        provider = "resend" if resend_key else "smtp"
+        provider = "gmail_api"
 
-    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "") or user or "adityakumar933046@gmail.com"
+    google_client_id = getattr(settings, "GOOGLE_CLIENT_ID", "").strip() or os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+    google_client_secret = getattr(settings, "GOOGLE_CLIENT_SECRET", "").strip() or os.environ.get("GOOGLE_CLIENT_SECRET", "").strip()
+    google_refresh_token = getattr(settings, "GOOGLE_REFRESH_TOKEN", "").strip() or os.environ.get("GOOGLE_REFRESH_TOKEN", "").strip()
+    gmail_sender = getattr(settings, "GMAIL_SENDER_EMAIL", "").strip() or os.environ.get("GMAIL_SENDER_EMAIL", "").strip()
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "") or gmail_sender or "smartcampus.in.org@gmail.com"
 
     test_result = None
 
@@ -852,156 +974,55 @@ def email_diagnostics_view(request):
 
     checks = []
 
-    # Check 1: Active Provider & Environment
+    # Check 1: Active Provider
     checks.append({
         "name": "Active Email Provider",
-        "status": "PASS" if (provider == "resend" and resend_key) or (provider == "smtp" and user and password) else "WARN",
-        "details": f"EMAIL_PROVIDER={provider.upper()} | DEFAULT_FROM_EMAIL={from_email}",
+        "status": "PASS" if provider == "gmail_api" else "INFO",
+        "details": f"EMAIL_PROVIDER={provider.upper()} (Official Google Gmail REST API over HTTPS Port 443)",
     })
 
-    # Check 2: Resend API Configuration
-    if provider == "resend" or resend_key:
-        checks.append({
-            "name": "Resend HTTPS API (Port 443)",
-            "status": "PASS" if resend_key else "FAIL",
-            "details": f"RESEND_API_KEY is {'configured (' + str(len(resend_key)) + ' chars). Outbound HTTPS active.' if resend_key else 'MISSING. Please configure RESEND_API_KEY in Render environment.'}",
-        })
+    # Check 2: Google Client ID
+    checks.append({
+        "name": "GOOGLE_CLIENT_ID",
+        "status": "PASS" if google_client_id else "FAIL",
+        "details": f"Configured ({len(google_client_id)} chars)" if google_client_id else "MISSING. Add GOOGLE_CLIENT_ID to Render Environment Variables.",
+    })
 
-    # If Resend is primary, we skip slow/blocked SMTP tests to avoid blocking the page
-    if provider == "resend" and resend_key:
-        checks.append({
-            "name": "SMTP Port 587 Check",
-            "status": "SKIP",
-            "details": "Skipped: Resend HTTPS API (port 443) is the primary provider. SMTP is bypassed.",
-        })
+    # Check 3: Google Client Secret
+    checks.append({
+        "name": "GOOGLE_CLIENT_SECRET",
+        "status": "PASS" if google_client_secret else "FAIL",
+        "details": f"Configured ({len(google_client_secret)} chars)" if google_client_secret else "MISSING. Add GOOGLE_CLIENT_SECRET to Render Environment Variables.",
+    })
+
+    # Check 4: Google Refresh Token
+    checks.append({
+        "name": "GOOGLE_REFRESH_TOKEN",
+        "status": "PASS" if google_refresh_token else "FAIL",
+        "details": f"Configured ({len(google_refresh_token)} chars)" if google_refresh_token else "MISSING. Authorize your Gmail account via the button below or add GOOGLE_REFRESH_TOKEN to Render.",
+    })
+
+    # Check 5: Sender Address
+    checks.append({
+        "name": "Authorized Sender Email",
+        "status": "PASS" if (gmail_sender or from_email) else "WARN",
+        "details": f"Sender: {from_email} (Must match your authorized Google Account)",
+    })
+
+    site_url = getattr(settings, "SITE_URL", "").rstrip("/")
+    if site_url:
+        redirect_uri = f"{site_url}/admin/gmail/oauth/callback/"
     else:
-        # Check: DNS
-        t0 = time.time()
-        try:
-            infos = socket.getaddrinfo(host, port, socket.AF_UNSPEC, socket.SOCK_STREAM)
-            ips = sorted(list({i[4][0] for i in infos}))
-            elapsed = (time.time() - t0) * 1000
-            checks.append({
-                "name": "DNS Resolution",
-                "status": "PASS",
-                "details": f"Resolved '{host}' to {ips[:3]} in {elapsed:.1f}ms",
-            })
-        except Exception as e:
-            checks.append({
-                "name": "DNS Resolution",
-                "status": "FAIL",
-                "details": f"Failed to resolve '{host}': {e}",
-            })
-
-        # Check: TCP Socket Connect (3s timeout for responsiveness)
-        t0 = time.time()
-        tcp_ok = False
-        try:
-            sock = socket.create_connection((host, port), timeout=3)
-            elapsed = (time.time() - t0) * 1000
-            sock.close()
-            tcp_ok = True
-            checks.append({
-                "name": f"TCP Socket ({host}:{port})",
-                "status": "PASS",
-                "details": f"Successfully opened TCP connection to port {port} in {elapsed:.1f}ms",
-            })
-        except (socket.timeout, TimeoutError):
-            checks.append({
-                "name": f"TCP Socket ({host}:{port})",
-                "status": "FAIL",
-                "details": f"Connection timed out. Outbound SMTP traffic to port {port} is blocked or hanging.",
-            })
-        except Exception as e:
-            checks.append({
-                "name": f"TCP Socket ({host}:{port})",
-                "status": "FAIL",
-                "details": f"TCP connection error: {e}",
-            })
-
-        # Check: SMTP Handshake & TLS
-        if tcp_ok:
-            try:
-                if use_ssl:
-                    s = smtplib.SMTP_SSL(host, port, timeout=5)
-                    s.ehlo()
-                    checks.append({
-                        "name": "SMTP Handshake (SSL)",
-                        "status": "PASS",
-                        "details": "Connected and negotiated SSL channel.",
-                    })
-                else:
-                    s = smtplib.SMTP(host, port, timeout=5)
-                    s.ehlo()
-                    if use_tls:
-                        s.starttls()
-                        s.ehlo()
-                        checks.append({
-                            "name": "SMTP Handshake (STARTTLS)",
-                            "status": "PASS",
-                            "details": "STARTTLS negotiation successful. Encrypted connection established.",
-                        })
-                    else:
-                        checks.append({
-                            "name": "SMTP Handshake (Plain)",
-                            "status": "WARN",
-                            "details": "Connected without TLS encryption.",
-                        })
-
-                if user and password:
-                    try:
-                        s.login(user, password)
-                        checks.append({
-                            "name": "SMTP Authentication",
-                            "status": "PASS",
-                            "details": f"Successfully authenticated as {user}",
-                        })
-                    except smtplib.SMTPAuthenticationError as auth_e:
-                        checks.append({
-                            "name": "SMTP Authentication",
-                            "status": "FAIL",
-                            "details": f"Authentication rejected by mail server ({auth_e}). Check Gmail App Password.",
-                        })
-                    except Exception as auth_e:
-                        checks.append({
-                            "name": "SMTP Authentication",
-                            "status": "FAIL",
-                            "details": f"Auth error: {auth_e}",
-                        })
-                else:
-                    checks.append({
-                        "name": "SMTP Authentication",
-                        "status": "WARN",
-                        "details": "Skipped: EMAIL_HOST_USER or EMAIL_HOST_PASSWORD is not set in environment.",
-                    })
-
-                try:
-                    s.quit()
-                except Exception:
-                    pass
-            except Exception as e:
-                checks.append({
-                    "name": "SMTP Handshake & TLS",
-                    "status": "FAIL",
-                    "details": f"Handshake failed: {e}",
-                })
-        else:
-            checks.append({
-                "name": "SMTP Handshake & TLS",
-                "status": "SKIP",
-                "details": "Skipped because TCP connection to port failed.",
-            })
+        redirect_uri = request.build_absolute_uri("/admin/gmail/oauth/callback/")
 
     context = {
         "checks": checks,
         "test_result": test_result,
-        "host": host,
-        "port": port,
-        "user": user,
         "provider": provider,
         "from_email": from_email,
-        "has_password": bool(password),
-        "has_resend": bool(resend_key),
+        "has_client_id": bool(google_client_id),
+        "has_client_secret": bool(google_client_secret),
+        "has_refresh_token": bool(google_refresh_token),
+        "redirect_uri": redirect_uri,
     }
     return render(request, "accounts/email_diagnostics.html", context)
-

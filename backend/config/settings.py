@@ -205,7 +205,7 @@ else:
     EMAIL_USE_SSL = False
     EMAIL_USE_TLS = raw_use_tls
 
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "adityakumar933046@gmail.com").strip()
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "smartcampus.in.org@gmail.com").strip()
 
 EMAIL_HOST_PASSWORD = (
     os.getenv("EMAIL_HOST_PASSWORD", "")
@@ -216,25 +216,46 @@ EMAIL_HOST_PASSWORD = (
     .replace("-", "")
 )
 
-DEFAULT_FROM_EMAIL = os.getenv(
-    "DEFAULT_FROM_EMAIL",
-    EMAIL_HOST_USER or "adityakumar933046@gmail.com"
-).strip()
+# ==========================================================
+# EMAIL CONFIGURATION (GMAIL API OVER HTTPS / OAUTH 2.0)
+# ==========================================================
+
+# Email Provider Configuration ('gmail_api', 'resend', or 'smtp')
+EMAIL_PROVIDER = os.getenv("EMAIL_PROVIDER", "").strip().lower()
+if not EMAIL_PROVIDER:
+    if os.getenv("GOOGLE_REFRESH_TOKEN") or os.getenv("GOOGLE_CLIENT_ID"):
+        EMAIL_PROVIDER = "gmail_api"
+    elif os.getenv("RESEND_API_KEY"):
+        EMAIL_PROVIDER = "resend"
+    else:
+        EMAIL_PROVIDER = "gmail_api"
+
+# Gmail API OAuth 2.0 Credentials (Port 443 HTTPS - No SMTP block)
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "").strip()
+GOOGLE_REFRESH_TOKEN = os.getenv("GOOGLE_REFRESH_TOKEN", "").strip()
+GMAIL_SENDER_EMAIL = os.getenv("GMAIL_SENDER_EMAIL", "smartcampus.in.org@gmail.com").strip()
+
+# Alternative / Legacy Provider Keys
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "").strip()
+
+# Sender Address Configuration:
+raw_default_from = os.getenv("DEFAULT_FROM_EMAIL", "").strip()
+if raw_default_from:
+    DEFAULT_FROM_EMAIL = raw_default_from
+elif GMAIL_SENDER_EMAIL:
+    DEFAULT_FROM_EMAIL = GMAIL_SENDER_EMAIL
+elif EMAIL_PROVIDER == "resend":
+    DEFAULT_FROM_EMAIL = "Smart Campus <onboarding@resend.dev>"
+else:
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or "smartcampus.in.org@gmail.com"
+
+EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "15"))
 
 SITE_URL = os.getenv(
     "SITE_URL",
     "https://ai-college-campus-management.onrender.com"
 ).strip()
-
-# Email Provider Configuration (resend or smtp)
-EMAIL_PROVIDER = os.getenv("EMAIL_PROVIDER", "").strip().lower()
-if not EMAIL_PROVIDER:
-    EMAIL_PROVIDER = "resend" if os.getenv("RESEND_API_KEY") else "smtp"
-
-# HTTPS Email Provider Support (Resend API / SDK)
-RESEND_API_KEY = os.getenv("RESEND_API_KEY", "").strip()
-SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "").strip()
-BREVO_API_KEY = os.getenv("BREVO_API_KEY", "").strip()
 
 # CSRF Trusted Origins
 csrf_origins_env = os.environ.get("CSRF_TRUSTED_ORIGINS", "")

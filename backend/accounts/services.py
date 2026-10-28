@@ -1,3 +1,5 @@
+import os
+import logging
 import random
 import secrets
 import string
@@ -591,7 +593,7 @@ campus_email_logger = logging.getLogger("campus_email")
 
 
 def _sanitize_error(err_str, secrets=None):
-    """Remove sensitive keys or passwords from error strings."""
+    """Remove sensitive keys, client secrets, passwords, or tokens from error strings."""
     if not err_str:
         return ""
     clean = str(err_str)
@@ -600,6 +602,134 @@ def _sanitize_error(err_str, secrets=None):
             if s and len(s) > 3:
                 clean = clean.replace(s, "[REDACTED]")
     return clean
+
+
+def _send_via_gmail_api(recipient, sender, subject, text_content, html_content=None):
+    """
+    Deliver email using the official Google Gmail REST API over HTTPS (port 443) with OAuth 2.0.
+    Bypasses cloud provider SMTP restrictions.
+    Does not log tokens or client secrets.
+    Returns: (bool, str) -> (success, message_or_error)
+    """
+    import base64
+    import socket
+    from email.message import EmailMessage
+    from django.conf import settings
+
+    client_id = getattr(settings, 'GOOGLE_CLIENT_ID', '').strip() or os.environ.get('GOOGLE_CLIENT_ID', '').strip()
+    client_secret = getattr(settings, 'GOOGLE_CLIENT_SECRET', '').strip() or os.environ.get('GOOGLE_CLIENT_SECRET', '').strip()
+    refresh_token = getattr(settings, 'GOOGLE_REFRESH_TOKEN', '').strip() or os.environ.get('GOOGLE_REFRESH_TOKEN', '').strip()
+    sender_email = (
+        getattr(settings, 'GMAIL_SENDER_EMAIL', '').strip()
+        or getattr(settings, 'DEFAULT_FROM_EMAIL', '').strip()
+        or os.environ.get('GMAIL_SENDER_EMAIL', '').strip()
+        or os.environ.get('DEFAULT_FROM_EMAIL', '').strip()
+        or sender
+        or "smartcampus.in.org@gmail.com"
+    )
+
+    secrets_to_mask = [client_id, client_secret, refresh_token]
+
+    # Validate required credentials
+    missing = []
+    if not client_id:
+        missing.append("GOOGLE_CLIENT_ID")
+    if not client_secret:
+        missing.append("GOOGLE_CLIENT_SECRET")
+    if not refresh_token:
+        missing.append("GOOGLE_REFRESH_TOKEN")
+
+    if missing:
+        err_msg = (
+            f"Gmail API configuration incomplete: missing {', '.join(missing)}. "
+            "Please configure these environment variables in Render (or authorize via /admin/gmail/oauth/init/) "
+            "to enable Gmail API email delivery."
+        )
+        campus_email_logger.error("Gmail API missing configuration: %s", missing)
+        return False, err_msg
+
+    try:
+        from google.oauth2.credentials import Credentials
+        from google.auth.transport.requests import Request
+        from googleapiclient.discovery import build
+        from google.auth.exceptions import RefreshError
+        import googleapiclient.errors
+    except ImportError as ie:
+        err_msg = f"Google API client libraries are not installed ({ie}). Please ensure google-api-python-client is in requirements.txt."
+        campus_email_logger.error("Gmail API import error: %s", err_msg)
+        return False, err_msg
+
+    try:
+        # Build OAuth 2.0 Credentials with auto-refresh
+        creds = Credentials(
+            token=None,
+            refresh_token=refresh_token,
+            token_uri="https://oauth2.googleapis.com/token",
+            client_id=client_id,
+            client_secret=client_secret,
+            scopes=["https://www.googleapis.com/auth/gmail.send"],
+        )
+
+        # Build Gmail service resource (cache_discovery=False for clean serverless / ephemeral environments)
+        service = build("gmail", "v1", credentials=creds, cache_discovery=False)
+
+        # Compose standard MIME email message
+        message = EmailMessage()
+        message.set_content(text_content or "")
+        if html_content:
+            message.add_alternative(html_content, subtype="html")
+
+        # Set headers
+        message["To"] = recipient
+        message["From"] = sender_email
+        message["Subject"] = subject
+
+        raw_bytes = message.as_bytes()
+        raw_b64 = base64.urlsafe_b64encode(raw_bytes).decode("utf-8")
+        body = {"raw": raw_b64}
+
+        campus_email_logger.info("Submitting email via Gmail API to %s from %s", recipient, sender_email)
+        res = service.users().messages().send(userId="me", body=body).execute()
+
+        msg_id = res.get("id", "")
+        id_suffix = f" (Message ID: {msg_id})" if msg_id else ""
+        campus_email_logger.info("Email accepted by Gmail API for %s%s", recipient, id_suffix)
+        return True, f"Email accepted by Gmail API{id_suffix}."
+
+    except RefreshError as rerr:
+        raw_err = str(rerr)
+        safe_err = _sanitize_error(raw_err, secrets_to_mask)
+        err_msg = (
+            "Gmail API authorization failed: The OAuth 2.0 refresh token is invalid, expired, or has been revoked. "
+            f"Details: {safe_err}. Please re-authorize the application at /admin/gmail/oauth/init/ or generate a new GOOGLE_REFRESH_TOKEN."
+        )
+        campus_email_logger.error("Gmail API RefreshError for %s: %s", recipient, safe_err)
+        return False, err_msg
+
+    except googleapiclient.errors.HttpError as herr:
+        raw_err = str(herr)
+        safe_err = _sanitize_error(raw_err, secrets_to_mask)
+        status_code = getattr(herr.resp, 'status', 0) if hasattr(herr, 'resp') else 0
+        if status_code == 403:
+            err_msg = f"Gmail API permission or quota error ({status_code}): {safe_err}. Check Google Cloud API permissions and daily sending quota."
+        elif status_code == 400:
+            err_msg = f"Gmail API bad request error ({status_code}): {safe_err}. Verify recipient email address."
+        else:
+            err_msg = f"Gmail API HTTP error ({status_code}): {safe_err}"
+        campus_email_logger.error("Gmail API HttpError for %s: %s", recipient, safe_err)
+        return False, err_msg
+
+    except (socket.timeout, TimeoutError) as terr:
+        err_msg = f"Gmail API connection timed out: {terr}. Transient network issue reaching Google APIs."
+        campus_email_logger.warning("Gmail API timeout for %s: %s", recipient, err_msg)
+        return False, err_msg
+
+    except Exception as exc:
+        raw_err = str(exc)
+        safe_err = _sanitize_error(raw_err, secrets_to_mask)
+        err_msg = f"Gmail API dispatch error: {safe_err}"
+        campus_email_logger.error("Unexpected Gmail API error for %s: %s", recipient, safe_err)
+        return False, err_msg
 
 
 def _send_via_resend(recipient, sender, subject, text_content, html_content, resend_key):
@@ -611,13 +741,26 @@ def _send_via_resend(recipient, sender, subject, text_content, html_content, res
     import json
     import urllib.request
     import urllib.error
+    from email.utils import parseaddr
     from django.conf import settings
 
     if not resend_key:
         campus_email_logger.error("Resend API key missing while Resend provider selected.")
         return False, "Resend API key is not configured. Please set the RESEND_API_KEY environment variable in Render."
 
-    # Strategy 1: Official Resend Python SDK
+    real_name, email_addr = parseaddr(sender)
+    clean_addr = email_addr if email_addr else sender.strip()
+    domain = clean_addr.split('@')[-1].lower() if '@' in clean_addr else ''
+
+    if not domain:
+        err_msg = "Invalid sender email address. Please configure DEFAULT_FROM_EMAIL in Render."
+        campus_email_logger.error("Resend sender configuration error for %s: %s", recipient, err_msg)
+        return False, f"Resend configuration error: {err_msg}"
+
+    if domain in ["gmail.com", "googlemail.com"]:
+        sender = "Smart Campus <onboarding@resend.dev>"
+        domain = "resend.dev"
+
     try:
         import resend
 
@@ -631,7 +774,7 @@ def _send_via_resend(recipient, sender, subject, text_content, html_content, res
         if text_content:
             params["text"] = text_content
 
-        campus_email_logger.info("Submitting email via Resend Python SDK to %s", recipient)
+        campus_email_logger.info("Submitting email via Resend Python SDK to %s from %s", recipient, sender)
         response = resend.Emails.send(params)
 
         email_id = ""
@@ -645,9 +788,8 @@ def _send_via_resend(recipient, sender, subject, text_content, html_content, res
         return True, f"Email submitted successfully via Resend API{id_suffix}."
 
     except ImportError:
-        # Fallback to direct HTTPS API using standard library urllib
         try:
-            campus_email_logger.info("Submitting email via Resend direct HTTPS API to %s", recipient)
+            campus_email_logger.info("Submitting email via Resend direct HTTPS API to %s from %s", recipient, sender)
             payload = {
                 "from": sender,
                 "to": [recipient],
@@ -680,6 +822,12 @@ def _send_via_resend(recipient, sender, subject, text_content, html_content, res
         except urllib.error.HTTPError as he:
             err_body = he.read().decode("utf-8", errors="ignore")
             safe_body = _sanitize_error(err_body, [resend_key])
+            if "domain is not verified" in safe_body.lower() or "not verified" in safe_body.lower():
+                safe_body = (
+                    f"The sender domain '{domain}' is not verified in Resend. "
+                    "Please verify your domain at https://resend.com/domains, or set DEFAULT_FROM_EMAIL "
+                    "to 'Smart Campus <onboarding@resend.dev>' in your Render environment variables."
+                )
             campus_email_logger.warning("Resend HTTPS API returned error %s for %s: %s", he.code, recipient, safe_body)
             return False, f"Resend API error ({he.code}): {safe_body}"
         except urllib.error.URLError as ue:
@@ -694,6 +842,12 @@ def _send_via_resend(recipient, sender, subject, text_content, html_content, res
     except Exception as exc:
         raw_msg = str(exc)
         safe_msg = _sanitize_error(raw_msg, [resend_key])
+        if "domain is not verified" in safe_msg.lower() or "not verified" in safe_msg.lower():
+            safe_msg = (
+                f"The sender domain '{domain}' is not verified in Resend. "
+                "Please verify your domain at https://resend.com/domains, or set DEFAULT_FROM_EMAIL "
+                "to 'Smart Campus <onboarding@resend.dev>' in your Render environment variables."
+            )
         campus_email_logger.warning("Resend SDK error for %s: %s", recipient, safe_msg)
         return False, f"Resend API error: {safe_msg}"
 
@@ -701,7 +855,7 @@ def _send_via_resend(recipient, sender, subject, text_content, html_content, res
 def _send_via_smtp(recipient, sender, subject, text_content, html_content):
     """
     Standard Django SMTP backend with explicit finite timeout guard.
-    Used when EMAIL_PROVIDER is explicitly set to 'smtp'.
+    Used only when EMAIL_PROVIDER is explicitly set to 'smtp'.
     """
     import socket
     import smtplib
@@ -757,16 +911,14 @@ def _send_via_smtp(recipient, sender, subject, text_content, html_content):
 def send_campus_email(to_email, subject, text_content, html_content=None, from_email=None):
     """
     Robust central dispatcher for sending email across Smart Campus.
-    Uses Resend HTTPS API when EMAIL_PROVIDER is 'resend' or RESEND_API_KEY is configured.
-    Never falls back to SMTP when Resend fails.
+    Primary Strategy: Official Google Gmail REST API over HTTPS (OAuth 2.0).
+    Never silently falls back to SMTP if Gmail API fails.
     Returns: (bool, str) -> (success, message_or_error)
     """
     import os
     from django.conf import settings
 
-    sender = from_email or getattr(settings, 'DEFAULT_FROM_EMAIL', None) or 'adityakumar933046@gmail.com'
     recipient = to_email.strip() if isinstance(to_email, str) else str(to_email)
-
     if not recipient:
         return False, "Recipient email address is missing."
 
@@ -774,17 +926,29 @@ def send_campus_email(to_email, subject, text_content, html_content=None, from_e
         getattr(settings, 'EMAIL_PROVIDER', '').strip().lower()
         or os.environ.get('EMAIL_PROVIDER', '').strip().lower()
     )
-    resend_key = (
-        getattr(settings, 'RESEND_API_KEY', '').strip()
-        or os.environ.get('RESEND_API_KEY', '').strip()
-    )
+    if not provider:
+        provider = "gmail_api"
 
-    # Use Resend if:
-    # 1. EMAIL_PROVIDER is explicitly 'resend'
-    # 2. RESEND_API_KEY is provided and EMAIL_PROVIDER is not explicitly 'smtp'
-    use_resend = (provider == 'resend') or (bool(resend_key) and provider != 'smtp')
+    # Strategy 1: Official Gmail API (Primary)
+    if provider in ["gmail_api", "gmail", "google"]:
+        sender = (
+            from_email
+            or getattr(settings, 'GMAIL_SENDER_EMAIL', None)
+            or getattr(settings, 'DEFAULT_FROM_EMAIL', None)
+            or "smartcampus.in.org@gmail.com"
+        )
+        return _send_via_gmail_api(
+            recipient=recipient,
+            sender=sender,
+            subject=subject,
+            text_content=text_content,
+            html_content=html_content,
+        )
 
-    if use_resend:
+    # Strategy 2: Resend HTTPS API (Alternative)
+    if provider == "resend":
+        resend_key = getattr(settings, 'RESEND_API_KEY', '').strip() or os.environ.get('RESEND_API_KEY', '').strip()
+        sender = from_email or getattr(settings, 'DEFAULT_FROM_EMAIL', None) or "Smart Campus <onboarding@resend.dev>"
         return _send_via_resend(
             recipient=recipient,
             sender=sender,
@@ -794,7 +958,8 @@ def send_campus_email(to_email, subject, text_content, html_content=None, from_e
             resend_key=resend_key,
         )
 
-    # Strategy B: SMTP (used only when EMAIL_PROVIDER is 'smtp')
+    # Strategy 3: Standard SMTP (used only when EMAIL_PROVIDER is explicitly set to 'smtp')
+    sender = from_email or getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', None) or "smartcampus.in.org@gmail.com"
     return _send_via_smtp(
         recipient=recipient,
         sender=sender,
@@ -842,7 +1007,7 @@ def send_account_credentials_email(user, temporary_password, role=None, request=
     try:
         text_content = render_to_string("emails/account_credentials.txt", context)
         html_content = render_to_string("emails/account_credentials.html", context)
-        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or 'adityakumar933046@gmail.com'
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None)
 
         ok, msg = send_campus_email(
             to_email=user.email,

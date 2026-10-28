@@ -96,4 +96,6 @@ urlpatterns = [
     # EMAIL DIAGNOSTICS (ADMIN SECURE)
     # ==========================================================
     path("admin/email-diagnostics/", views.email_diagnostics_view, name="email_diagnostics"),
+    path("admin/gmail/oauth/init/", views.gmail_oauth_init_view, name="gmail_oauth_init"),
+    path("admin/gmail/oauth/callback/", views.gmail_oauth_callback_view, name="gmail_oauth_callback"),
 ]

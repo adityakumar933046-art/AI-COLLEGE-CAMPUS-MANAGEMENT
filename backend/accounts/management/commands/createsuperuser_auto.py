@@ -17,7 +17,7 @@ class Command(BaseCommand):
             os.environ.get("SUPERUSER_EMAIL", "").strip()
             or os.environ.get("DJANGO_SUPERUSER_EMAIL", "").strip()
             or os.environ.get("CAMPUS_ADMIN_EMAIL", "").strip()
-            or "adityakumar933046@gmail.com"
+            or "smartcampus.in.org@gmail.com"
         )
         password = (
             os.environ.get("SUPERUSER_PASSWORD", "").strip()
