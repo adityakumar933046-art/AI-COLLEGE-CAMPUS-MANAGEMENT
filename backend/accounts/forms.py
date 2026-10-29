@@ -727,3 +727,76 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         )
 
     )
+
+
+# ==========================================================
+# CUSTOM PASSWORD RESET FORM (HTTPS / PRODUCTION SAFE)
+# ==========================================================
+
+import urllib.parse
+from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.tokens import default_token_generator
+from django.conf import settings
+
+
+class CustomPasswordResetForm(PasswordResetForm):
+    """
+    Enhanced PasswordResetForm that guarantees:
+    1. Production domain and https protocol derived from settings.SITE_URL.
+    2. Correct sender address (DEFAULT_FROM_EMAIL / GMAIL_SENDER_EMAIL).
+    3. Safe email dispatch using Gmail API via CampusEmailBackend.
+    """
+    email = forms.EmailField(
+        label="Email Address",
+        max_length=254,
+        widget=forms.EmailInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Enter your registered email address",
+                "autocomplete": "email",
+                "id": "id_email",
+                "required": "required",
+            }
+        ),
+    )
+
+    def save(self, domain_override=None,
+             subject_template_name='accounts/password_reset_subject.txt',
+             email_template_name='accounts/password_reset_email.txt',
+             use_https=False, token_generator=default_token_generator,
+             from_email=None, request=None, html_email_template_name='accounts/password_reset_email.html',
+             extra_email_context=None):
+        site_url = getattr(settings, "SITE_URL", "").rstrip("/")
+        if site_url:
+            parsed = urllib.parse.urlparse(site_url)
+            domain_override = parsed.netloc or parsed.path or domain_override
+            use_https = True if parsed.scheme == "https" else use_https
+        else:
+            use_https = True
+
+        from_email = (
+            from_email
+            or getattr(settings, "DEFAULT_FROM_EMAIL", None)
+            or getattr(settings, "GMAIL_SENDER_EMAIL", None)
+            or "Smart Campus <smartcampus.in.org@gmail.com>"
+        )
+
+        extra_context = {
+            "site_name": "Smart Campus",
+            "protocol": "https" if use_https else "http",
+            "domain": domain_override or "ai-college-campus-management.onrender.com",
+        }
+        if extra_email_context:
+            extra_context.update(extra_email_context)
+
+        return super().save(
+            domain_override=domain_override,
+            subject_template_name=subject_template_name,
+            email_template_name=email_template_name,
+            use_https=use_https,
+            token_generator=token_generator,
+            from_email=from_email,
+            request=request,
+            html_email_template_name=html_email_template_name,
+            extra_email_context=extra_context,
+        )

@@ -19,6 +19,7 @@ from django.urls import reverse_lazy
 from .models import User
 
 from .forms import (
+    CustomPasswordResetForm,
     LoginForm,
     RegisterForm,
     UserUpdateForm,
@@ -639,11 +640,23 @@ def unauthorized(request):
 # ==========================================================
 
 class CustomPasswordResetView(PasswordResetView):
+    form_class = CustomPasswordResetForm
     template_name = "accounts/password_reset.html"
     email_template_name = "accounts/password_reset_email.txt"
     html_email_template_name = "accounts/password_reset_email.html"
     subject_template_name = "accounts/password_reset_subject.txt"
     success_url = reverse_lazy("password_reset_done")
+
+    def form_valid(self, form):
+        try:
+            return super().form_valid(form)
+        except Exception as exc:
+            campus_email_logger.error("Password reset email dispatch failure: %s", str(exc))
+            messages.error(
+                self.request,
+                "Unable to deliver password reset email right now due to a temporary service error. Please try again."
+            )
+            return self.form_invalid(form)
 
 
 class CustomPasswordResetDoneView(
@@ -688,19 +701,7 @@ from .services import create_password_reset_otp, verify_password_reset_otp, rese
 def forgot_password_view(request):
     if request.user.is_authenticated:
         return redirect("home")
-
-    if request.method == "POST":
-        email = request.POST.get("email", "").strip().lower()
-        if email:
-            user = User.objects.filter(email__iexact=email, is_active=True, is_active_account=True).first()
-            if user:
-                create_password_reset_otp(user)
-
-            request.session["reset_email"] = email
-            messages.info(request, "If an account exists for this email, a verification code has been sent.")
-            return redirect("verify_otp")
-
-    return render(request, "accounts/forgot_password.html")
+    return redirect("password_reset")
 
 
 def verify_otp_view(request):

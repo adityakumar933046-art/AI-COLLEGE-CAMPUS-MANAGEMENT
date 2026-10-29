@@ -263,3 +263,142 @@ class GmailApiEmailIntegrationTests(TestCase):
         self.assertIn("janedoe", html_content)
         self.assertIn("TempPassword999", html_content)
         self.assertIn("https://ai-college-campus-management.onrender.com/login/", html_content)
+
+
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.urls import reverse
+
+
+class PasswordResetWorkflowTests(TestCase):
+    """
+    Automated test suite verifying the complete Password Reset workflow:
+    - Forgot-password page & loading overlay rendering
+    - Gmail API dispatch via CampusEmailBackend
+    - Unknown email handling
+    - Valid and invalid token verification
+    - Secure password update in the database
+    - Success screen & Back to Login navigation
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="student_alice",
+            email="alice@student.smartcampus.edu",
+            password="OriginalPassword123!",
+            first_name="Alice",
+            last_name="Smith",
+            role="STUDENT",
+        )
+
+    def test_password_reset_page_renders_loading_and_back_button(self):
+        response = self.client.get(reverse("password_reset"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Forgot Password?")
+        self.assertContains(response, "loadingOverlay")
+        self.assertContains(response, "Sending password reset email...")
+        self.assertContains(response, "Back to Login")
+
+    def test_forgot_password_alias_redirects_to_password_reset(self):
+        response = self.client.get(reverse("forgot_password"))
+        self.assertRedirects(response, reverse("password_reset"))
+
+    @override_settings(
+        EMAIL_BACKEND="accounts.email_backend.CampusEmailBackend",
+        SITE_URL="https://ai-college-campus-management.onrender.com",
+    )
+    @patch("accounts.services.send_campus_email")
+    def test_valid_password_reset_dispatches_email_with_production_url(self, mock_send):
+        mock_send.return_value = (True, "Email accepted by Gmail API")
+
+        response = self.client.post(
+            reverse("password_reset"),
+            {"email": "alice@student.smartcampus.edu"},
+        )
+        self.assertRedirects(response, reverse("password_reset_done"))
+        self.assertTrue(mock_send.called)
+
+        # Inspect email dispatch arguments
+        kwargs = mock_send.call_args.kwargs
+        self.assertEqual(kwargs.get("to_email"), "alice@student.smartcampus.edu")
+        self.assertIn("Password Reset", kwargs.get("subject", ""))
+        self.assertIn("https://ai-college-campus-management.onrender.com", kwargs.get("text_content", ""))
+        self.assertIn("/reset/", kwargs.get("text_content", ""))
+
+    @override_settings(EMAIL_BACKEND="accounts.email_backend.CampusEmailBackend")
+    @patch("accounts.services.send_campus_email")
+    def test_unknown_email_does_not_reveal_user_absence(self, mock_send):
+        response = self.client.post(
+            reverse("password_reset"),
+            {"email": "nonexistent@example.com"},
+        )
+        self.assertRedirects(response, reverse("password_reset_done"))
+        self.assertFalse(mock_send.called)
+
+    def test_password_reset_confirm_with_valid_token(self):
+        uid = urlsafe_base64_encode(force_bytes(self.user.pk))
+        token = default_token_generator.make_token(self.user)
+
+        confirm_url = reverse("password_reset_confirm", kwargs={"uidb64": uid, "token": token})
+        # Django redirects from /reset/<uid>/<token>/ to /reset/<uid>/set-password/ to mask token
+        response = self.client.get(confirm_url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Create New Password")
+
+        # Submit new password to set-password route
+        set_pwd_url = reverse("password_reset_confirm", kwargs={"uidb64": uid, "token": "set-password"})
+        post_response = self.client.post(
+            set_pwd_url,
+            {
+                "new_password1": "NewSecureCampusPass456!",
+                "new_password2": "NewSecureCampusPass456!",
+            },
+        )
+        self.assertRedirects(post_response, reverse("password_reset_complete"))
+
+        # Verify password successfully updated in database
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("NewSecureCampusPass456!"))
+        self.assertFalse(self.user.check_password("OriginalPassword123!"))
+
+    def test_password_reset_confirm_with_invalid_token(self):
+        uid = urlsafe_base64_encode(force_bytes(self.user.pk))
+        invalid_token = "invalid-token-12345"
+
+        confirm_url = reverse("password_reset_confirm", kwargs={"uidb64": uid, "token": invalid_token})
+        response = self.client.get(confirm_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Password Reset Link Invalid")
+        self.assertContains(response, "Request New Reset Link")
+        self.assertContains(response, "Back to Login")
+
+    def test_password_reset_confirm_mismatched_passwords(self):
+        uid = urlsafe_base64_encode(force_bytes(self.user.pk))
+        token = default_token_generator.make_token(self.user)
+
+        confirm_url = reverse("password_reset_confirm", kwargs={"uidb64": uid, "token": token})
+        # Initialize session token
+        self.client.get(confirm_url)
+
+        set_pwd_url = reverse("password_reset_confirm", kwargs={"uidb64": uid, "token": "set-password"})
+        response = self.client.post(
+            set_pwd_url,
+            {
+                "new_password1": "NewPassword123!",
+                "new_password2": "MismatchedPassword456!",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("match", response.content.decode("utf-8").lower())
+        # Password remains unchanged in DB
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("OriginalPassword123!"))
+
+    def test_password_reset_complete_renders_success_and_back_to_login(self):
+        response = self.client.get(reverse("password_reset_complete"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Password Reset Successful")
+        self.assertContains(response, "Your password has been updated successfully.")
+        self.assertContains(response, "Back to Login")
+        self.assertContains(response, reverse("login"))

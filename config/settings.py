@@ -182,7 +182,7 @@ LOGIN_REDIRECT_URL = '/student-dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
 # EMAIL CONFIGURATION
-EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "accounts.email_backend.CampusEmailBackend")
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
 EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "10"))

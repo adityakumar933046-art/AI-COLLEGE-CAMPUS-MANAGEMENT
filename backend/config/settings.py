@@ -188,7 +188,7 @@ LOGOUT_REDIRECT_URL = '/'
 
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND",
-    "django.core.mail.backends.smtp.EmailBackend"
+    "accounts.email_backend.CampusEmailBackend"
 )
 
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")

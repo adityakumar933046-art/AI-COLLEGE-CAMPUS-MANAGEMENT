@@ -23,6 +23,10 @@
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+    <!-- FontAwesome Icons (Fixed for first-load across all templates) -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css">
+
     <!-- Google Font -->
     <link rel="preconnect"
           href="https://fonts.googleapis.com">
@@ -134,7 +138,7 @@
             MAIN CONTENT
     =========================== -->
 
-    <div class="main-content p-0" id="mainContent">
+    <div class="main-content p-0 {% if not request.user.is_authenticated %}ms-0 w-100{% endif %}" id="mainContent" {% if not request.user.is_authenticated %}style="margin-left:0 !important; width:100% !important;"{% endif %}>
 
 
         <!-- ==========================
@@ -295,33 +299,37 @@
 
         const scrollBtn = document.getElementById("scrollTopBtn");
 
-        window.addEventListener("scroll", function () {
+        if (scrollBtn) {
 
-            if(window.scrollY > 300){
+            window.addEventListener("scroll", function () {
 
-                scrollBtn.style.display="block";
+                if(window.scrollY > 300){
 
-            }
+                    scrollBtn.style.display="block";
 
-            else{
+                }
 
-                scrollBtn.style.display="none";
+                else{
 
-            }
+                    scrollBtn.style.display="none";
 
-        });
-
-        scrollBtn.addEventListener("click", function(){
-
-            window.scrollTo({
-
-                top:0,
-
-                behavior:"smooth"
+                }
 
             });
 
-        });
+            scrollBtn.addEventListener("click", function(){
+
+                window.scrollTo({
+
+                    top:0,
+
+                    behavior:"smooth"
+
+                });
+
+            });
+
+        }
 
     </script>
 
