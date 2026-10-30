@@ -701,7 +701,25 @@ from .services import create_password_reset_otp, verify_password_reset_otp, rese
 def forgot_password_view(request):
     if request.user.is_authenticated:
         return redirect("home")
-    return redirect("password_reset")
+
+    if request.method == "POST":
+        email = request.POST.get("email", "").strip().lower()
+        if email:
+            user = User.objects.filter(email__iexact=email, is_active=True, is_active_account=True).first()
+            if user:
+                ok, msg, _ = create_password_reset_otp(user)
+                if not ok:
+                    messages.warning(request, msg)
+                    request.session["reset_email"] = email
+                    return redirect("verify_otp")
+
+            request.session["reset_email"] = email
+            messages.info(request, "If an account exists for this email, a 6-digit verification code has been sent.")
+            return redirect("verify_otp")
+        else:
+            messages.error(request, "Please enter your registered email address.")
+
+    return render(request, "accounts/forgot_password.html")
 
 
 def verify_otp_view(request):

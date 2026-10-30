@@ -300,9 +300,73 @@ class PasswordResetWorkflowTests(TestCase):
         self.assertContains(response, "Sending password reset email...")
         self.assertContains(response, "Back to Login")
 
-    def test_forgot_password_alias_redirects_to_password_reset(self):
+    def test_otp_forgot_password_page_renders_loading_and_back_button(self):
         response = self.client.get(reverse("forgot_password"))
-        self.assertRedirects(response, reverse("password_reset"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Forgot Password")
+        self.assertContains(response, "loadingOverlay")
+        self.assertContains(response, "Sending verification code...")
+        self.assertContains(response, "Back to Login")
+
+    @patch("accounts.services.send_campus_email")
+    def test_otp_forgot_password_valid_email_dispatches_otp(self, mock_send):
+        from accounts.models import PasswordResetOTP
+        mock_send.return_value = (True, "Email accepted by Gmail API")
+
+        response = self.client.post(
+            reverse("forgot_password"),
+            {"email": "alice@student.smartcampus.edu"},
+        )
+        self.assertRedirects(response, reverse("verify_otp"))
+        self.assertTrue(mock_send.called)
+
+        otp_obj = PasswordResetOTP.objects.filter(user=self.user, is_verified=False).first()
+        self.assertIsNotNone(otp_obj)
+        self.assertEqual(len(otp_obj.otp), 6)
+
+    @patch("accounts.services.send_campus_email")
+    def test_otp_full_verification_and_password_reset_flow(self, mock_send):
+        from accounts.models import PasswordResetOTP
+        mock_send.return_value = (True, "Email accepted by Gmail API")
+
+        # Step 1: Request OTP
+        self.client.post(reverse("forgot_password"), {"email": "alice@student.smartcampus.edu"})
+        otp_obj = PasswordResetOTP.objects.get(user=self.user, is_verified=False)
+
+        # Step 2: Verify page renders
+        verify_page = self.client.get(reverse("verify_otp"))
+        self.assertEqual(verify_page.status_code, 200)
+        self.assertContains(verify_page, "Verify Code")
+        self.assertContains(verify_page, "Back to Login")
+
+        # Step 3: Submit invalid OTP
+        bad_post = self.client.post(reverse("verify_otp"), {"otp": "000000"})
+        self.assertEqual(bad_post.status_code, 200)
+        self.assertContains(bad_post, "Invalid verification code")
+
+        # Step 4: Submit valid OTP
+        good_post = self.client.post(reverse("verify_otp"), {"otp": otp_obj.otp})
+        self.assertRedirects(good_post, reverse("reset_password"))
+
+        # Step 5: Reset password page renders with eye toggle
+        reset_page = self.client.get(reverse("reset_password"))
+        self.assertEqual(reset_page.status_code, 200)
+        self.assertContains(reset_page, "Set New Password")
+        self.assertContains(reset_page, "toggleVisibility")
+
+        # Step 6: Submit new password
+        pwd_post = self.client.post(
+            reverse("reset_password"),
+            {
+                "new_password1": "AliceNewSecurePass789!",
+                "new_password2": "AliceNewSecurePass789!",
+            },
+        )
+        self.assertRedirects(pwd_post, reverse("login"))
+
+        # Password successfully updated in DB
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("AliceNewSecurePass789!"))
 
     @override_settings(
         EMAIL_BACKEND="accounts.email_backend.CampusEmailBackend",
