@@ -98,4 +98,10 @@ urlpatterns = [
     path("admin/email-diagnostics/", views.email_diagnostics_view, name="email_diagnostics"),
     path("admin/gmail/oauth/init/", views.gmail_oauth_init_view, name="gmail_oauth_init"),
     path("admin/gmail/oauth/callback/", views.gmail_oauth_callback_view, name="gmail_oauth_callback"),
+
+    # ==========================================================
+    # GOOGLE OAUTH LOGIN
+    # ==========================================================
+    path("google/login/", views.google_login_view, name="google_login"),
+    path("google/callback/", views.google_callback_view, name="google_callback"),
 ]

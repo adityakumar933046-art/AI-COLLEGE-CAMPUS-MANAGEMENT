@@ -466,3 +466,213 @@ class PasswordResetWorkflowTests(TestCase):
         self.assertContains(response, "Your password has been updated successfully.")
         self.assertContains(response, "Back to Login")
         self.assertContains(response, reverse("login"))
+
+
+# ==========================================================
+# GOOGLE OAUTH LOGIN TESTS
+# ==========================================================
+
+class GoogleLoginOAuthTests(TestCase):
+    """
+    Comprehensive tests for Google OAuth 2.0 Login:
+    - OAuth flow initiation, state generation, CSRF protection
+    - Handling cancelled Google sign-in
+    - Handling mismatched/expired OAuth state
+    - Token verification (issuer, audience, unverified email)
+    - Unauthorized/non-existent Google accounts
+    - Inactive accounts rejection
+    - Successful student login and redirect to student dashboard
+    - Successful administrator login and redirect to admin dashboard
+    """
+
+    def setUp(self):
+        self.student_user = User.objects.create_user(
+            username="student_user",
+            email="student@campus.edu",
+            password="CampusPassword123!",
+            first_name="Jane",
+            last_name="Doe",
+            role=User.Roles.STUDENT,
+        )
+        self.admin_user = User.objects.create_user(
+            username="admin_user",
+            email="admin@campus.edu",
+            password="AdminPassword123!",
+            first_name="Admin",
+            last_name="Staff",
+            role=User.Roles.ADMIN,
+        )
+
+    def test_google_login_unconfigured_redirects_to_login(self):
+        with override_settings(GOOGLE_CLIENT_ID=""):
+            response = self.client.get(reverse("google_login"))
+            self.assertRedirects(response, reverse("login"))
+
+    @override_settings(
+        GOOGLE_CLIENT_ID="mock-client-id-12345.apps.googleusercontent.com",
+        GOOGLE_CLIENT_SECRET="mock-secret-99999",
+        SITE_URL="http://127.0.0.1:8000",
+    )
+    def test_google_login_initiates_oauth_with_state(self):
+        response = self.client.get(reverse("google_login"))
+        self.assertEqual(response.status_code, 302)
+        redirect_url = response["Location"]
+        self.assertIn("accounts.google.com/o/oauth2/v2/auth", redirect_url)
+        self.assertIn("client_id=mock-client-id-12345", redirect_url)
+        self.assertIn("response_type=code", redirect_url)
+        self.assertIn("scope=openid+email+profile", redirect_url)
+
+        # Check session has state stored
+        session_state = self.client.session.get("google_oauth_state")
+        self.assertTrue(session_state)
+        self.assertIn(f"state={session_state}", redirect_url)
+
+    def test_google_callback_cancelled(self):
+        response = self.client.get(reverse("google_callback") + "?error=access_denied")
+        self.assertRedirects(response, reverse("login"))
+
+    def test_google_callback_invalid_state(self):
+        # Set session state
+        session = self.client.session
+        session["google_oauth_state"] = "legitimate-state-token"
+        session.save()
+
+        # Submit different state
+        response = self.client.get(reverse("google_callback") + "?code=test_code&state=forged_state")
+        self.assertRedirects(response, reverse("login"))
+
+    @override_settings(
+        GOOGLE_CLIENT_ID="mock-client-id-12345.apps.googleusercontent.com",
+        GOOGLE_CLIENT_SECRET="mock-secret-99999",
+    )
+    @patch("urllib.request.urlopen")
+    @patch("google.oauth2.id_token.verify_oauth2_token")
+    def test_google_callback_unverified_email_rejected(self, mock_verify, mock_urlopen):
+        session = self.client.session
+        session["google_oauth_state"] = "valid_state_123"
+        session.save()
+
+        mock_resp = MagicMock()
+        mock_resp.read.return_value = b'{"id_token": "mock_id_token", "access_token": "mock_token"}'
+        mock_urlopen.return_value.__enter__.return_value = mock_resp
+
+        mock_verify.return_value = {
+            "iss": "https://accounts.google.com",
+            "aud": "mock-client-id-12345.apps.googleusercontent.com",
+            "email": "unverified@example.com",
+            "email_verified": False,
+        }
+
+        response = self.client.get(reverse("google_callback") + "?code=valid_code&state=valid_state_123")
+        self.assertRedirects(response, reverse("login"))
+
+    @override_settings(
+        GOOGLE_CLIENT_ID="mock-client-id-12345.apps.googleusercontent.com",
+        GOOGLE_CLIENT_SECRET="mock-secret-99999",
+    )
+    @patch("urllib.request.urlopen")
+    @patch("google.oauth2.id_token.verify_oauth2_token")
+    def test_google_callback_unknown_user_rejected(self, mock_verify, mock_urlopen):
+        session = self.client.session
+        session["google_oauth_state"] = "valid_state_123"
+        session.save()
+
+        mock_resp = MagicMock()
+        mock_resp.read.return_value = b'{"id_token": "mock_id_token", "access_token": "mock_token"}'
+        mock_urlopen.return_value.__enter__.return_value = mock_resp
+
+        mock_verify.return_value = {
+            "iss": "https://accounts.google.com",
+            "aud": "mock-client-id-12345.apps.googleusercontent.com",
+            "email": "nonexistent@campus.edu",
+            "email_verified": True,
+        }
+
+        response = self.client.get(reverse("google_callback") + "?code=valid_code&state=valid_state_123")
+        self.assertRedirects(response, reverse("login"))
+
+    @override_settings(
+        GOOGLE_CLIENT_ID="mock-client-id-12345.apps.googleusercontent.com",
+        GOOGLE_CLIENT_SECRET="mock-secret-99999",
+    )
+    @patch("urllib.request.urlopen")
+    @patch("google.oauth2.id_token.verify_oauth2_token")
+    def test_google_callback_inactive_user_rejected(self, mock_verify, mock_urlopen):
+        self.student_user.is_active = False
+        self.student_user.save()
+
+        session = self.client.session
+        session["google_oauth_state"] = "valid_state_123"
+        session.save()
+
+        mock_resp = MagicMock()
+        mock_resp.read.return_value = b'{"id_token": "mock_id_token", "access_token": "mock_token"}'
+        mock_urlopen.return_value.__enter__.return_value = mock_resp
+
+        mock_verify.return_value = {
+            "iss": "https://accounts.google.com",
+            "aud": "mock-client-id-12345.apps.googleusercontent.com",
+            "email": "student@campus.edu",
+            "email_verified": True,
+        }
+
+        response = self.client.get(reverse("google_callback") + "?code=valid_code&state=valid_state_123")
+        self.assertRedirects(response, reverse("login"))
+
+    @override_settings(
+        GOOGLE_CLIENT_ID="mock-client-id-12345.apps.googleusercontent.com",
+        GOOGLE_CLIENT_SECRET="mock-secret-99999",
+    )
+    @patch("urllib.request.urlopen")
+    @patch("google.oauth2.id_token.verify_oauth2_token")
+    def test_google_callback_student_success(self, mock_verify, mock_urlopen):
+        session = self.client.session
+        session["google_oauth_state"] = "valid_state_123"
+        session.save()
+
+        mock_resp = MagicMock()
+        mock_resp.read.return_value = b'{"id_token": "mock_id_token", "access_token": "mock_token"}'
+        mock_urlopen.return_value.__enter__.return_value = mock_resp
+
+        mock_verify.return_value = {
+            "iss": "https://accounts.google.com",
+            "aud": "mock-client-id-12345.apps.googleusercontent.com",
+            "email": "student@campus.edu",
+            "email_verified": True,
+            "name": "Jane Doe",
+        }
+
+        response = self.client.get(reverse("google_callback") + "?code=valid_code&state=valid_state_123")
+        self.assertRedirects(response, reverse("student_dashboard"))
+
+        # User is authenticated in session
+        self.assertEqual(int(self.client.session["_auth_user_id"]), self.student_user.pk)
+
+    @override_settings(
+        GOOGLE_CLIENT_ID="mock-client-id-12345.apps.googleusercontent.com",
+        GOOGLE_CLIENT_SECRET="mock-secret-99999",
+    )
+    @patch("urllib.request.urlopen")
+    @patch("google.oauth2.id_token.verify_oauth2_token")
+    def test_google_callback_admin_success(self, mock_verify, mock_urlopen):
+        session = self.client.session
+        session["google_oauth_state"] = "valid_state_123"
+        session.save()
+
+        mock_resp = MagicMock()
+        mock_resp.read.return_value = b'{"id_token": "mock_id_token", "access_token": "mock_token"}'
+        mock_urlopen.return_value.__enter__.return_value = mock_resp
+
+        mock_verify.return_value = {
+            "iss": "https://accounts.google.com",
+            "aud": "mock-client-id-12345.apps.googleusercontent.com",
+            "email": "admin@campus.edu",
+            "email_verified": True,
+            "name": "Admin Staff",
+        }
+
+        response = self.client.get(reverse("google_callback") + "?code=valid_code&state=valid_state_123")
+        self.assertRedirects(response, reverse("admin_dashboard"))
+
+        # User is authenticated in session
+        self.assertEqual(int(self.client.session["_auth_user_id"]), self.admin_user.pk)

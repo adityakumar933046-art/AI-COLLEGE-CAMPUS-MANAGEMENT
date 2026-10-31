@@ -1045,3 +1045,206 @@ def email_diagnostics_view(request):
         "redirect_uri": redirect_uri,
     }
     return render(request, "accounts/email_diagnostics.html", context)
+
+
+# ==========================================================
+# GOOGLE OAUTH 2.0 LOGIN
+# ==========================================================
+
+def get_google_redirect_uri(request):
+    """
+    Returns the absolute Google OAuth callback URI for the current environment.
+    Supports local dev (http://127.0.0.1:8000/google/callback/) and Render production
+    (https://ai-college-campus-management.onrender.com/google/callback/).
+    """
+    from django.conf import settings
+    if request.is_secure():
+        return f"https://{request.get_host()}/google/callback/"
+    site_url = getattr(settings, "SITE_URL", "").strip().rstrip("/")
+    if site_url and ("https://" in site_url or "onrender.com" in site_url):
+        return f"{site_url}/google/callback/"
+    return request.build_absolute_uri("/google/callback/")
+
+
+def google_login_view(request):
+    """
+    Initiates Google OAuth 2.0 authorization code flow.
+    Generates a secure state token stored in session to prevent CSRF.
+    """
+    import os
+    import secrets
+    import urllib.parse
+    from django.conf import settings
+
+    if request.user.is_authenticated:
+        if request.user.role == User.Roles.ADMIN:
+            return redirect("admin_dashboard")
+        elif request.user.role == User.Roles.TEACHER:
+            return redirect("teacher_dashboard")
+        return redirect("student_dashboard")
+
+    client_id = getattr(settings, "GOOGLE_CLIENT_ID", "").strip() or os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+    if not client_id:
+        messages.error(
+            request,
+            "Google Login is not configured yet. GOOGLE_CLIENT_ID is missing from settings/environment."
+        )
+        return redirect("login")
+
+    state = secrets.token_urlsafe(32)
+    request.session["google_oauth_state"] = state
+    request.session.modified = True
+
+    redirect_uri = get_google_redirect_uri(request)
+    params = {
+        "client_id": client_id,
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "state": state,
+        "access_type": "online",
+        "prompt": "select_account",
+    }
+    auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urllib.parse.urlencode(params)}"
+    return redirect(auth_url)
+
+
+def google_callback_view(request):
+    """
+    Handles Google OAuth 2.0 authorization callback:
+    1. Validates OAuth state (CSRF mitigation).
+    2. Exchanges code for ID token and access token.
+    3. Cryptographically verifies Google ID token (issuer, audience, expiry, email_verified).
+    4. Looks up existing active student/teacher/admin user by verified email.
+    5. Authenticates user session, logs activity, and redirects to their dashboard.
+    """
+    import os
+    import json
+    import secrets
+    import urllib.request
+    import urllib.parse
+    from django.conf import settings
+
+    # Check for cancellation or Google error
+    error = request.GET.get("error")
+    if error:
+        if error == "access_denied":
+            messages.warning(request, "Google sign-in was cancelled.")
+        else:
+            messages.error(request, f"Google authentication failed: {error}")
+        return redirect("login")
+
+    # Validate state parameter
+    state = request.GET.get("state")
+    expected_state = request.session.pop("google_oauth_state", None)
+    if not state or not expected_state or not secrets.compare_digest(state, expected_state):
+        messages.error(
+            request,
+            "Invalid or expired session state during Google authentication. Please try again."
+        )
+        return redirect("login")
+
+    # Retrieve authorization code
+    code = request.GET.get("code")
+    if not code:
+        messages.error(request, "Authorization code not provided by Google.")
+        return redirect("login")
+
+    client_id = getattr(settings, "GOOGLE_CLIENT_ID", "").strip() or os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+    client_secret = getattr(settings, "GOOGLE_CLIENT_SECRET", "").strip() or os.environ.get("GOOGLE_CLIENT_SECRET", "").strip()
+
+    if not client_id or not client_secret:
+        messages.error(request, "Google OAuth client credentials are not fully configured.")
+        return redirect("login")
+
+    redirect_uri = get_google_redirect_uri(request)
+    token_payload = {
+        "code": code,
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "redirect_uri": redirect_uri,
+        "grant_type": "authorization_code",
+    }
+
+    try:
+        req = urllib.request.Request(
+            "https://oauth2.googleapis.com/token",
+            data=urllib.parse.urlencode(token_payload).encode("utf-8"),
+            headers={
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": "SmartCampus-GoogleAuth/1.0",
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            token_data = json.loads(resp.read().decode("utf-8"))
+    except Exception as exc:
+        messages.error(request, f"Failed to exchange Google authorization code: {exc}")
+        return redirect("login")
+
+    raw_id_token = token_data.get("id_token")
+    if not raw_id_token:
+        messages.error(request, "Google did not return an identity token.")
+        return redirect("login")
+
+    # Cryptographically verify the Google ID token
+    try:
+        from google.oauth2 import id_token
+        from google.auth.transport import requests as google_requests
+
+        id_info = id_token.verify_oauth2_token(
+            raw_id_token,
+            google_requests.Request(),
+            client_id,
+        )
+    except Exception as exc:
+        messages.error(request, f"Google identity verification failed: {exc}")
+        return redirect("login")
+
+    # Verify issuer
+    if id_info.get("iss") not in ["accounts.google.com", "https://accounts.google.com"]:
+        messages.error(request, "Invalid identity token issuer.")
+        return redirect("login")
+
+    # Check email and verified status
+    email = (id_info.get("email") or "").strip().lower()
+    email_verified = id_info.get("email_verified", False)
+    if not email or not email_verified:
+        messages.error(
+            request,
+            "Your Google email is unverified. Please verify your email with Google before signing in."
+        )
+        return redirect("login")
+
+    # Look up existing active user
+    user = User.objects.filter(email__iexact=email).first()
+    if not user:
+        messages.error(
+            request,
+            f"No registered campus account found for Google email ({email}). "
+            "Please log in with your username/password or contact the campus administrator."
+        )
+        return redirect("login")
+
+    # Check account active status
+    if not user.is_active or not getattr(user, "is_active_account", True):
+        messages.error(
+            request,
+            "Your campus account is currently inactive or deactivated. Please contact an administrator."
+        )
+        return redirect("login")
+
+    # Log user into Django session
+    login(request, user)
+
+    # Save login history & activity log
+    save_login_history(request=request, user=user)
+    log_login(user=user, request=request)
+
+    messages.success(request, f"Welcome back, {user.full_name}!")
+
+    if user.role == User.Roles.ADMIN:
+        return redirect("admin_dashboard")
+    elif user.role == User.Roles.TEACHER:
+        return redirect("teacher_dashboard")
+    return redirect("student_dashboard")

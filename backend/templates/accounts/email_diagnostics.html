@@ -177,8 +177,11 @@
                     <li class="mb-1">Under <em>OAuth consent screen</em>, select <strong>External</strong>, set Publishing status to <strong>Testing</strong>, and add your Gmail address as a <strong>Test User</strong>.</li>
                     <li class="mb-1">Create an <strong>OAuth Client ID</strong> (Application type: <em>Web application</em>).</li>
                     <li class="mb-1">
-                        Add Authorized Redirect URI:<br>
-                        <code class="user-select-all bg-white px-2 py-1 rounded border d-inline-block mt-1">{{ redirect_uri }}</code>
+                        Add Authorized Redirect URIs in your Google Cloud Console OAuth Client:<br>
+                        <span class="small text-dark fw-semibold">1. For Gmail Sending Authorization:</span><br>
+                        <code class="user-select-all bg-white px-2 py-1 rounded border d-inline-block mt-1 mb-1">{{ redirect_uri }}</code><br>
+                        <span class="small text-dark fw-semibold">2. For "Continue with Google" User Login:</span><br>
+                        <code class="user-select-all bg-white px-2 py-1 rounded border d-inline-block mt-1">{{ google_login_redirect_uri }}</code>
                     </li>
                     <li>Copy the Client ID and Client Secret into your Render Environment Variables as <code>GOOGLE_CLIENT_ID</code> and <code>GOOGLE_CLIENT_SECRET</code>.</li>
                 </ol>
